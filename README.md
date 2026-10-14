@@ -25,11 +25,11 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 ### Claude Code
 
 ```text
-/plugin marketplace add D:\workspace\bpm-skills
+/plugin marketplace add hoangcm0109/bpm-skills
 /plugin install bpm-skills@bpm-skills
 ```
 
-(hoặc `/plugin marketplace add hoangcm0109/bpm-skills` để cài từ GitHub). Sau khi cài, skill xuất hiện dạng `bpm-skills:dynaform-build-form`.
+Đã clone repo về máy thì thay `hoangcm0109/bpm-skills` bằng đường dẫn thư mục clone. Sau khi cài, skill xuất hiện dạng `bpm-skills:dynaform-build-form`.
 
 ### Codex
 
