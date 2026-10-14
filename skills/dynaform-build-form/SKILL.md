@@ -1,6 +1,6 @@
 ---
 name: dynaform-build-form
-description: Dựng một form dynaform (FormDesignJson của @dnu/dynaform-builder) từ yêu cầu nghiệp vụ — viết spec gọn, chạy script sinh JSON, kiểm tra và nạp vào builder/runtime. Dùng khi người dùng nói "tạo form", "dựng form đăng ký/khảo sát/…", "sinh JSON form", "build form dynaform", "thiết kế form bằng AI". Skill điều phối; chi tiết từng cụm nằm ở các skill dynaform-components, dynaform-validation, dynaform-logic-events, dynaform-layout, dynaform-data-source.
+description: Dựng một form dynaform (FormDesignJson của @dnu/dynaform-builder) từ yêu cầu nghiệp vụ — viết spec gọn, chạy script sinh JSON, kiểm tra và nạp vào builder/runtime. Dùng khi người dùng nói "tạo form", "dựng form đăng ký/khảo sát/…", "sinh JSON form", "build form dynaform", "thiết kế form bằng AI". Đây là skill điểm vào duy nhất cần gọi: đã gồm bảng tra nhanh về component, validation, logic/event, bố cục và data source; chỉ đọc thêm skill chi tiết khi cần.
 ---
 
 # Dựng form dynaform
@@ -8,10 +8,15 @@ description: Dựng một form dynaform (FormDesignJson của @dnu/dynaform-buil
 Form dynaform là một JSON (`FormDesignJson`) gồm `settings` + `form_components[]`. Viết JSON đầy đủ bằng tay rất dài và dễ sai
 (item_control, variables, editable_props…), nên quy trình chuẩn là: **viết spec gọn → script sinh JSON → script kiểm tra → nạp vào builder**.
 
+## Cách gọi
+
+Chỉ cần gọi skill này (`/bpm-skills:dynaform-build-form <yêu cầu>`) hoặc mô tả yêu cầu bằng lời — không cần gọi thêm skill con.
+Thư mục chứa file SKILL.md này gọi là `<skill>`; script nằm ở `<skill>/scripts/dynaform.mjs` (đường dẫn tuyệt đối/tương đối theo thư mục skill, **không** theo thư mục dự án).
+
 ## Quy trình
 
 1. **Làm rõ yêu cầu** (hỏi lại nếu mơ hồ): form để làm gì, field nào, bắt buộc/không, ràng buộc, field phụ thuộc nhau, nút submit làm gì, có chia nhóm/tab/bước không.
-2. **Chọn component** — xem skill `dynaform-components`. Mỗi `type` phải có trong registry; dùng `input` cho text/email/password, `tel` cho số điện thoại.
+2. **Chọn component** — theo bảng tra nhanh bên dưới. Mỗi `type` phải có trong registry; dùng `input` cho text, `tel` cho số điện thoại.
 3. **Viết spec** theo `references/spec-format.md` (file `*.spec.json`). Quy tắc chốt:
    - `name` snake_case, duy nhất toàn form; mọi tham chiếu chéo (matchField, rule, event, dependsOn) dùng `name`, không dùng id.
    - Cha (container/tab/steps/dialog) phải đứng **trước** con trong mảng; con khai báo `parent` (+ `tabId` nếu cha là tab/steps/columns).
@@ -19,18 +24,80 @@ Form dynaform là một JSON (`FormDesignJson`) gồm `settings` + `form_compone
    - Nhãn, thông báo lỗi, placeholder viết **tiếng Việt**; `name`, `type`, mã lỗi kỹ thuật giữ tiếng Anh.
 4. **Sinh JSON**:
    ```bash
-   node skills/dynaform-build-form/scripts/dynaform.mjs build my-form.spec.json --out my-form.json
+   node <skill>/scripts/dynaform.mjs build my-form.spec.json --out my-form.json
    ```
    Script tự kiểm tra spec (type, trùng name, ref không tồn tại, options, parent/tabId, tổng columns = 12…) rồi kiểm tra lại JSON đầu ra. Có lỗi thì exit 1 và liệt kê từng lỗi — sửa spec rồi chạy lại, không sửa tay file JSON.
 5. **Kiểm tra lại bất kỳ JSON nào** (cả JSON do builder xuất):
    ```bash
-   node skills/dynaform-build-form/scripts/dynaform.mjs validate my-form.json
+   node <skill>/scripts/dynaform.mjs validate my-form.json
    ```
 6. **Nạp form** (chọn theo ngữ cảnh):
    - Trong builder: nút *Open JSON* (`open-json-dialog`) → dán nội dung `my-form.json` → xem lại trên canvas, chỉnh tay nếu cần rồi Save.
-   - Trong app host: truyền vào `data.dataFormDesign` của `DynamicFormBuilder` (mode `editor` | `preview` | `release`) — xem skill `dynaform-embed-lib`.
-   - Lưu thành form trên backend: tạo form bằng *Create Form* của module mfe-dynaform rồi mở editor và dán JSON (xem `dynaform-mfe-module`). Không tự gọi API ghi nếu người dùng chưa yêu cầu.
+   - Trong app host: truyền vào `data.dataFormDesign` của `DynamicFormBuilder` (mode `editor` | `preview` | `release`) — xem `../dynaform-embed-lib/SKILL.md`.
+   - Lưu thành form trên backend: tạo form bằng *Create Form* của module mfe-dynaform rồi mở editor và dán JSON (xem `../dynaform-mfe-module/SKILL.md`). Không tự gọi API ghi nếu người dùng chưa yêu cầu.
 7. **Báo cáo**: liệt kê field đã dựng (name, type, bắt buộc), logic/event đã gắn, phần chưa làm được hoặc cần người dùng cấu hình thêm (data source thật, URL API, quyền).
+
+## Bảng tra nhanh
+
+**Chọn type theo dữ liệu**
+
+| Cần | Type | Ghi chú |
+|---|---|---|
+| Text 1 dòng / nhiều dòng | `input` / `textarea` | |
+| Email, mật khẩu, URL | `email`, `password`, `url` | nhập lại mật khẩu → `matchField` |
+| Điện thoại | `tel` | không có `phone` |
+| Số | `number` | |
+| Chọn 1 (danh sách / API) | `select` | cần `options` hoặc `dataSource` |
+| Chọn 1 (ít lựa chọn) / chọn nhiều | `radio-group` / `checkbox-group` | cần `options` |
+| Đồng ý / bật tắt | `checkbox` / `switch` | |
+| Ngày / khoảng ngày / giờ | `date-picker` / `range-picker` / `time-picker` | |
+| Tệp, chữ ký, văn bản định dạng | `file`, `signature`, `wysiwyg-editor` | cấu hình sâu trong builder |
+| Văn bản tĩnh, ảnh, đường kẻ | `text`, `image`, `divider` | `text.content` là HTML |
+| Nút | `submit-button`, `button`, `reset-button` | |
+| Nhóm / tab / wizard / cột | `container`, `tab`, `steps`, `columns` | xem bố cục |
+| Popup | `dialog`, `drawer`, `bottom-sheet` | đứng trước nút mở |
+
+**Validation** (`validations[]`, `{ type, value?, errorMessage? }`): `required` (dùng `required: true`), `minLength`, `maxLength`, `min`, `max`,
+`email`, `url`, `regex`, `matchField` (`value` = `name` field gốc), `equals`, `notEquals`, `greater`, `lower`, `greaterEqual`, `lowerEqual`, `contains`, `notContains`, `readOnly`.
+`errorMessage` tiếng Việt, ngắn, nói cách sửa.
+
+**Logic & sự kiện**
+
+- Hiện/ẩn/bắt buộc theo điều kiện → `rules`: `{ match: "AND"|"OR", when: [{ field, operator, value }], then: [{ type, target }] }`.
+  Toán tử: `equals notEquals isEmpty isNotEmpty greaterThan lessThan contains notContains`. `show↔hide`, `enable↔disable`, `require↔optional` tự có nhánh ngược.
+- Nút/sự kiện → `events`: `{ event: "click"|"change"|"load"|"open"|"close", actions: [...] }`.
+  Action: `show hide enable disable require optional setValue openModal closeModal toggleModal openLink callApi customScript`.
+  `switchTab`/`collapse` chưa có tác dụng. `target` luôn là `name`. Mặc định **không** dùng `customScript`.
+- Nhiều bước / rẽ nhánh / try-catch → `events[].flow` (action engine) — đọc `../dynaform-logic-events/SKILL.md` trước khi viết.
+
+**Bố cục**
+
+- Lưới 12 cột: `colSpan` 1–12 (mặc định 12); 2 field/hàng = 6, 3 field = 4. Mobile: `overrides: { sm: { styles: { colSpan: "12" } } }`.
+- Con khai `parent`; thêm `tabId` khi cha là `tab`/`steps` (id trong `tabs[]`/`steps[]`) hoặc `columns` (`col-0`, `col-1`…; `columns.spans` tổng 12).
+- Cha đứng trước con. `dialog` variant `form`/`custom` mới có con; confirmation/info dùng `dialog.title/description`.
+- Form ngắn: phẳng 2 cột; form dài: `container` theo nhóm; nhiều phần độc lập: `tab`; tuần tự: `steps`. `grid` dựng trong builder.
+
+**Data source**
+
+- Option tĩnh: `options: [{ label, value }]` (value là chuỗi).
+- Option từ API: `dataSource.api: { baseUrl, endpoint, method?, responsePath?, labelField, valueField }`.
+- Phụ thuộc field khác: thêm `dependsOn: ["<name cha>"]` và `pathParams: { "<param>": "{$<name cha>}" }`; cấp cha đứng trước.
+- Điền sẵn: `default` (cố định); ở host dùng `data.dataUserFill`. Không đưa token/secret vào spec.
+
+## Khi cần chi tiết hơn
+
+Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc file theo đường dẫn** (tính từ `<skill>`):
+
+| Cần | Đọc |
+|---|---|
+| Cấu hình riêng từng component, danh mục đầy đủ | `../dynaform-components/SKILL.md` |
+| Rule validation, cách đặt `matchField` | `../dynaform-validation/SKILL.md` |
+| Flow, call_api, branch/try, danh sách step | `../dynaform-logic-events/SKILL.md` |
+| Bố cục, viewport, theme, settings | `../dynaform-layout/SKILL.md` |
+| API options, phụ thuộc, điền sẵn | `../dynaform-data-source/SKILL.md` |
+| Nhúng lib vào app/MFE, props, release mode | `../dynaform-embed-lib/SKILL.md` |
+| Quy ước trong repo mfe-dynaform | `../dynaform-mfe-module/SKILL.md` |
+| Cú pháp spec đầy đủ / cấu trúc JSON xuất | `references/spec-format.md`, `references/output-format.md` |
 
 ## Việc script KHÔNG làm — nói rõ với người dùng
 
@@ -44,7 +111,7 @@ Form dynaform là một JSON (`FormDesignJson`) gồm `settings` + `form_compone
 - Mặc định **không** sinh `customScript`/`run_script`; URL API/`navigate` do người dùng cung cấp, chỉ `https://` hoặc đường dẫn nội bộ.
 - Không tự lưu/publish form hay gọi API thật nếu người dùng chưa yêu cầu rõ.
 - Báo cáo cuối nêu rõ: script/URL/HTML có trong form và field thu thập dữ liệu cá nhân.
-- Chi tiết: `SECURITY.md`, `docs/security/form-json-safety.md`.
+- Chi tiết (ở gốc repo/plugin, ngoài thư mục skill): `SECURITY.md`, `docs/security/form-json-safety.md`.
 
 ## Bẫy hay gặp
 
