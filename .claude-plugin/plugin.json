@@ -1,0 +1,19 @@
+{
+  "name": "bpm-skills",
+  "version": "0.1.0",
+  "description": "Agent skills cho hệ sinh thái BPM của Dai Nam University: dựng form dynaform (@dnu/dynaform-builder), nhúng thư viện vào MFE và làm việc trong mfe-dynaform.",
+  "author": {
+    "name": "Hoang Chu Minh"
+  },
+  "homepage": "http://git.dnu.edu.vn/dnu/fe_dynaform",
+  "repository": "https://github.com/hoangcm0109/bpm-skills",
+  "license": "UNLICENSED",
+  "keywords": [
+    "bpm",
+    "dynaform",
+    "form-builder",
+    "mfe",
+    "react",
+    "skills"
+  ]
+}

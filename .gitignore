@@ -1,0 +1,5 @@
+node_modules/
+*.log
+.DS_Store
+# file sinh ra khi thử skill
+*.generated.json

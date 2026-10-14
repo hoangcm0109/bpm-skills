@@ -1,0 +1,36 @@
+{
+  "name": "bpm-skills",
+  "version": "0.1.0",
+  "description": "Agent skills cho hệ sinh thái BPM của Dai Nam University: dựng form dynaform (@dnu/dynaform-builder), nhúng thư viện vào MFE và làm việc trong mfe-dynaform.",
+  "author": {
+    "name": "Hoang Chu Minh"
+  },
+  "homepage": "http://git.dnu.edu.vn/dnu/fe_dynaform",
+  "repository": "https://github.com/hoangcm0109/bpm-skills",
+  "license": "UNLICENSED",
+  "keywords": [
+    "bpm",
+    "dynaform",
+    "form-builder",
+    "mfe",
+    "react",
+    "skills"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "BPM Skills",
+    "shortDescription": "Dựng form dynaform và tích hợp @dnu/dynaform-builder",
+    "longDescription": "Bộ skill cho form builder dynaform của Dai Nam University: chuyển yêu cầu nghiệp vụ thành form JSON hợp lệ (component, validation, logic/event, layout, data source), kiểm tra bằng script, nhúng thư viện @dnu/dynaform-builder vào ứng dụng/MFE và tuân thủ quy ước của repo mfe-dynaform.",
+    "developerName": "Hoang Chu Minh",
+    "category": "Coding",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Dựng form đăng ký sinh viên có kiểm tra hợp lệ và chọn tỉnh/quận phụ thuộc.",
+      "Kiểm tra file form JSON này có hợp lệ với dynaform không.",
+      "Nhúng DynaformBuilder ở chế độ release vào trang này."
+    ]
+  }
+}

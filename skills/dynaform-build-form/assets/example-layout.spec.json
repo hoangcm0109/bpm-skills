@@ -1,0 +1,22 @@
+{
+  "name": "Đăng ký sinh viên",
+  "description": "Ví dụ bố cục: container, 2 cột, 3 cột (columns) và tab",
+  "components": [
+    { "type": "container", "name": "personal", "label": "Thông tin cá nhân" },
+    { "type": "input", "name": "full_name", "label": "Họ và tên", "required": true, "colSpan": 6, "parent": "personal" },
+    { "type": "date-picker", "name": "dob", "label": "Ngày sinh", "colSpan": 6, "parent": "personal" },
+    { "type": "email", "name": "email", "label": "Email", "colSpan": 12, "parent": "personal" },
+
+    { "type": "columns", "name": "address_row", "label": "Địa chỉ", "columns": { "count": 3, "spans": [4, 4, 4] } },
+    { "type": "input", "name": "city", "label": "Tỉnh/Thành", "parent": "address_row", "tabId": "col-0" },
+    { "type": "input", "name": "district", "label": "Quận/Huyện", "parent": "address_row", "tabId": "col-1" },
+    { "type": "input", "name": "ward", "label": "Phường/Xã", "parent": "address_row", "tabId": "col-2" },
+
+    { "type": "tab", "name": "more", "label": "Thông tin thêm", "tabs": [
+      { "id": "tab-contact", "label": "Liên hệ" }, { "id": "tab-family", "label": "Gia đình" } ] },
+    { "type": "tel", "name": "phone", "label": "Điện thoại", "parent": "more", "tabId": "tab-contact" },
+    { "type": "input", "name": "parent_name", "label": "Họ tên phụ huynh", "parent": "more", "tabId": "tab-family" },
+
+    { "type": "submit-button", "name": "btn_submit", "label": "Gửi hồ sơ" }
+  ]
+}

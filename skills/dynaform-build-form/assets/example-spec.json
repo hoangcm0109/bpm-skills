@@ -1,0 +1,44 @@
+{
+  "name": "Đăng ký tài khoản",
+  "description": "Ví dụ đủ các cơ chế: container, tab, select phụ thuộc API, matchField, rule hiển thị, dialog",
+  "components": [
+    { "type": "text", "name": "intro_text", "label": "Thông tin đăng ký", "content": "<h2>Đăng ký tài khoản</h2>" },
+
+    { "type": "container", "name": "account_section", "label": "Tài khoản" },
+    { "type": "input", "name": "full_name", "label": "Họ và tên", "required": true, "requiredMessage": "Vui lòng nhập họ tên",
+      "colSpan": 6, "parent": "account_section", "placeholder": "Nguyễn Văn A",
+      "validations": [{ "type": "minLength", "value": 3, "errorMessage": "Tối thiểu 3 ký tự" }] },
+    { "type": "email", "name": "email", "label": "Email", "required": true, "colSpan": 6, "parent": "account_section",
+      "validations": [{ "type": "email", "errorMessage": "Email không hợp lệ" }] },
+    { "type": "password", "name": "password", "label": "Mật khẩu", "required": true, "colSpan": 6, "parent": "account_section",
+      "validations": [{ "type": "minLength", "value": 8 }] },
+    { "type": "password", "name": "confirm_password", "label": "Nhập lại mật khẩu", "required": true, "colSpan": 6,
+      "parent": "account_section",
+      "validations": [{ "type": "matchField", "value": "password", "errorMessage": "Mật khẩu không khớp" }] },
+
+    { "type": "select", "name": "account_type", "label": "Loại tài khoản", "colSpan": 6, "required": true,
+      "options": [{ "label": "Cá nhân", "value": "personal" }, { "label": "Doanh nghiệp", "value": "company" }] },
+    { "type": "input", "name": "company_name", "label": "Tên doanh nghiệp", "colSpan": 6, "hidden": true,
+      "rules": [
+        { "name": "Hiện khi là doanh nghiệp", "match": "AND",
+          "when": [{ "field": "account_type", "operator": "equals", "value": "company" }],
+          "then": [{ "type": "show", "target": "company_name" }, { "type": "require", "target": "company_name" }] }
+      ] },
+
+    { "type": "tab", "name": "address_tabs", "label": "Địa chỉ", "tabs": [
+        { "id": "tab-home", "label": "Thường trú" }, { "id": "tab-work", "label": "Cơ quan" }] },
+    { "type": "select", "name": "province", "label": "Tỉnh/Thành", "colSpan": 4, "parent": "address_tabs", "tabId": "tab-home",
+      "dataSource": { "api": { "baseUrl": "https://provinces.open-api.vn", "endpoint": "/api/p/",
+        "labelField": "name", "valueField": "code" } } },
+    { "type": "select", "name": "district", "label": "Quận/Huyện", "colSpan": 4, "parent": "address_tabs", "tabId": "tab-home",
+      "dataSource": { "api": { "baseUrl": "https://provinces.open-api.vn", "endpoint": "/api/p/{province_code}?depth=2",
+        "pathParams": { "province_code": "{$province}" }, "dependsOn": ["province"],
+        "responsePath": "districts", "labelField": "name", "valueField": "code" } } },
+    { "type": "textarea", "name": "work_address", "label": "Địa chỉ cơ quan", "parent": "address_tabs", "tabId": "tab-work" },
+
+    { "type": "dialog", "name": "success_dialog", "label": "Đăng ký thành công",
+      "dialog": { "variant": "info", "title": "Thành công", "description": "Tài khoản của bạn đã được tạo." } },
+    { "type": "submit-button", "name": "btn_submit", "label": "Đăng ký",
+      "events": [{ "event": "click", "actions": [{ "type": "openModal", "target": "success_dialog" }] }] }
+  ]
+}
