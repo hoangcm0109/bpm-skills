@@ -21,6 +21,7 @@ Repo này là **plugin chứa agent skills**, không phải ứng dụng. Skill 
 - Không đưa bí mật hay dữ liệu cá nhân thật vào spec/JSON. Không tự lưu/publish form, gọi API thật, commit/push, đổi version lib khi chưa được yêu cầu rõ.
 - Không sinh `customScript`/`run_script` làm mặc định; nếu cần phải hiển thị mã cho người dùng duyệt.
 - Script `dynaform.mjs` chỉ dùng `node:fs`/`node:crypto`, không mạng, không exec — giữ nguyên cam kết đó khi sửa (xem `docs/security/review-checklist.md`).
+- Script `stream-server.mjs` (build dần) là ngoại lệ duy nhất có mở cổng: chỉ `127.0.0.1`, chỉ GET, chỉ đọc file spec. Không nhét logic mạng vào `dynaform.mjs`.
 
 ## Quy tắc khi sửa repo này
 

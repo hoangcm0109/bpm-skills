@@ -7,6 +7,7 @@
   "formKey": "",                   // tuỳ chọn
   "endpoint": "", "method": "POST",// tuỳ chọn: nơi submit (settings.setting)
   "size": "normal",                // xs | sm | normal | lg | xl
+  "complete": true,                // tuỳ chọn: chỉ dùng khi build dần (stream-preview.md); bỏ qua khi build thường
   "theme": { "styles": {...}, "colors": {...} }, // bỏ qua = theme mặc định
   "components": [ /* mảng component, THỨ TỰ = thứ tự hiển thị, cha trước con */ ]
 }
@@ -40,6 +41,7 @@
 | `dialog` | type dialog | `{ "variant": "confirmation"\|"form"\|"info"\|"custom", "title", "description" }` |
 | `styles` | | trộn thêm vào `editable_props.styles` (vd `{ "showLabel": "no" }`) |
 | `overrides` | | override theo viewport: `{ "sm": { "styles": { "colSpan": "12" } } }` |
+| `custom` | | CSS thuần + class Tailwind của người dùng cho **mọi** control (lib ≥ 4.6.0) → `properties.custom`: `{ "className": "rounded-xl border p-4", "css": "background:#f8fafc", "control": { "className", "css" }, "label": { "className", "css" } }` — xem `dynaform-components` › Style tuỳ chỉnh |
 | `props` | | passthrough vào `editable_props.properties` (cấu hình sâu: table, file…) |
 
 ## Ánh xạ sang JSON đầu ra
@@ -49,6 +51,7 @@
 | `name` | `item_control.variables.name` + `key_path` + `wrapper.variable_name` |
 | `label`, `placeholder`, `required`, `attributes`, `tabs`… | `item_control.editable_props.properties.*` |
 | `colSpan`, `styles` | `item_control.editable_props.styles` |
+| `custom` | `item_control.editable_props.properties.custom` |
 | `required` + `validations` | `item_control.validation_schema[]` (+ `properties.required`) |
 | `options` | `variables.data_source` = `{ connection_type: "hard", connection_config: { value: [...] } }` |
 | `dataSource.api` | `variables.data_source` = `{ connection_type: "api", request_config, response_mapping, connection_config, depends_on? }` |

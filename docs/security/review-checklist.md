@@ -26,6 +26,13 @@
   ```
 - [ ] Ca lỗi vẫn exit 1 (trùng name, ref treo, type lạ, select thiếu options).
 
+## B2. Script cầu nối (`scripts/stream-server.mjs`)
+
+- [ ] Chỉ import `node:fs`, `node:http` và `./dynaform.mjs`; không `child_process`, `eval`, `new Function`, `fetch`, `net` ra ngoài, không đọc `process.env`.
+- [ ] Chỉ `listen` trên `127.0.0.1`; kiểm `Host` và `Origin`; chỉ phục vụ `GET`; không endpoint ghi.
+- [ ] Chỉ đọc file spec truyền vào; không ghi file.
+- [ ] Đã thử: Host lạ → 403, Origin ngoài localhost → 403, file spec đang ghi dở không làm server sập.
+
 ## C. Manifest plugin
 
 - [ ] `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json` cùng `name`/`version`.

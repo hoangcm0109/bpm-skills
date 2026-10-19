@@ -9,7 +9,7 @@
  * transformFormComponents. Xem references/spec-format.md để biết cú pháp spec.
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 // ── Registry: type → thông tin item_control (lấy từ src/config/component-groups.ts) ──────────
 const R = (group, renderer, icon, display, category = "form") => ({ group, renderer, icon, display, category });
@@ -268,6 +268,7 @@ function buildItemControl(c, order, ids) {
     ...(c.stepsOptions ? { stepsOptions: c.stepsOptions } : {}),
     ...(c.columns ? { columns: { count: 2, gap: "1rem", stackOnMobile: "yes", ...c.columns } } : {}),
     ...(c.dialog ? { dialog: c.dialog } : {}),
+    ...(c.custom ? { custom: c.custom } : {}),
     ...(c.props ?? {}),
   };
   const handlers = [
@@ -301,9 +302,18 @@ function buildItemControl(c, order, ids) {
   };
 }
 
-export function buildForm(spec) {
+/** UUID tất định theo (seed, key) — dùng cho chế độ stream để mỗi lần build lại vẫn giữ nguyên id. */
+function stableUuid(seed, key) {
+  const h = createHash("sha1").update(`${seed}:${key}`).digest("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
+
+/** `opts.stableIds`: id sinh từ name thay vì ngẫu nhiên (build lặp lại cho kết quả giống hệt nhau). */
+export function buildForm(spec, opts = {}) {
   const comps = spec.components;
-  const ids = new Map(comps.map((c) => [c.name, randomUUID()]));
+  const seed = spec.id ?? spec.name ?? "form";
+  const uid = (key) => (opts.stableIds ? stableUuid(seed, key) : randomUUID());
+  const ids = new Map(comps.map((c) => [c.name, uid(`item:${c.name}`)]));
   const order = new Map();
   const controls = new Map(); // name -> item_control
   const roots = [];
@@ -316,14 +326,14 @@ export function buildForm(spec) {
     const wrapper = CONTAINER_KIND[c.type]
       ? ic // container: không có vỏ ngoài (đúng như builder xuất)
       : {
-          id: randomUUID(), parent_id: ic.parent_id, data_lang: ic.data_lang, status: "", variable_name: c.name,
+          id: uid(`wrap:${c.name}`), parent_id: ic.parent_id, data_lang: ic.data_lang, status: "", variable_name: c.name,
           external_id: "", validation_rules: {}, logic_rules: [], variable_rules: {}, sort_order: n, page: 1,
           kind: "component", item_control: ic,
         };
     if (c.parent) controls.get(c.parent).children_schema.push(wrapper);
     else roots.push(wrapper);
   });
-  const id = spec.id ?? randomUUID();
+  const id = spec.id ?? uid("form");
   return {
     id, name: spec.name ?? "Untitled form", description: spec.description ?? "",
     settings: {

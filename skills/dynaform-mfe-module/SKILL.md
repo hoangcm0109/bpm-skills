@@ -42,7 +42,7 @@ Chạy được cả **standalone** và **trong shell** — mọi thay đổi ph
 - **Không có dialog tạo form** trong module (đã gỡ `CreateFormDialog`): trang danh sách chỉ có nút "Đi tới workspace để tạo form", mở `{REACT_APP_BPM_URL}/workflow/workspaces` ở tab mới (`resolveBpmUrl()` trong `lib/runtimeConfig.ts`, `BPM_WORKSPACES_PATH` trong `constants/formManager.ts`). Chưa cấu hình `REACT_APP_BPM_URL` thì nút ẩn. Form mới được tạo bên trong một workspace của BPM, không tạo từ mfe-dynaform.
 - Chỉ mở editor cho version **`draft`**; mở với `id` + môi trường của version đang chọn.
 - Môi trường & publish: `ENDPOINTS.formDesign.{publish,changeStatus,edit,crossEnv}`; pipeline lấy từ `flow_publish` của form.
-- Version lib hiện dùng trong module: `v4.5.2` (kiểm tra `package.json` của mfe-dynaform trước khi nói về version).
+- Version lib hiện dùng trong module: `v4.6.0` (kiểm tra `package.json` của mfe-dynaform trước khi nói về version).
 - Sửa version lib: đổi tag trong `package.json` rồi cài lại; thử thay đổi lib chưa release bằng `pnpm start:linked` (xem `dynaform-embed-lib`).
 
 ## Quy trình sửa

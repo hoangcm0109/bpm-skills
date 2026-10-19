@@ -1,6 +1,6 @@
 ---
 name: dynaform-build-form
-description: Dựng một form dynaform (FormDesignJson của @dnu/dynaform-builder) từ yêu cầu nghiệp vụ — viết spec gọn, chạy script sinh JSON, kiểm tra và nạp vào builder/runtime. Dùng khi người dùng nói "tạo form", "dựng form đăng ký/khảo sát/…", "sinh JSON form", "build form dynaform", "thiết kế form bằng AI". Đây là skill điểm vào duy nhất cần gọi: đã gồm bảng tra nhanh về component, validation, logic/event, bố cục và data source; chỉ đọc thêm skill chi tiết khi cần.
+description: Dựng một form dynaform (FormDesignJson của @dnu/dynaform-builder) từ yêu cầu nghiệp vụ — viết spec gọn, chạy script sinh JSON, kiểm tra và nạp vào builder/runtime. Dùng khi người dùng nói "tạo form", "dựng form đăng ký/khảo sát/…", "sinh JSON form", "build form dynaform", "thiết kế form bằng AI", "cho xem form hiện dần/stream/build tới đâu hiện tới đó". Đây là skill điểm vào duy nhất cần gọi: đã gồm bảng tra nhanh về component, validation, logic/event, bố cục và data source; chỉ đọc thêm skill chi tiết khi cần.
 ---
 
 # Dựng form dynaform
@@ -36,6 +36,14 @@ Thư mục chứa file SKILL.md này gọi là `<skill>`; script nằm ở `<ski
    - Trong app host: truyền vào `data.dataFormDesign` của `DynamicFormBuilder` (mode `editor` | `preview` | `release`), hoặc `form={…}` của `DynaformBuilder` (lib ≥ 4.5.0) — xem `../dynaform-embed-lib/SKILL.md`.
    - Lưu thành form trên backend: module mfe-dynaform **không còn dialog tạo form** — form mới được tạo trong workspace của BPM (nút "Đi tới workspace để tạo form" mở `{REACT_APP_BPM_URL}/workflow/workspaces`); sau đó mở editor của form đó và dán JSON (xem `../dynaform-mfe-module/SKILL.md`). Không tự gọi API ghi nếu người dùng chưa yêu cầu.
 7. **Báo cáo**: liệt kê field đã dựng (name, type, bắt buộc), logic/event đã gắn, phần chưa làm được hoặc cần người dùng cấu hình thêm (data source thật, URL API, quyền).
+
+## Build dần — xem form hiện trực tiếp (chỉ khi người dùng muốn)
+
+Khi người dùng muốn thấy form lớn lên theo từng bước thay vì chờ build xong: bật cầu nối dev `stream-server.mjs`, rồi ghi spec **từng đợt nhỏ**;
+trang `/dynaform/form-manager/stream` của mfe-dynaform nhận và vẽ lại sau mỗi lần file đổi. Quy trình, cú pháp và giới hạn: `references/stream-preview.md`.
+
+- Mặc định vẫn là luồng build một lần ở trên. Chỉ dùng chế độ này khi người dùng yêu cầu rõ và đang chạy mfe-dynaform ở máy dev.
+- Server chỉ nghe `127.0.0.1`, chỉ đọc đúng file spec; xong việc thì tắt.
 
 ## Bảng tra nhanh
 
@@ -98,12 +106,13 @@ Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc fi
 | Nhúng lib vào app/MFE, props, release mode | `../dynaform-embed-lib/SKILL.md` |
 | Quy ước trong repo mfe-dynaform | `../dynaform-mfe-module/SKILL.md` |
 | Cú pháp spec đầy đủ / cấu trúc JSON xuất | `references/spec-format.md`, `references/output-format.md` |
+| Build dần, xem form hiện trực tiếp | `references/stream-preview.md` |
 
 ## Việc script KHÔNG làm — nói rõ với người dùng
 
 - `grid` (children theo slot), `table`, `matrix`, `list`, `custom-embed`, `form-loop`, `sub-form`… có cấu hình sâu: script chỉ tạo khung (`props` truyền thẳng vào `editable_props.properties`). Cấu hình chi tiết nên làm trong builder.
 - Action `switchTab` / `collapse` hiện chưa có tác dụng ở runtime (action engine) — script cảnh báo.
-- Script không gọi mạng, không kiểm tra API/data source có sống không.
+- `dynaform.mjs` không gọi mạng, không kiểm tra API/data source có sống không. Chỉ `stream-server.mjs` (tuỳ chọn, chế độ build dần) mở cổng — và chỉ trên `127.0.0.1`.
 
 ## Bảo mật khi dựng form
 

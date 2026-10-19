@@ -10,10 +10,10 @@ Lib phát hành bằng **git tag** `vX.Y.Z` của repo `fe_dynaform`, `dist/lib`
 ## 1. Cài đặt
 
 ```jsonc
-"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v4.5.2"
+"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v4.6.0"
 ```
 
-(`v4.5.2` là tag mới nhất lúc viết skill. Các prop ghi "từ 4.5.0" ở dưới cần tag ≥ 4.5.0.)
+(`v4.6.0` là tag mới nhất lúc viết skill. Các prop ghi "từ 4.5.0" ở dưới cần tag ≥ 4.5.0.)
 
 - Luôn `git+http://` (http thường → `TAR_BAD_ARCHIVE`) và **pin tag**; không dùng `#main`/nhánh.
 - Peer: `react`, `react-dom` ≥ 18. `@tanstack/react-query`, `@sth87/shadcn-design-system`, `lucide-react` đã bundle trong lib; host không cần bọc `QueryClientProvider` cho lib.
@@ -58,6 +58,7 @@ Props chính: `idForm` (bắt buộc nếu không truyền `form`), `environment
   - `hideSubmitButton` (mặc định `true`): ẩn nút Gửi của runtime; host tự có nút và lấy giá trị bằng `ref.current.onSubmit()` (null = không hợp lệ).
   - `ref`: `DynaformBuilder` là `forwardRef`, handle = `DynamicFormBuilderHandle` của lõi (`onSubmit`, `getFormJson`, undo/redo, `setViewport`…), dùng ở cả editor lẫn preview/release.
   - `isolatedState` (**4.5.1**, preview/release): state runtime riêng; bật khi nhiều form mount cùng trang (modal, task form).
+- **Từ 4.6.0**: `ref.current.loadFormJson(json, { snapshot?, progress? })` thay toàn bộ form của editor từ host (build dần; editor chỉ đọc `dataFormDesign` lúc mount); canvas có hiệu ứng build dần. Mọi control nhận **CSS thuần + class Tailwind** (`properties.custom`, panel "CSS tuỳ chỉnh" ở tab Thiết kế; host tắt bằng `embedPolicy.allowCustomCss: false`). Control `table-filter` đã **gỡ** (không migrate): form cũ hiện khung cảnh báo tại chỗ đó.
 - `onError` (**4.4.0**, editor): gọi khi lưu form / lưu thành control thất bại; lib đã tự toast message chi tiết của server và `console.error` toàn bộ response. `error` = `{ action, message, status?, details[], body?, cause }` để host ghi log riêng.
 
 ```tsx
@@ -118,6 +119,8 @@ JSON từ `dynaform-build-form` → `data.dataFormDesign` (hoặc dán qua Open 
 | Lưu form lỗi nhưng chỉ thấy "Request failed" | lib < 4.4.0; nâng tag để có message chi tiết của server + `onError` |
 | `ref.current` luôn `null` / prop `form`, `dataUserFill` không có tác dụng | lib < 4.5.0 |
 | Lưu lại form làm các container về `sort_order` 1 | lib < 4.5.2 (loader làm rơi `sort_order`); nâng tag |
+| `loadFormJson` không tồn tại / `custom` (CSS) không có tác dụng | lib < 4.6.0 |
+| Class Tailwind trong `properties.custom` không hiện ở viewer | form chưa qua editor nên chưa có `tailwindCss`; mở trong builder và Save |
 
 Thư mục nguồn của lib (từ 4.4.1): `src/lib/builder-core/` (`DynamicFormBuilder`, modes, SDK events, transform, embed) và `src/lib/builder-host/` (`DynaformBuilder`: REST + react-query + save). Hai thư mục này **không** trùng nhau: host render core, không ngược lại. Export public và tên package không đổi.
 

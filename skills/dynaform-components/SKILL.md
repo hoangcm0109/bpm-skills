@@ -58,6 +58,24 @@ Chi tiết cách bố cục: skill `dynaform-layout`.
 - Cấu hình riêng của một type nằm ở `props` (passthrough vào `editable_props.properties`). Chỉ truyền khoá bạn **đã xác nhận** từ docs/builder; khoá lạ vẫn được lưu nhưng có thể không có tác dụng.
 - Gặp control cấu hình phức tạp (table, matrix, file, custom-embed): dựng khung bằng script, sau đó mở builder để cấu hình chi tiết và Save.
 
+## Style tuỳ chỉnh — CSS thuần / class Tailwind (lib ≥ 4.6.0)
+
+Mọi control (nhập liệu, content, layout, overlay) nhận `custom` trong spec → `properties.custom`:
+
+```jsonc
+{ "type": "input", "name": "email", "custom": {
+  "className": "rounded-xl border p-4 hover:bg-muted",        // khung ngoài (label + ô nhập + lỗi): Tailwind
+  "css": "background: #f8fafc; &:hover { box-shadow: 0 2px 8px #0002 }",  // khung ngoài: CSS thuần
+  "control": { "className": "border-2 border-rose-500 rounded-xl" },     // CHÍNH ô nhập (chỉ control nhập liệu)
+  "label":   { "className": "font-bold uppercase text-rose-600" }        // nhãn của field (chỉ control nhập liệu)
+} }
+```
+
+- Phần **`control`** = input / textarea / select / checkbox / switch (Button thì là chính nút); **`label`** = nhãn của field. Container / content / layout chỉ có khung ngoài; Dialog / Drawer / Bottom sheet áp lên panel khi mở.
+- Class viết Tailwind thường (`p-4`, `hover:`, `dark:`, `w-[37px]`, `@max-3xl:`); phải **viết đủ tên class** (không ghép `p-${n}`). CSS thuần: khai báo trực tiếp hoặc rule lồng (`&:hover {…}`, `& input {…}`); `@import`, `expression()`, `url()` ngoài `https:` bị lọc.
+- **Đừng tự điền `tailwindCss` / `twHash`**: builder tự sinh khi form được nạp vào editor (`loadFormJson` / Open JSON / mở editor). Form chưa qua editor chỉ hiện CSS thuần cho tới khi được lưu từ builder — nên sau khi dựng bằng script, mở form trong builder một lần và Save.
+- Host tắt được bằng `embedPolicy.allowCustomCss: false`. Chi tiết: `docs/CUSTOM_STYLE.md` trong fe_dynaform.
+
 ## Tài liệu sâu trong fe_dynaform (đọc khi cần)
 
-`docs/DATA_TABLE.md`, `docs/TABLE_FILTER.md`, `docs/COLLECTION_CONTROLS.md`, `docs/FILE_UPLOAD_CONFIG_GUIDE.md`, `docs/CUSTOM_EMBED.md`, `docs/CONTROL_OVERRIDES.md`, `docs/TIMELINE.md`, `docs/WYSIWYG_EDITOR_GUIDE.md`.
+`docs/DATA_TABLE.md`, `docs/CUSTOM_STYLE.md`, `docs/COLLECTION_CONTROLS.md`, `docs/FILE_UPLOAD_CONFIG_GUIDE.md`, `docs/CUSTOM_EMBED.md`, `docs/CONTROL_OVERRIDES.md`, `docs/TIMELINE.md`, `docs/WYSIWYG_EDITOR_GUIDE.md`.

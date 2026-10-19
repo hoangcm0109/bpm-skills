@@ -10,8 +10,8 @@ Tài liệu này mô tả rủi ro khi dùng bộ skill này và cách dùng an 
 
 ## Phạm vi
 
-Repo chỉ chứa **hướng dẫn (markdown)**, **một script Node** (`skills/dynaform-build-form/scripts/dynaform.mjs`) và **manifest plugin**.
-Không có dịch vụ chạy nền, không có hook, không có MCP server, không có biến môi trường bắt buộc.
+Repo chỉ chứa **hướng dẫn (markdown)**, **hai script Node** (`skills/dynaform-build-form/scripts/dynaform.mjs` và `stream-server.mjs`) và **manifest plugin**.
+Không có dịch vụ chạy nền tự khởi động (`stream-server.mjs` chỉ chạy khi người dùng yêu cầu build dần), không có hook, không có MCP server, không có biến môi trường bắt buộc.
 
 ## Cam kết của script `dynaform.mjs`
 
@@ -22,6 +22,17 @@ Không có dịch vụ chạy nền, không có hook, không có MCP server, kh�
 - Không đọc biến môi trường, không đọc file ngoài tham số.
 - Không thực thi nội dung trong spec/form JSON (kể cả `customScript.code`): chỉ chép sang JSON đầu ra dưới dạng chuỗi.
 - `crypto.randomUUID()` chỉ dùng để sinh id.
+
+## Cam kết của script `stream-server.mjs` (cầu nối build dần, tuỳ chọn)
+
+Ngoại lệ có phạm vi hẹp của quy tắc "không mạng", tách riêng khỏi `dynaform.mjs` để `dynaform.mjs` vẫn giữ nguyên các cam kết trên:
+
+- Chỉ import `node:fs`, `node:http` và `dynaform.mjs`. **Không** `child_process`/`eval`/`Function`, không đọc biến môi trường, không gọi ra ngoài.
+- Chỉ lắng nghe `127.0.0.1`; từ chối `Host` không phải localhost (chống DNS rebinding) và `Origin` ngoài localhost (trừ khi thêm `--allow-origin`).
+- Chỉ nhận `GET` (`/events`, `/snapshot`, `/health`). Không có endpoint ghi, không nhận dữ liệu từ client.
+- Chỉ **đọc** đúng file spec truyền vào; không ghi file.
+- Không thực thi nội dung spec; chỉ build thành JSON rồi đẩy sang trình duyệt. Trang xem trước chạy form như runtime thật, nên `customScript`/`run_script` trong spec (nếu có) sẽ chạy trên trình duyệt người xem.
+- Chỉ dành cho máy dev; không chạy trên máy chủ dùng chung.
 
 ## Rủi ro chính (tóm tắt)
 
