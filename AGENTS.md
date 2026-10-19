@@ -33,4 +33,5 @@ Repo này là **plugin chứa agent skills**, không phải ứng dụng. Skill 
   node skills/dynaform-build-form/scripts/dynaform.mjs validate /tmp/form.json
   ```
 - Thêm skill mới: tạo `skills/<tên>/SKILL.md`, cập nhật bảng trên và `README.md`. Không cần đăng ký trong manifest (skill được nạp theo thư mục `skills/`).
-- Đổi version: cập nhật đồng bộ `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`.
+- Đổi version: cập nhật đồng bộ `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`, và ghi một mục vào `CHANGELOG.md`. Claude Code chỉ cập nhật cho người dùng khi `version` tăng; cách người dùng cập nhật nằm ở `README.md` → "Cài đặt & cập nhật".
+- Khi lib `@dnu/dynaform-builder` ra tag mới: đối chiếu `fe_dynaform/.claude/memory-logs/` và `docs/DYNAFORM_BUILDER_INTEGRATION.md`, cập nhật tag mẫu trong `dynaform-embed-lib` và dòng "khớp lib" trong README.

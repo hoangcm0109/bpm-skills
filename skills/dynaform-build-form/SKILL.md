@@ -33,8 +33,8 @@ Thư mục chứa file SKILL.md này gọi là `<skill>`; script nằm ở `<ski
    ```
 6. **Nạp form** (chọn theo ngữ cảnh):
    - Trong builder: nút *Open JSON* (`open-json-dialog`) → dán nội dung `my-form.json` → xem lại trên canvas, chỉnh tay nếu cần rồi Save.
-   - Trong app host: truyền vào `data.dataFormDesign` của `DynamicFormBuilder` (mode `editor` | `preview` | `release`) — xem `../dynaform-embed-lib/SKILL.md`.
-   - Lưu thành form trên backend: tạo form bằng *Create Form* của module mfe-dynaform rồi mở editor và dán JSON (xem `../dynaform-mfe-module/SKILL.md`). Không tự gọi API ghi nếu người dùng chưa yêu cầu.
+   - Trong app host: truyền vào `data.dataFormDesign` của `DynamicFormBuilder` (mode `editor` | `preview` | `release`), hoặc `form={…}` của `DynaformBuilder` (lib ≥ 4.5.0) — xem `../dynaform-embed-lib/SKILL.md`.
+   - Lưu thành form trên backend: module mfe-dynaform **không còn dialog tạo form** — form mới được tạo trong workspace của BPM (nút "Đi tới workspace để tạo form" mở `{REACT_APP_BPM_URL}/workflow/workspaces`); sau đó mở editor của form đó và dán JSON (xem `../dynaform-mfe-module/SKILL.md`). Không tự gọi API ghi nếu người dùng chưa yêu cầu.
 7. **Báo cáo**: liệt kê field đã dựng (name, type, bắt buộc), logic/event đã gắn, phần chưa làm được hoặc cần người dùng cấu hình thêm (data source thật, URL API, quyền).
 
 ## Bảng tra nhanh
@@ -131,4 +131,4 @@ Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc fi
 - `references/output-format.md` — cấu trúc JSON builder xuất (để đọc/sửa JSON có sẵn).
 - `assets/example-spec.json` — ví dụ chạy được: container, tab, select phụ thuộc API, matchField, rule hiển thị, dialog.
 - `assets/example-layout.spec.json` — ví dụ **chỉ bố cục**: container (6/6 + 12), `columns` 3 cột, `tab` — mẫu để dựng layout form.
-- Nguồn sự thật của lib: repo `fe_dynaform` (`src/models/FormComponent.ts` `toGroupJSON`, `src/lib/dynamic-form-builder/transform/transform-form-components.ts`).
+- Nguồn sự thật của lib: repo `fe_dynaform` (`src/models/FormComponent.ts` `toGroupJSON`, `src/lib/builder-core/transform/transform-form-components.ts`; thư mục này tên cũ là `dynamic-form-builder` trước 4.4.1).
