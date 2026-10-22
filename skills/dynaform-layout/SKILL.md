@@ -1,6 +1,6 @@
 ---
 name: dynaform-layout
-description: Bố cục form dynaform — lưới 12 cột (colSpan, colStart), mỗi control chiếm bao nhiêu cột, xếp hàng, responsive desktop-first (override sm/md, tự xuống hàng trên mobile), chọn container/columns/grid/tab/steps, công thức bố cục (2-3-4 cột, 8+4, nút căn phải), theme/settings. Dùng khi sắp xếp field thành hàng/nhóm, quyết định số cột cho từng control, chia tab/wizard, chỉnh hiển thị mobile, hoặc đổi theme form.
+description: Bố cục form dynaform — lưới 12 cột (colSpan, colStart), mỗi control chiếm bao nhiêu cột, căn dọc trong hàng (alignSelf — nút thẳng đáy với ô nhập), xếp hàng, responsive desktop-first (override sm/md, tự xuống hàng trên mobile), chọn container/columns/grid/tab/steps, công thức bố cục (2-3-4 cột, 8+4, nút căn phải), theme/settings. Dùng khi sắp xếp field thành hàng/nhóm, quyết định số cột cho từng control, chia tab/wizard, chỉnh hiển thị mobile, hoặc đổi theme form.
 ---
 
 # Bố cục form
@@ -14,6 +14,7 @@ Mọi khoá dưới đây là khoá của **spec** (`*.spec.json`) — script `d
 - Control có `colSpan` 1–12 (mặc định **12** = cả hàng) tính **trong vùng chứa nó**, không tính theo cả form. Vùng 6 cột bên trong `columns` vẫn có đủ 12 cột con.
 - Thứ tự mảng `components` = thứ tự hiển thị. Lib xếp như lưới CSS: cộng dồn `colSpan` theo thứ tự; cộng thêm control mà tổng **> 12** thì control đó xuống hàng mới. Không có khái niệm "hàng" khai báo sẵn.
 - `colStart` (`"auto"` hoặc 1–12): đặt cột bắt đầu. Cần `colStart + colSpan − 1 ≤ 12`. Dùng để căn phải (nút) hoặc chừa khoảng trống; còn lại để `auto`.
+- `alignSelf` (`"start"` mặc định | `"center"` | `"end"` | `"stretch"`): căn **dọc** của control trong hàng của nó (lib mới hơn v4.7.0; trước đó mọi ô cố định `start`). Control trong cùng hàng cao khác nhau (ô nhập có nhãn + nút không nhãn) mặc định dính mép trên; `end` đưa nút xuống ngang đáy ô nhập, `center` căn giữa, `stretch` kéo cao bằng hàng. Đổi theo viewport như `colSpan`: `overrides: { sm: { alignSelf: "start" } }`. Giá trị `start` không ghi ra JSON.
 - Nhóm không đầy hàng (vd 6 + 4 = 10) không lỗi nhưng chừa trống bên phải — script cảnh báo.
 - Overlay (`dialog`/`drawer`/`bottom-sheet`) không chiếm chỗ trong lưới; đặt trước nút mở.
 
@@ -115,10 +116,18 @@ Nguyên tắc:
 { "type": "input", "name": "zip",     "label": "Mã bưu chính", "colSpan": 3 }
 ```
 
-**Ô nhập + nút bên cạnh** — mã khuyến mại (9) + nút Áp dụng (3). Nút nằm sát mép trên của hàng nên lệch với ô nhập có nhãn; nếu cần thẳng hàng, ẩn nhãn ô nhập (`styles.showLabel: "no"` + `placeholder`):
+**Ô nhập + nút bên cạnh** — mã khuyến mại (9) + nút Áp dụng (3). Ô nhập có nhãn cao hơn nút, mặc định nút dính mép trên nên lệch; đặt `alignSelf: "end"` để nút thẳng đáy với ô nhập:
 ```jsonc
 { "type": "input",  "name": "promo", "label": "Mã khuyến mại", "colSpan": 9 },
-{ "type": "button", "name": "btn_apply", "label": "Áp dụng", "colSpan": 3 }
+{ "type": "button", "name": "btn_apply", "label": "Áp dụng", "colSpan": 3, "alignSelf": "end" }
+```
+(Nếu ô nhập đang hiện thông báo lỗi bên dưới thì ô cao thêm và nút lệch lên một chút. Muốn thẳng tuyệt đối với đỉnh ô nhập: ẩn nhãn ô nhập bằng `styles.showLabel: "no"` + `placeholder`, giữ nút `alignSelf: "start"`.)
+
+**Hàng bộ lọc** — các ô lọc có nhãn + hai nút Xoá bộ lọc / Áp dụng cùng hàng:
+```jsonc
+{ "type": "select", "name": "class_code", "label": "Lớp học", "colSpan": 6, "options": [{ "label": "Tất cả lớp", "value": "" }, { "label": "Lớp A", "value": "a" }] },
+{ "type": "button", "name": "btn_clear", "label": "Xóa bộ lọc", "colSpan": 3, "alignSelf": "end" },
+{ "type": "button", "name": "btn_apply", "label": "Áp dụng",   "colSpan": 3, "alignSelf": "end" }
 ```
 
 **Nút căn phải** — Huỷ + Gửi dồn về bên phải hàng cuối:
@@ -174,6 +183,7 @@ Bỏ qua = theme mặc định. UI form phải đọc được ở cả light/da
 5. Cha đứng trước con; `tabId` đúng ngăn.
 6. Đã quyết định mobile: để mặc định (tự xếp chồng) hay `overrides.sm` riêng.
 7. Overlay đứng trước nút mở nó.
+8. Nút đứng cạnh ô nhập có nhãn: `alignSelf: "end"` (không dùng khoảng trắng / `text` rỗng để đẩy nút xuống).
 
 Ví dụ chạy được: `skills/dynaform-build-form/assets/example-layout.spec.json`.
 Tài liệu lib: `docs/CONTAINER_DRAG_DROP.md`, `docs/CANVAS_NAVIGATION.md`, `public/templates/sample/*.json` (mẫu form thật).

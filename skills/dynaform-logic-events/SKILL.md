@@ -102,6 +102,7 @@ Từ hai thao tác có phụ thuộc nhau (dùng kết quả bước trước, r
 - Gốc `flow` là một step (thường `sequence`). `branch.then` / `branch.else` là **MỘT step** (dùng `sequence` để gộp).
 - Mọi step nhận: `id` (bắt buộc, duy nhất trong handler), `label?`, `enabled?` (`false` = bỏ qua), `continueOnError?` (lỗi được ghi lại nhưng sequence chạy tiếp), `form?` (chỉ layout nhiều form).
 - Lỗi một step làm `sequence` dừng ngay, trừ khi `continueOnError`. Dùng `try` để bắt lỗi (`catch` đọc `$error.message`; `finally` luôn chạy).
+- **Huỷ** (`confirm` bị Hủy, dialog `awaitSubmit` bị đóng): kết quả step là `cancelled` — flow **dừng ngay kể cả step có `continueOnError`**, `catch` của `try` **không chạy** (huỷ không phải lỗi; `finally` vẫn chạy), không toast lỗi. Đặt `confirm` **trước** bước có tác dụng phụ (gọi API xoá…), không đặt trong `catch`.
 
 ### 6.1 Giá trị (`ValueSource`)
 
@@ -164,7 +165,8 @@ Script chỉ tham chiếu tới `name` đã có trong spec và `$steps.<id>` có
 
 | step | Trường | Ghi chú |
 |---|---|---|
-| `dialog` | `action`: `open\|close\|toggle`, `target` (name dialog/drawer/bottom-sheet) | mở từ dòng loop/list → nội dung dialog đọc dòng đó |
+| `dialog` | `action`: `open\|close\|toggle`, `target` (name dialog/drawer/bottom-sheet); `fillFromRow?`, `awaitSubmit?` | mở từ dòng loop/list → nội dung dialog đọc dòng đó. `fillFromRow: true` (flow chạy cho một dòng: hành động hàng của table, dòng loop): control trong dialog có **tên biến trùng khoá của dòng** được điền sẵn. `awaitSubmit: true`: mở dialog rồi **dừng ở step này** — nút xác nhận / gửi của dialog (footer action `confirm`/`submit`) cho flow chạy tiếp, `output.values` = giá trị trong dialog; đóng dialog bằng cách khác (X, Esc, click ngoài) → flow dừng, không báo lỗi |
+| `confirm` | `message` (chuỗi hoặc ValueSource, có `{{$row.data.name}}`), `title?`, `confirmLabel?` (mặc định "Tiếp tục"), `cancelLabel?` (mặc định "Hủy"), `destructive?` (nút đỏ) | hỏi người dùng đồng ý trước khi chạy tiếp (thay confirm modal). Bấm Hủy / Esc → **flow dừng lặng lẽ** (xem "Huỷ" bên dưới) |
 | `show_message` | `level`: `success\|error\|warning\|info`, `message` (chuỗi hoặc ValueSource, có `{{…}}`) | toast |
 | `navigate` | `url` (có `{{…}}`), `newTab?`, `delayMs?`, `pathMapping?`, `queryMapping?`, `download?: { authConfig?, fileName? }` | `download` tải file **tại tab hiện tại** kèm header Authorization. `delayMs` để người dùng kịp đọc toast. Chỉ `https://` hoặc đường dẫn nội bộ |
 | `push_table` | `tableId`, `mode`: `rows\|request`, `rows`/`total` (mode rows), body (mode request), `keepPage?` | đẩy dữ liệu vào `table` / `record-gallery`; `request` = bảng tự gọi lại API của nó (về trang 1; `keepPage: true` giữ trang). **Trong spec viết `tableId` = name của table**, script đổi sang id lúc build |
@@ -358,12 +360,49 @@ rồi dùng `rules`/`condition` để hiện ra khi điều kiện đúng.
 ```
 (Hoặc `reset_form` để đưa cả form về ban đầu.)
 
+### 7.16 Hành động từng dòng của table (`actions[].flow`)
+
+Mỗi hành động trong cột hành động của `table` có **flow riêng**, chạy khi bấm với `$row` = dòng được bấm: `$row.data.<cột>`, `$row.key`, `$row.index`.
+Khai trong spec ở `props.table.actionColumn.actions[]` (cấu hình cột / dữ liệu bảng làm trong builder; script chỉ kiểm flow):
+
+```jsonc
+{ "type": "table", "name": "users_table",
+  "props": { "table": { "actionColumn": { "enabled": true, "actions": [
+    // Xoá: hỏi → gọi API với id của dòng → tải lại bảng, giữ trang
+    { "id": "del", "label": "Xoá", "type": "delete", "variant": "danger", "flow": { "id": "flow", "type": "sequence", "steps": [
+      { "id": "ask", "type": "confirm", "title": "Xoá người dùng", "message": "Xoá {{$row.data.name}}?", "destructive": true },
+      { "id": "api", "type": "try",
+        "steps": [
+          { "id": "call", "type": "call_api", "method": "DELETE", "url": "https://api.example.com/users/{id}",
+            "pathMapping": [{ "source": { "type": "ref", "path": "$row.data.id" }, "target": "id", "required": true }] },
+          { "id": "reload", "type": "push_table", "tableId": "users_table", "mode": "request", "keepPage": true },
+          { "id": "ok", "type": "show_message", "level": "success", "message": "Đã xoá" }
+        ],
+        "catch": [{ "id": "fail", "type": "show_message", "level": "error", "message": "Xoá thất bại: {{$error.message}}" }] }
+    ] } },
+    // Sửa: mở dialog điền sẵn từ dòng, CHỜ nút xác nhận rồi mới gọi API
+    { "id": "edit", "label": "Sửa", "type": "custom", "flow": { "id": "flow", "type": "sequence", "steps": [
+      { "id": "open", "type": "dialog", "action": "open", "target": "edit_dialog", "fillFromRow": true, "awaitSubmit": true },
+      { "id": "save", "type": "call_api", "method": "PUT", "url": "https://api.example.com/users/{id}", "bodyMode": "static", "body": {},
+        "pathMapping": [{ "source": { "type": "ref", "path": "$row.data.id" }, "target": "id", "required": true }] }
+    ] } },
+    // Xem chi tiết: điều hướng theo khoá dòng
+    { "id": "view", "label": "Xem", "type": "view", "flow": { "id": "flow", "type": "navigate", "url": "/users/{{$row.key}}" } }
+  ] } } } }
+```
+
+- Có `flow` thì flow **nắm toàn bộ cú click**: `confirm` / `dialogTarget` / `dataSourceId` / `redirectUrl` cũ và hành vi sửa/xoá cục bộ của `type` bị bỏ qua (script cảnh báo khi còn trường cũ). Muốn hỏi xác nhận → step `confirm`.
+- `type` (`edit`/`delete`/`view`/`custom`) chỉ quyết định nhãn/biểu tượng mặc định; không có `flow` thì `edit`/`delete` vẫn sửa/xoá dòng cục bộ (bảng tĩnh).
+- `push_table.tableId` viết bằng **name của table** (script đổi sang id lúc build). `keepPage: true` tải lại tại trang hiện tại.
+- Dialog mở từ hàng bảng đứng **trước** table trong mảng; nút xác nhận của dialog dùng footer action `confirm` (không kiểm tra form) hoặc `submit` (kiểm tra các trường trong dialog).
+- Cấu hình cũ (confirm, mở dialog, gọi Data Source, redirect) ở form lưu từ trước **vẫn chạy** (lib tự chuyển thành flow khi bấm; builder hiển thị "chuyển từ cấu hình cũ"). Sự kiện script `table-row-action` giai đoạn `response` không còn bắn cho hành động chạy bằng flow.
+
 ## 8. Giới hạn & lưu ý
 
 - **Export code React** chỉ mang dialog / link / API đơn giản; `load`, `condition` và flow phức tạp chỉ chạy ở runtime (preview / viewer / SDK).
 - Không có phép tính số học trong `ValueSource` (cộng/nhân): tính toán để backend làm, hoặc `run_script` có duyệt. Data mapper `map` lo định dạng/đổi mã/đếm.
 - `condition` luôn nhìn giá trị gốc của form; nhiều `condition` trên form lớn tốn kém — gom vào ít handler, mỗi handler một `branch`.
-- Bảng: action hàng, link ô và footer overlay có đường logic riêng (chưa đi qua `eventHandlers`) — cấu hình trong builder.
+- Bảng: **hành động hàng chạy flow riêng** (`actions[].flow`, §7.16). Link ô của cột và nút footer có sẵn của dialog vẫn có đường logic riêng (chưa đi qua `eventHandlers`) — cấu hình trong builder.
 - Mở/đóng dialog luôn qua step `dialog` (key theo dialog), kể cả từ hàng bảng; dialog mở từ dòng loop/list đọc dữ liệu dòng đó.
 - `required` thay đổi động: dùng `field_state` `require`/`optional` (đừng đặt `required: true` cứng cho control cần bật/tắt — `../dynaform-validation/SKILL.md`).
 - Gỡ lỗi: builder có **Sơ đồ + chạy thử + trace từng step** (`docs/ACTION_ENGINE.md`); mỗi lần gọi API test trong editor nhập giá trị mẫu cho các field flow đọc.

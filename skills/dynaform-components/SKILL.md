@@ -143,6 +143,11 @@ Chi tiết bố cục (số cột từng control, responsive, công thức): ski
 | Hiện JSON / mã | `json-tree`, `code` | |
 | Chữ ký, soạn thảo định dạng, lịch, thanh trượt, tệp | `signature`, `wysiwyg-editor`, `calendar`, `range-slider`, `file` | |
 
+### Hành động từng dòng của `table`
+
+Cột hành động nằm ở `props.table.actionColumn` (`enabled`, `title`, `iconOnly`, `actions[]`). Mỗi hành động: `id`, `label`, `actionKey`, `type` (`edit` | `delete` | `view` | `custom`), `variant` (`outline` | `ghost` | `filled` | `danger`), `icon?`, `tooltip?`, `placement` (`inline` | `menu`), `hiddenWhen` / `disabledWhen` (biểu thức JS theo `row`) và **`flow`** — action flow chạy khi bấm với `$row.data.<cột>`, `$row.key`, `$row.index`.
+Hỏi xác nhận, gọi API, mở dialog (điền sẵn từ dòng, chờ xác nhận), điều hướng, tải lại bảng đều là **step trong flow** — không dùng trường cũ `confirm` / `dialogTarget` / `dataSourceId` / `redirectUrl` cho form mới. Công thức và ví dụ chạy được: `../dynaform-logic-events/SKILL.md` §7.16.
+
 Ngoài ra, nhiều nhu cầu chỉ là **diện mạo**: dùng `custom` (class Tailwind / CSS cho khung ngoài, ô nhập, nhãn) trước khi nghĩ tới viết control mới.
 
 ## Khi nào mới dùng `custom-embed`

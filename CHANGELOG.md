@@ -3,6 +3,15 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.6.0 — 2026-10-22 (theo lib sau `@dnu/dynaform-builder` v4.7.0 — chưa có tag mới)
+
+Đồng bộ với các thay đổi mới của lib `fe_dynaform` (xem `.claude/memory-logs/2026-10-22.md` của lib).
+
+- **`alignSelf`** (`start` mặc định | `center` | `end` | `stretch`, theo viewport): căn dọc control trong hàng lưới. Spec có khoá `alignSelf` → `styles.alignSelf` (`start` không ghi ra); script kiểm giá trị. `dynaform-layout`: mục giải thích, công thức "ô nhập + nút" dùng `alignSelf: "end"`, công thức "hàng bộ lọc", checklist.
+- **Step `confirm`** (`message`, `title`, `confirmLabel`, `cancelLabel`, `destructive`) và **`dialog.fillFromRow` / `dialog.awaitSubmit`**: bảng step trong `dynaform-logic-events`; ngữ nghĩa **huỷ** (Hủy / đóng dialog đang chờ → flow dừng lặng lẽ, `catch` không chạy, `continueOnError` không cứu). `dynaform.mjs`: nhận `confirm`, kiểm `message`, kiểu của `fillFromRow` / `awaitSubmit`, cảnh báo `awaitSubmit` thiếu nút xác nhận.
+- **Hành động từng dòng của `table` chạy action flow** (`props.table.actionColumn.actions[].flow`, `$row.data.<cột>` / `$row.key` / `$row.index`): `dynaform-logic-events` §7.16 (xoá có xác nhận + tải lại bảng, sửa bằng dialog chờ xác nhận, xem chi tiết), `dynaform-components` mục "Hành động từng dòng của table"; sửa mục giới hạn "action hàng chưa đi qua eventHandlers". `dynaform.mjs` kiểm flow trong hành động hàng (id step, tham chiếu, `confirm`…), cảnh báo khi còn trường cũ (`confirm` / `dialogTarget` / `dataSourceId` / `redirectUrl`) cạnh `flow`, và đổi `push_table.tableId` (name → id) cả trong flow của hành động hàng.
+- Lưu ý: các tính năng này nằm ở lib **chưa gắn tag** (sau v4.7.0); `dynaform-embed-lib` / `mfe-module` vẫn ghi tag `v4.7.0` cho tới khi có tag mới.
+
 ## 0.5.0 — 2026-10-22 (khớp `@dnu/dynaform-builder` v4.7.0)
 
 Bổ sung kiến thức cho Agent Build Form: bố cục, control layout và toàn bộ event/action.

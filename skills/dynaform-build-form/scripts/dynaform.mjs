@@ -199,6 +199,7 @@ export function checkSpec(spec) {
     if (c.type === "custom-embed") checkEmbedSpec(c, at, byName, errors, warnings);
     else if (c.embed !== undefined) errors.push(`${at}: khoá "embed" chỉ dùng cho type custom-embed`);
     checkHandlerFlows(c, at, byName, errors, warnings);
+    if (c.type === "table") checkTableRowFlows(c, at, byName, errors, warnings);
     for (const [key, types] of [["grid", ["grid"]], ["list", ["list", "nested-list"]], ["loop", ["form-loop"]], ["container", ["container"]]])
       if (c[key] !== undefined && !types.includes(c.type)) errors.push(`${at}: khoá "${key}" chỉ dùng cho type ${types.join("/")}`);
     if (c.type === "grid" && c.grid?.cols !== undefined && !(Number.isInteger(c.grid.cols) && c.grid.cols >= 1 && c.grid.cols <= 6))
@@ -281,6 +282,7 @@ function buildEmbedConfig(e) {
 }
 
 // ── Bố cục: colStart / colSpan / overrides / grid ───────────────────────────────────────────
+const ALIGN_SELF = new Set(["start", "center", "end", "stretch"]); // căn dọc trong hàng lưới (properties.style.alignSelf)
 const VIEWPORTS = new Set(["sm", "md"]); // lib chỉ đọc override md (< 5xl) và sm (< 3xl); giá trị gốc = desktop
 
 /** Chấp nhận dạng gọn `{ sm: { colSpan: 12 } }`, dạng cũ `{ sm: { styles: {...} } }` và dạng của lib `{ sm: { properties: { style } } }`. */
@@ -304,6 +306,7 @@ function checkLayout(comps, byName, errors, warnings) {
   for (const c of comps) {
     if (!c || typeof c !== "object") continue;
     const at = `components[${comps.indexOf(c)}] (${c.name})`;
+    if (c.alignSelf !== undefined && !ALIGN_SELF.has(c.alignSelf)) errors.push(`${at}: alignSelf phải là ${[...ALIGN_SELF].join(" | ")}`);
     if (c.colStart !== undefined && c.colStart !== "auto") {
       const s = Number(c.colStart);
       const span = Number(c.colSpan ?? 12);
@@ -356,7 +359,7 @@ function checkLayout(comps, byName, errors, warnings) {
 // ── Kiểm tra flow tự viết (events[].flow) ────────────────────────────────────────────────────
 const STEP_TYPES = new Set([
   "sequence", "parallel", "branch", "try", "for_each", "validate_form", "call_api", "push_table", "set_values", "field_state",
-  "dialog", "run_script", "show_message", "navigate", "emit_event", "embed_command", "reset_form", "submit_form", "open_form",
+  "dialog", "confirm", "run_script", "show_message", "navigate", "emit_event", "embed_command", "reset_form", "submit_form", "open_form",
   "close_form", "refetch", "switch_tab", "collapse",
 ]);
 const LAYOUT_ONLY_STEPS = new Set(["open_form", "close_form", "refetch"]);
@@ -460,8 +463,17 @@ function checkStep(step, at, ctx) {
       if (!Array.isArray(step.targets) || !step.targets.length) e("cần targets: [name, …]");
       for (const t of step.targets ?? []) if (!fieldExists(t)) e(`targets: "${t}" không tồn tại`);
       break;
+    case "confirm": {
+      if (step.message === undefined || (typeof step.message === "string" && !step.message.trim())) e("cần message (nội dung hỏi xác nhận)");
+      else checkValueSource(step.message, `${here}.message`, ctx);
+      for (const k of ["title", "confirmLabel", "cancelLabel"]) if (step[k] !== undefined && typeof step[k] !== "string") e(`${k} phải là chuỗi`);
+      break;
+    }
     case "dialog": {
       if (!["open", "close", "toggle"].includes(step.action)) e('action phải là "open"|"close"|"toggle"');
+      for (const k of ["fillFromRow", "awaitSubmit"]) if (step[k] !== undefined && typeof step[k] !== "boolean") e(`${k} phải là true/false`);
+      if (step.awaitSubmit && step.action === "close") w("awaitSubmit không có tác dụng với action close");
+      if (step.awaitSubmit) w("awaitSubmit: dialog phải có nút xác nhận / gửi (footer action confirm|submit) — đóng dialog bằng cách khác thì flow dừng, không báo lỗi");
       const t = ctx.byName.get(step.target)?.c;
       if (!step.form && !t) e(`target "${step.target}" không tồn tại`);
       else if (t && !OVERLAYS.has(t.type)) e(`target "${step.target}" là ${t.type}, không phải dialog/drawer/bottom-sheet`);
@@ -522,6 +534,24 @@ function checkHandlerFlows(c, at, byName, errors, warnings) {
       collectStepIds(h.flow, stepIds, errors, `${at} (flow ${h.event})`);
       checkStep(h.flow, `${at} (flow ${h.event})`, { byName, errors, warnings, stepIds });
     }
+  }
+}
+
+/** Hành động hàng của table: `props.table.actionColumn.actions[].flow` chạy với `$row` = dòng được bấm. */
+function tableRowActions(c) {
+  const list = c?.props?.table?.actionColumn?.actions;
+  return Array.isArray(list) ? list : [];
+}
+
+function checkTableRowFlows(c, at, byName, errors, warnings) {
+  for (const [i, action] of tableRowActions(c).entries()) {
+    if (!action?.flow) continue;
+    const where = `${at} (hành động hàng #${i + 1}${action.label ? ` "${action.label}"` : ""})`;
+    const stepIds = new Set();
+    collectStepIds(action.flow, stepIds, errors, where);
+    checkStep(action.flow, where, { byName, errors, warnings, stepIds, row: true });
+    if (action.confirm || action.dialogTarget || action.dataSourceId || action.redirectUrl)
+      warnings.push(`${where}: đã có flow thì confirm / dialogTarget / dataSourceId / redirectUrl bị bỏ qua — dùng step confirm / dialog / call_api / navigate trong flow`);
   }
 }
 
@@ -683,6 +713,7 @@ function buildItemControl(c, order, ids, mobile = "stack") {
   const styles = {
     colSpan: String(c.colSpan ?? 12),
     ...(c.colStart !== undefined ? { colStart: String(c.colStart) } : {}),
+    ...(c.alignSelf !== undefined && c.alignSelf !== "start" ? { alignSelf: c.alignSelf } : {}),
     ...(c.type === "custom-embed" ? { showLabel: "no", labelPosition: "top" } : {}),
     ...(c.type === "container" ? containerStyles(c.container) : {}),
     ...(c.styles ?? {}),
@@ -742,6 +773,10 @@ export function buildForm(spec, opts = {}) {
     }
     // push_table.tableId cần COMPONENT id (không phải name) — đổi name trong spec sang id vừa sinh.
     if (c.events?.some((h) => h.flow)) out = { ...out, events: c.events.map((h) => (h.flow ? { ...h, flow: swapTableIds(h.flow, ids) } : h)) };
+    if (tableRowActions(c).some((a) => a?.flow)) {
+      const table = c.props.table;
+      out = { ...out, props: { ...c.props, table: { ...table, actionColumn: { ...table.actionColumn, actions: table.actionColumn.actions.map((a) => (a?.flow ? { ...a, flow: swapTableIds(a.flow, ids) } : a)) } } } };
+    }
     return out;
   });
   const order = new Map();
