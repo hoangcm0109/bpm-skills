@@ -10,6 +10,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { createHash, randomUUID } from "node:crypto";
+import { Script } from "node:vm";
 
 // ── Registry: type → thông tin item_control (lấy từ src/config/component-groups.ts) ──────────
 const R = (group, renderer, icon, display, category = "form") => ({ group, renderer, icon, display, category });
@@ -55,6 +56,19 @@ export const TYPE_REGISTRY = {
   "time-picker": R("advanced", "DfsTimePicker", "Clock", "Time Picker"),
   calendar: R("advanced", "DfsCalendar", "Calendar", "Calendar"),
   table: R("advanced", "DfsFormTable", "Table", "Table", "content"),
+  // Control cấu hình sâu — script chỉ dựng khung, cấu hình chi tiết (props) hoặc làm trong builder.
+  timeline: R("advanced", "DfsFormTimeline", "History", "Timeline", "content"),
+  descriptions: R("advanced", "DfsFormDescriptions", "ListChecks", "Descriptions", "content"),
+  "json-tree": R("advanced", "DfsJsonTree", "Braces", "JSON Tree"),
+  code: R("advanced", "code", "Code2", "Code"),
+  "form-loop": R("layout", "DfsFormLoop", "Repeat", "Form Loop", "layout"),
+  "sub-form": R("layout", "DfsSubForm", "FileStack", "Sub-form", "content"),
+  "record-picker": R("choose", "DfsRecordPickerField", "LayoutList", "Record Picker"),
+  "record-gallery": R("choose", "DfsRecordGalleryField", "GalleryVerticalEnd", "Record Gallery"),
+  "stat-cards": R("choose", "DfsStatCardsField", "ChartColumn", "Stat Cards"),
+  "sortable-list": R("choose", "DfsSortableListField", "ArrowDownUp", "Sortable List"),
+  // Dùng CUỐI CÙNG: chỉ khi không control nào ở trên đáp ứng được (xem dynaform-components › custom-embed).
+  "custom-embed": R("choose", "DfsCustomEmbedField", "CodeXml", "Custom Embed"),
 };
 
 /** Container có con; giá trị = cách chia "ngăn" của children. */
@@ -82,6 +96,8 @@ const REF_ACTIONS = new Set([
 const OTHER_ACTIONS = new Set(["openLink", "callApi", "customScript", "flow"]);
 const EVENTS = new Set(["click", "dblclick", "hover", "change", "load", "open", "close"]);
 const NAME_RE = /^[a-z][a-z0-9_]*$/;
+const EMBED_NAME_RE = /^[A-Za-z][\w-]*$/; // tên input / output / event của custom-embed (khớp lib)
+const EMBED_VALUE_TYPES = new Set(["none", "string", "number", "boolean", "array", "object"]);
 
 const DEFAULT_THEME = {
   styles: { type: "normal", borderRadius: "0.5rem", fontSize: "14px" },
@@ -169,9 +185,86 @@ export function checkSpec(spec) {
     if (c.dataSource?.api?.dependsOn)
       for (const d of c.dataSource.api.dependsOn) if (!byName.has(d)) errors.push(`${at}: dataSource.dependsOn "${d}" không tồn tại`);
     if (c.type === "dialog" && c.parent === undefined && !c.dialog?.variant) warnings.push(`${at}: dialog nên khai báo dialog.variant`);
+    if (c.type === "hidden")
+      warnings.push(`${at}: control "hidden" — ưu tiên action flow (set_values, $steps.<id>.output, $event.payload) thay vì cất trạng thái vào field ẩn. Chỉ giữ khi giá trị phải nằm trong payload submit mà không có nguồn hiển thị, hoặc host nạp sẵn (dataUserFill)${c.reason ? ` — lý do: ${c.reason}` : "; ghi lý do vào khoá reason"}`);
+    for (const a of refs) if (a?.type === "customScript")
+      warnings.push(`${at}: customScript — ưu tiên flow có sẵn step (set_values, call_api, branch…); chỉ dùng script khi không step nào làm được`);
+    if (c.type === "custom-embed") checkEmbedSpec(c, at, byName, errors, warnings);
+    else if (c.embed !== undefined) errors.push(`${at}: khoá "embed" chỉ dùng cho type custom-embed`);
   });
   if (!comps.some((c) => c?.type === "submit-button" || c?.type === "button")) warnings.push("form chưa có nút submit");
   return { errors, warnings };
+}
+
+/** Kiểm tra `embed` của custom-embed: chỉ dùng khi control có sẵn không đáp ứng; khi dùng thì React (TSX) + Tailwind. */
+function checkEmbedSpec(c, at, byName, errors, warnings) {
+  if (typeof c.reason !== "string" || !c.reason.trim())
+    errors.push(`${at}: custom-embed cần "reason" — nêu control có sẵn nào đã cân nhắc và vì sao không đáp ứng (xem dynaform-components › Khi nào mới dùng custom-embed)`);
+  else warnings.push(`${at}: dùng custom-embed — lý do: ${c.reason}`);
+  const e = c.embed;
+  if (!e || typeof e !== "object") return errors.push(`${at}: custom-embed cần embed: { code, inputs?, outputs?, events? }`);
+  const mode = e.mode ?? "sandbox";
+  if (mode !== "sandbox" && mode !== "template") errors.push(`${at}: embed.mode phải là "sandbox" | "template"`);
+  const react = mode === "sandbox" && e.framework !== "none";
+  if (!react) warnings.push(`${at}: ưu tiên embed React + Tailwind (mode "sandbox", framework mặc định "react"); Template / JS thuần chỉ cho khối tĩnh rất đơn giản`);
+  if (e.valueType !== undefined && !EMBED_VALUE_TYPES.has(e.valueType)) errors.push(`${at}: embed.valueType phải là ${[...EMBED_VALUE_TYPES].join(" | ")}`);
+  if (e.tailwind === false) warnings.push(`${at}: embed.tailwind=false — ưu tiên Tailwind, CSS thuần chỉ là phần thêm`);
+  if (typeof e.css === "string" && e.css.trim()) warnings.push(`${at}: embed.css (CSS thuần) — ưu tiên class Tailwind trong code`);
+  if (react) {
+    const code = e.code ?? e.js;
+    if (typeof code !== "string" || !code.trim()) errors.push(`${at}: embed React cần embed.code (hoặc embed.js)`);
+    else {
+      try { new Script(code, { filename: `${c.name}.embed.js` }); } // chỉ biên dịch để bắt lỗi cú pháp, KHÔNG chạy
+      catch (err) {
+        errors.push(`${at}: embed.code không phải JavaScript hợp lệ (${err.message}). Script không biên dịch TSX — dùng thẻ DfbReact.html\`<div class="…">…</div>\` thay JSX, không dùng import/export`);
+      }
+      if (/class(?:Name)?=["'`]?[^"'`>]*\$\{/.test(code))
+        warnings.push(`${at}: class ghép lúc chạy (class="…\${…}") không được Tailwind sinh CSS — viết đủ tên class`);
+      if (!/\bDfbReact\b/.test(code)) warnings.push(`${at}: embed.code chưa dùng DfbReact (const { html, render, useDfbData } = DfbReact; … render(App))`);
+    }
+  }
+  const seen = new Set();
+  for (const [i, inp] of (e.inputs ?? []).entries()) {
+    if (!EMBED_NAME_RE.test(inp?.name ?? "")) errors.push(`${at}: embed.inputs[${i}].name không hợp lệ`);
+    else if (seen.has(inp.name)) errors.push(`${at}: embed.inputs trùng name "${inp.name}"`);
+    else seen.add(inp.name);
+    if (inp?.field !== undefined && !byName.has(inp.field)) errors.push(`${at}: embed.inputs[${i}].field "${inp.field}" không tồn tại`);
+    if (inp?.field === undefined && inp?.ref === undefined) errors.push(`${at}: embed.inputs[${i}] cần field (name của field) hoặc ref (đường dẫn layout)`);
+  }
+  for (const [i, out] of (e.outputs ?? []).entries()) {
+    if (!EMBED_NAME_RE.test(out?.name ?? "")) errors.push(`${at}: embed.outputs[${i}].name không hợp lệ`);
+    if (!byName.has(out?.to)) errors.push(`${at}: embed.outputs[${i}].to "${out?.to}" không tồn tại`);
+  }
+  const declared = new Set(e.events ?? []);
+  for (const ev of declared) if (!EMBED_NAME_RE.test(ev)) errors.push(`${at}: embed.events "${ev}" không hợp lệ`);
+  for (const h of c.events ?? []) {
+    const m = /^embed:(.+)$/.exec(h?.event ?? "");
+    if (m && !declared.has(m[1])) errors.push(`${at}: event "${h.event}" chưa khai báo trong embed.events`);
+  }
+  if (e.tailwind !== false)
+    warnings.push(`${at}: tailwindCss chưa được sinh — mở form trong builder → Mã nhúng → Lưu (biên dịch TSX + Tailwind) trước khi dùng`);
+}
+
+/** spec.embed → properties.embed (khớp EmbedControlConfig của lib). Không sinh tailwindCss: chỉ builder biên dịch được. */
+function buildEmbedConfig(e) {
+  const mode = e.mode ?? "sandbox";
+  const react = mode === "sandbox" && e.framework !== "none";
+  const code = e.code ?? e.source;
+  const cfg = {
+    schemaVersion: 1, mode, valueType: e.valueType ?? "none",
+    html: e.html ?? (react ? '<div id="root"></div>' : ""),
+    css: e.css ?? "",
+    inputs: (e.inputs ?? []).map((i) => ({ name: i.name, from: i.field !== undefined ? { field: i.field } : { ref: i.ref } })),
+    outputs: (e.outputs ?? []).map((o) => ({ name: o.name, to: o.to })),
+    events: e.events ?? [], permissions: e.permissions ?? [],
+    height: e.height ?? { mode: "auto" }, designMode: e.designMode ?? "live",
+    tailwind: e.tailwind !== false,
+  };
+  if (mode === "sandbox") cfg.js = e.js ?? code ?? "";
+  if (react) { cfg.framework = "react"; if (code) cfg.source = code; } // source = js: JS hợp lệ cũng là TSX hợp lệ
+  if (Array.isArray(e.libs)) cfg.libs = e.libs;
+  if (e.sampleData) cfg.sampleData = e.sampleData;
+  return cfg;
 }
 
 // ── Build ───────────────────────────────────────────────────────────────────────────────────
@@ -269,6 +362,7 @@ function buildItemControl(c, order, ids) {
     ...(c.columns ? { columns: { count: 2, gap: "1rem", stackOnMobile: "yes", ...c.columns } } : {}),
     ...(c.dialog ? { dialog: c.dialog } : {}),
     ...(c.custom ? { custom: c.custom } : {}),
+    ...(c.type === "custom-embed" && c.embed ? { embed: buildEmbedConfig(c.embed) } : {}),
     ...(c.props ?? {}),
   };
   const handlers = [
@@ -279,7 +373,7 @@ function buildItemControl(c, order, ids) {
     ...(c.rules ?? []).map((r, i) => ruleToHandler(r, c.name, i)),
   ];
   if (handlers.length) props.eventHandlers = handlers;
-  const styles = { colSpan: String(c.colSpan ?? 12), ...(c.styles ?? {}) };
+  const styles = { colSpan: String(c.colSpan ?? 12), ...(c.type === "custom-embed" ? { showLabel: "no", labelPosition: "top" } : {}), ...(c.styles ?? {}) };
   const required = c.required ? [{ type: "required", value: "yes", errorMessage: c.requiredMessage ?? "" }] : [];
   const validations = [...required, ...(c.validations ?? []).filter((v) => !(c.required && v.type === "required"))];
   const dataLang = `${c.type}-${c.name}`;
@@ -409,7 +503,18 @@ export function checkForm(form) {
           if (!names.has(t)) errors.push(`${at}: ${kind} -> "${t}" không tồn tại`);
         });
   }
-  return { errors, warnings: [] };
+  const warnings = [];
+  for (const { ic } of flat) {
+    const at = `${ic.type}(${ic.variables?.name ?? ic.id})`;
+    if (ic.type === "hidden") warnings.push(`${at}: control "hidden" — ưu tiên action flow; chỉ giữ khi thật sự cần (payload submit / dataUserFill)`);
+    if (ic.type === "custom-embed") {
+      const emb = ic.editable_props?.properties?.embed;
+      warnings.push(`${at}: custom-embed — chỉ dùng khi control có sẵn không đáp ứng; ưu tiên React + Tailwind`);
+      if (emb?.tailwind && !emb.tailwindCss) warnings.push(`${at}: chưa có tailwindCss — mở trong builder → Mã nhúng → Lưu`);
+      if (emb && !(emb.mode === "sandbox" && emb.framework === "react")) warnings.push(`${at}: embed chưa phải React (sandbox + framework "react")`);
+    }
+  }
+  return { errors, warnings };
 }
 
 // ── CLI ─────────────────────────────────────────────────────────────────────────────────────
@@ -430,7 +535,7 @@ if (isMain) {
   if (cmd === "build") {
     if (!report(checkSpec(json))) process.exit(1);
     const form = buildForm(json);
-    if (!report(checkForm(form))) process.exit(1);
+    if (!report({ errors: checkForm(form).errors, warnings: [] })) process.exit(1); // cảnh báo đã in ở bước kiểm spec
     const out = rest[rest.indexOf("--out") + 1];
     const text = JSON.stringify(form, null, 2);
     if (rest.includes("--out") && out) {

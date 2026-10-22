@@ -8,6 +8,15 @@ description: Logic và sự kiện của form dynaform — rule hiển thị/b�
 Mọi hành vi nằm trong `properties.eventHandlers[]` của component: `{ id, event, enabled, actions }`.
 **Mỗi handler chạy một flow** (action engine). Hệ thống visual rule cũ (`properties.logic.rules`) đã bị thay bằng handler `event: "condition"`.
 
+## Ưu tiên action flow, hạn chế field `hidden`
+
+- Mọi hành vi đi qua **flow** (`events[].flow`, hoặc action phẳng — script đổi sang flow). Gộp các việc liên tiếp của một sự kiện vào **một flow** thay vì rải ra nhiều handler nối nhau bằng field trung gian.
+- Dữ liệu giữa các bước truyền **trong flow**: `$steps.<id>.output.<path>` (kết quả bước trước), `$event.payload.<path>` (payload từ `embed:<tên>`/control), `$form.current.values.<name>`, template `{{…}}`. Không cần cất vào field.
+- **Đừng** tạo control `hidden` làm cờ ("đã bấm"), bộ nhớ tạm, hay tín hiệu cho handler `change`/`condition` khác kích hoạt. Mẫu sai thường gặp: embed `publish` vào field ẩn → handler `change` đọc field ẩn → mở dialog. Mẫu đúng: embed `emit` event → handler `embed:<tên>` chạy flow dùng `$event.payload` → `dialog`.
+- Control `hidden` chỉ hợp lý khi (a) giá trị **phải có trong payload submit** mà không có nguồn hiển thị, hoặc (b) host nạp sẵn qua `dataUserFill`. Khi giữ, ghi `reason` trong spec.
+- Phân biệt: `hidden: true` trên field thường là *ẩn hiển thị* (→ `styles.visible: "no"`), không phải control `hidden`. Theo `docs/ACTION_ENGINE.md` (fe_dynaform), field ẩn **tĩnh** kiểu này **không bật lại được bằng logic**; field cần hiện/ẩn động nên ẩn bằng handler `load` + `field_state: hide`. Ví dụ "Cách 1" bên dưới dùng `hidden: true` kèm rule `show` — chưa kiểm trên runtime thật, kiểm trước khi dựa vào.
+- `customScript` / `run_script` là phương án cuối, sau khi các step có sẵn (`set_values`, `call_api`, `branch`, `for_each`, ... và Data mapper `{kind:"map"}`) không làm được.
+
 ## Event
 
 | event | Khi nào |

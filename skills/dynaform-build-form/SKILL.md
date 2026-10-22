@@ -17,6 +17,7 @@ Thư mục chứa file SKILL.md này gọi là `<skill>`; script nằm ở `<ski
 
 1. **Làm rõ yêu cầu** (hỏi lại nếu mơ hồ): form để làm gì, field nào, bắt buộc/không, ràng buộc, field phụ thuộc nhau, nút submit làm gì, có chia nhóm/tab/bước không.
 2. **Chọn component** — theo bảng tra nhanh bên dưới. Mỗi `type` phải có trong registry; dùng `input` cho text, `tel` cho số điện thoại.
+   **Ưu tiên control có sẵn.** Đi theo thứ tự: (1) control cơ bản trong bảng; (2) control chuyên dụng (`table`, `timeline`, `descriptions`, `record-picker`, `record-gallery`, `stat-cards`, `sortable-list`, `matrix`, `tree-select`, `form-loop`, `sub-form`… — bảng "nhu cầu → control" ở `../dynaform-components/SKILL.md`); (3) ghép/tuỳ biến bằng `custom` (Tailwind) + `props` + action flow; (4) **chỉ khi cả ba không đáp ứng** mới dùng `custom-embed`, và phải ghi `reason` trong spec. Embed thì viết **React (TSX) + Tailwind** — xem `references/custom-embed.md`.
 3. **Viết spec** theo `references/spec-format.md` (file `*.spec.json`). Quy tắc chốt:
    - `name` snake_case, duy nhất toàn form; mọi tham chiếu chéo (matchField, rule, event, dependsOn) dùng `name`, không dùng id.
    - Cha (container/tab/steps/dialog) phải đứng **trước** con trong mảng; con khai báo `parent` (+ `tabId` nếu cha là tab/steps/columns).
@@ -35,7 +36,7 @@ Thư mục chứa file SKILL.md này gọi là `<skill>`; script nằm ở `<ski
    - Trong builder: nút *Open JSON* (`open-json-dialog`) → dán nội dung `my-form.json` → xem lại trên canvas, chỉnh tay nếu cần rồi Save.
    - Trong app host: truyền vào `data.dataFormDesign` của `DynamicFormBuilder` (mode `editor` | `preview` | `release`), hoặc `form={…}` của `DynaformBuilder` (lib ≥ 4.5.0) — xem `../dynaform-embed-lib/SKILL.md`.
    - Lưu thành form trên backend: module mfe-dynaform **không còn dialog tạo form** — form mới được tạo trong workspace của BPM (nút "Đi tới workspace để tạo form" mở `{REACT_APP_BPM_URL}/workflow/workspaces`); sau đó mở editor của form đó và dán JSON (xem `../dynaform-mfe-module/SKILL.md`). Không tự gọi API ghi nếu người dùng chưa yêu cầu.
-7. **Báo cáo**: liệt kê field đã dựng (name, type, bắt buộc), logic/event đã gắn, phần chưa làm được hoặc cần người dùng cấu hình thêm (data source thật, URL API, quyền).
+7. **Báo cáo**: liệt kê field đã dựng (name, type, bắt buộc), logic/event đã gắn, phần chưa làm được hoặc cần người dùng cấu hình thêm (data source thật, URL API, quyền). Nêu riêng: mỗi `custom-embed` đã dùng (kèm lý do control có sẵn không đáp ứng, và bước "mở builder → Lưu" để sinh Tailwind) và mỗi field `hidden` còn giữ (kèm lý do).
 
 ## Build dần — xem form hiện trực tiếp (chỉ khi người dùng muốn)
 
@@ -77,6 +78,7 @@ trang `/dynaform/form-manager/stream` của mfe-dynaform nhận và vẽ lại s
   Action: `show hide enable disable require optional setValue openModal closeModal toggleModal openLink callApi customScript`.
   `switchTab`/`collapse` chưa có tác dụng. `target` luôn là `name`. Mặc định **không** dùng `customScript`.
 - Nhiều bước / rẽ nhánh / try-catch → `events[].flow` (action engine) — đọc `../dynaform-logic-events/SKILL.md` trước khi viết.
+- **Ưu tiên action flow, hạn chế field `hidden`**: truyền dữ liệu giữa các bước bằng `$steps.<id>.output`, `$event.payload`, `set_values` ngay trong flow; không tạo field `hidden` để làm cờ/tín hiệu/bộ nhớ tạm giữa các event hay giữa embed và nút. Control `hidden` chỉ dành cho giá trị **phải nằm trong payload submit** mà không có nguồn hiển thị, hoặc giá trị host nạp sẵn (`dataUserFill`); khi dùng ghi `reason`. (`hidden: true` trên một field thường là *ẩn hiển thị* để rule `show` bật lại — khác với control `hidden`.)
 
 **Bố cục**
 
@@ -107,10 +109,12 @@ Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc fi
 | Quy ước trong repo mfe-dynaform | `../dynaform-mfe-module/SKILL.md` |
 | Cú pháp spec đầy đủ / cấu trúc JSON xuất | `references/spec-format.md`, `references/output-format.md` |
 | Build dần, xem form hiện trực tiếp | `references/stream-preview.md` |
+| Bắt buộc dùng `custom-embed` (React + Tailwind) | `references/custom-embed.md` |
 
 ## Việc script KHÔNG làm — nói rõ với người dùng
 
-- `grid` (children theo slot), `table`, `matrix`, `list`, `custom-embed`, `form-loop`, `sub-form`… có cấu hình sâu: script chỉ tạo khung (`props` truyền thẳng vào `editable_props.properties`). Cấu hình chi tiết nên làm trong builder.
+- `grid` (children theo slot), `table`, `matrix`, `list`, `form-loop`, `sub-form`, `record-*`… có cấu hình sâu: script chỉ tạo khung (`props` truyền thẳng vào `editable_props.properties`). Cấu hình chi tiết nên làm trong builder.
+- `custom-embed`: script ghi được code React (`embed.code`) và kiểm cú pháp, nhưng **không biên dịch TSX và không sinh `tailwindCss`** — người dùng phải mở form trong builder → Mã nhúng → Lưu (`references/custom-embed.md`). Nói rõ ở báo cáo cuối.
 - Action `switchTab` / `collapse` hiện chưa có tác dụng ở runtime (action engine) — script cảnh báo.
 - `dynaform.mjs` không gọi mạng, không kiểm tra API/data source có sống không. Chỉ `stream-server.mjs` (tuỳ chọn, chế độ build dần) mở cổng — và chỉ trên `127.0.0.1`.
 
@@ -133,6 +137,10 @@ Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc fi
 | Dialog có `children` cho variant confirmation/info | message nằm ở `dialog.title/description`; chỉ variant `form`/`custom` mới có con |
 | Quên đặt dialog **trước** nút mở nó | dialog đứng trước submit-button/button trong mảng |
 | Viết rule bằng `logic.rules` | dùng `rules[]` trong spec — script phát `condition` handler (hệ thống rule cũ đã bỏ) |
+| Dùng `custom-embed` cho thứ control có sẵn làm được (danh sách thẻ, thống kê, bảng, timeline…) | tra bảng "nhu cầu → control" ở `dynaform-components`; embed là lựa chọn cuối, kèm `reason` |
+| Embed viết JS thuần / Template + CSS riêng | React + Tailwind (`references/custom-embed.md`) |
+| Viết JSX thô, `import`, class ghép `p-${n}` trong `embed.code` | thẻ `html\`…\``, không import, viết đủ tên class |
+| Field `hidden` làm cờ/tín hiệu giữa các event | `set_values` / `$steps.<id>.output` / `$event.payload` trong một `flow` |
 
 ## Tham chiếu
 

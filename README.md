@@ -22,7 +22,7 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 
 ## Cài đặt & cập nhật
 
-Phiên bản hiện tại: **0.3.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v4.6.0`.
+Phiên bản hiện tại: **0.4.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v4.7.0`.
 
 ### Claude Code
 
@@ -50,7 +50,7 @@ Hai lệnh trên cũng có trong menu `/plugin` của Claude Code. Skill mới c
 Kiểm tra đã lên đúng bản:
 
 ```bash
-claude plugin list        # dòng bpm-skills@bpm-skills phải hiện Version: 0.3.0
+claude plugin list        # dòng bpm-skills@bpm-skills phải hiện Version: 0.4.0
 ```
 
 Lưu ý:

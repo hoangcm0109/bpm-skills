@@ -3,6 +3,15 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.4.0 — 2026-10-22 (khớp `@dnu/dynaform-builder` v4.7.0)
+
+- **Control có sẵn trước, `custom-embed` là lựa chọn cuối**: `dynaform-build-form` (bước chọn component) và `dynaform-components` có thang chọn 4 bước và bảng "nhu cầu → control chuyên dụng" (`table`, `timeline`, `descriptions`, `record-*`, `stat-cards`, `sortable-list`, `matrix`, `form-loop`, `sub-form`…). Spec `custom-embed` **bắt buộc** có `reason`; thiếu thì script báo lỗi.
+- **Embed ưu tiên React (TSX) + Tailwind**: spec có khoá `embed` (`code`, `inputs`, `outputs`, `events`, `valueType`, `height`, `sampleData`) → `properties.embed` (mặc định `mode: "sandbox"`, `framework: "react"`, `tailwind: true`; `code` ghi vào cả `source` và `js`). Script kiểm `inputs.field` / `outputs.to` / event đã khai báo, bắt lỗi cú pháp của `code` (JSX thô, `import`), cảnh báo class ghép lúc chạy, CSS thuần, Template/JS thuần. Tài liệu mới `references/custom-embed.md`. **Giới hạn**: script không biên dịch TSX và không sinh `tailwindCss` — người dùng phải mở form trong builder → Mã nhúng → Lưu.
+- **Ưu tiên action flow, hạn chế `hidden`**: `dynaform-logic-events` có mục riêng (truyền dữ liệu bằng `$steps.<id>.output` / `$event.payload` / `set_values` trong một flow, không cất tín hiệu vào field ẩn); control `hidden` chỉ giữ cho payload submit / `dataUserFill`. Script cảnh báo mỗi control `hidden` và mỗi `customScript`.
+- `dynaform.mjs`: registry thêm `custom-embed`, `timeline`, `descriptions`, `json-tree`, `code`, `form-loop`, `sub-form`, `record-picker`, `record-gallery`, `stat-cards`, `sortable-list` (trước đây bị từ chối "không có trong registry"). Dùng thêm `node:vm` **chỉ để biên dịch** (`new Script`) kiểm cú pháp — không chạy mã; cập nhật `SECURITY.md`, `AGENTS.md`, `docs/security/review-checklist.md` cho khớp.
+- Lib v4.7.0: kéo mép trái của control để resize (ghi `colStart` + `colSpan`); `dynaform-layout` ghi chú `colStart`. Tag mẫu `v4.7.0` ở `dynaform-embed-lib`, `dynaform-mfe-module`, README.
+- `dynaform-logic-events`: ghi chú theo `docs/ACTION_ENGINE.md` rằng field ẩn tĩnh (`hidden: true`) không bật lại được bằng logic — ví dụ "Cách 1" chưa được kiểm trên runtime thật.
+
 ## 0.3.0 — 2026-10-19 (khớp `@dnu/dynaform-builder` v4.6.0)
 
 - **Style tuỳ chỉnh**: spec có khoá `custom` (`className` Tailwind + `css` thuần cho khung ngoài, `control` cho chính ô nhập, `label` cho nhãn) → `properties.custom`; `dynaform.mjs` ghi thẳng vào `editable_props.properties`. `dynaform-components` có mục "Style tuỳ chỉnh" (không tự điền `tailwindCss`/`twHash`, builder sinh khi nạp form).

@@ -1,6 +1,6 @@
 ---
 name: dynaform-components
-description: Danh mục component (type) của dynaform builder và cách chọn đúng type cho từng loại dữ liệu — input, tel, select, date-picker, file, table, container, tab, steps, dialog… Dùng khi cần quyết định dùng component nào, cấu hình thuộc tính riêng của một component, hoặc khi gặp lỗi "type không có trong registry".
+description: Danh mục component (type) của dynaform builder và cách chọn đúng type cho từng loại dữ liệu — input, tel, select, date-picker, file, table, container, tab, steps, dialog… Dùng khi cần quyết định dùng component nào (ưu tiên control có sẵn; custom-embed chỉ là lựa chọn cuối, viết bằng React + Tailwind), cấu hình thuộc tính riêng của một component, hoặc khi gặp lỗi "type không có trong registry".
 ---
 
 # Component dynaform
@@ -30,7 +30,7 @@ Control tự định nghĩa của host (`defineControl`, tiền tố `x-`) cũng
 | Tệp đính kèm | `file` | cấu hình giới hạn qua `props.fileValidations` — nên chỉnh trong builder |
 | Chữ ký | `signature` | |
 | Soạn thảo văn bản định dạng | `wysiwyg-editor` | |
-| Giá trị ẩn gửi kèm (id, token) | `hidden` | |
+| Giá trị phải nằm trong payload submit mà không có nguồn hiển thị | `hidden` | **hạn chế** — không dùng làm cờ/tín hiệu giữa các event; xem "Ưu tiên action flow" ở `dynaform-logic-events` |
 | Bảng khảo sát (hàng × cột chấm điểm) | `matrix` | |
 | Hiển thị bảng dữ liệu | `table` | không dùng để thu 1 giá trị |
 | Văn bản tĩnh / tiêu đề | `text` | `content` là HTML; không thu dữ liệu |
@@ -51,12 +51,47 @@ Control tự định nghĩa của host (`defineControl`, tiền tố `x-`) cũng
 
 Chi tiết cách bố cục: skill `dynaform-layout`.
 
+## Control chuyên dụng — tra trước khi nghĩ tới custom-embed
+
+| Nhu cầu | Dùng | Ghi chú |
+|---|---|---|
+| Bảng dữ liệu từ API (phân trang, hành động từng dòng, cột HTML/ngày) | `table` | `docs/DATA_TABLE.md` |
+| Dòng thời gian / lịch sử | `timeline` | `docs/TIMELINE.md` |
+| Cặp nhãn–giá trị chỉ đọc (chi tiết hồ sơ) | `descriptions` | |
+| Chọn bản ghi từ API dạng thẻ (lọc, tìm kiếm, xem chi tiết) | `record-picker` | `docs/COLLECTION_CONTROLS.md` |
+| Thư viện thẻ/ảnh chọn nhiều, sắp xếp, phân trang, thanh hành động | `record-gallery` | |
+| Thẻ KPI bấm được để lọc | `stat-cards` | |
+| Danh sách kéo thả đổi thứ tự | `sortable-list` | |
+| Bảng khảo sát hàng × cột / chấm điểm | `matrix` | |
+| Chọn dạng cây | `tree-select` | |
+| Lặp một khối control theo mảng dữ liệu | `form-loop`, `list`, `nested-list` | `list` = 1 control/dòng, `nested-list` = nhiều control/dòng |
+| Nhúng form khác vào màn hình nhiều form | `sub-form` | layout runtime |
+| Hiện JSON / mã | `json-tree`, `code` | |
+| Chữ ký, soạn thảo định dạng, lịch, thanh trượt, tệp | `signature`, `wysiwyg-editor`, `calendar`, `range-slider`, `file` | |
+
+Ngoài ra, nhiều nhu cầu chỉ là **diện mạo**: dùng `custom` (class Tailwind / CSS cho khung ngoài, ô nhập, nhãn) trước khi nghĩ tới viết control mới.
+
+## Khi nào mới dùng `custom-embed`
+
+`custom-embed` (một control, tự viết giao diện bằng code) là **lựa chọn cuối cùng**. Đi hết các bước sau mà vẫn không đủ mới dùng:
+
+1. Có control cơ bản/chuyên dụng ở hai bảng trên làm được không?
+2. Ghép được bằng `custom` (Tailwind) + `props` + action flow không?
+3. Phần "thiếu" có phải chỉ là giao diện hiển thị dữ liệu *chỉ đọc*? → thử `descriptions` / `timeline` / `table` / `stat-cards` trước.
+
+Nếu vẫn phải dùng:
+- Spec ghi `reason` (đã thử control nào, thiếu gì) — script báo lỗi nếu thiếu.
+- **React 19 + Tailwind** (`mode: "sandbox"`, `framework: "react"`, `tailwind: true`) — mặc định của script. Template (HTML + `{{ }}`) / JS thuần / CSS thuần chỉ cho khối tĩnh rất đơn giản; trong builder, hộp "Mã nhúng" cũng đặt React + Tailwind làm lựa chọn khuyến nghị.
+- Viết đủ tên class Tailwind, màu theo token theme (`bg-card border-border text-foreground`…), `dark:` chạy được.
+- Giao tiếp qua `inputs` (field → embed), `outputs` (embed → field qua `dfb.publish`), `events` (`dfb.emit` → handler `embed:<tên>` chạy action flow). Không dùng field `hidden` làm cầu nối.
+- Cú pháp, ví dụ chạy được, bước "mở builder → Lưu" để sinh Tailwind: `../dynaform-build-form/references/custom-embed.md`; tài liệu lib: `docs/CUSTOM_EMBED.md` §19–21.
+
 ## Quy tắc cho mọi component
 
 - `name` snake_case duy nhất; nên có tiền tố nhóm khi form lớn (`addr_province`).
 - Component thu dữ liệu phải có `name`; `text`/`image`/`divider` không cần ràng buộc nhưng vẫn cần `name` duy nhất trong spec.
 - Cấu hình riêng của một type nằm ở `props` (passthrough vào `editable_props.properties`). Chỉ truyền khoá bạn **đã xác nhận** từ docs/builder; khoá lạ vẫn được lưu nhưng có thể không có tác dụng.
-- Gặp control cấu hình phức tạp (table, matrix, file, custom-embed): dựng khung bằng script, sau đó mở builder để cấu hình chi tiết và Save.
+- Gặp control cấu hình phức tạp (table, matrix, file, record-*, custom-embed): dựng khung bằng script, sau đó mở builder để cấu hình chi tiết và Save. Riêng `custom-embed` còn cần Lưu trong hộp "Mã nhúng" để sinh Tailwind.
 
 ## Style tuỳ chỉnh — CSS thuần / class Tailwind (lib ≥ 4.6.0)
 

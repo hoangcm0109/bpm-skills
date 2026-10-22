@@ -14,8 +14,9 @@
 
 ## B. Script (`scripts/dynaform.mjs`)
 
-- [ ] Chỉ import module chuẩn cần thiết (`node:fs`, `node:crypto`); không thêm dependency ngoài.
+- [ ] Chỉ import module chuẩn cần thiết (`node:fs`, `node:crypto`, `node:vm`); không thêm dependency ngoài.
 - [ ] Không có `child_process`, `eval`, `new Function`, `fetch`/`http(s)`, `net`, đọc `process.env`.
+- [ ] `node:vm` chỉ có `new Script(...)` (biên dịch kiểm cú pháp `embed.code`); không có `runInContext`/`runInNewContext`/`runInThisContext`/`compileFunction`.
 - [ ] Chỉ đọc file truyền vào; chỉ ghi `--out`; không tạo thư mục/ghi nơi khác.
 - [ ] Không thực thi hay nội suy `code`/`url`/HTML từ spec; chỉ chép nguyên văn sang đầu ra.
 - [ ] Lỗi in ra không kèm nội dung nhạy cảm của spec ngoài tên field.

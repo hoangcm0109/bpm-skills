@@ -9,6 +9,7 @@ description: Bố cục form dynaform — lưới 12 cột (colSpan), viewport s
 
 - Mỗi component có `colSpan` 1–12 (mặc định 12 = cả hàng). Field cùng hàng khi tổng `colSpan` ≤ 12.
 - Gợi ý: 2 field/hàng = `6`, 3 field = `4`, field dài (địa chỉ, ghi chú, textarea, bảng) = `12`.
+- `colStart` (`"auto"` hoặc cột bắt đầu 1–12) đặt vị trí cột của control trong hàng; builder ≥ 4.7.0 ghi `colStart` + `colSpan` khi kéo **mép trái** của control (kéo mép phải chỉ đổi `colSpan`). Cùng khoá `properties.style.colStart` mà nhóm Grid ở sidebar chỉnh. Trong spec đặt qua `styles: { "colStart": "7" }`; thường không cần — để `auto` và sắp thứ tự trong mảng.
 - Viewport: `sm` mobile (mặc định/base), `md` tablet, `lg` desktop. `lg` rơi về override của `md` nếu không có của riêng nó.
 - Override theo viewport trong spec:
   ```jsonc

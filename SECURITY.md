@@ -17,7 +17,8 @@ Không có dịch vụ chạy nền tự khởi động (`stream-server.mjs` ch�
 
 Đã kiểm tra trong mã nguồn; mọi thay đổi vi phạm các điểm dưới đây phải được review kỹ:
 
-- Chỉ import `node:fs` và `node:crypto`. **Không** gọi mạng, **không** `child_process`/`eval`/`Function`.
+- Chỉ import `node:fs`, `node:crypto` và `node:vm`. **Không** gọi mạng, **không** `child_process`/`eval`/`Function`.
+- `node:vm` chỉ dùng `new Script(code)` để **biên dịch** `embed.code` của custom-embed và bắt lỗi cú pháp (JSX thô, `import`). Không bao giờ gọi `runIn*`/`compileFunction`: mã trong spec không được chạy.
 - Chỉ **đọc** đúng file truyền vào và chỉ **ghi** đúng đường dẫn sau `--out`. Không ghi nơi khác.
 - Không đọc biến môi trường, không đọc file ngoài tham số.
 - Không thực thi nội dung trong spec/form JSON (kể cả `customScript.code`): chỉ chép sang JSON đầu ra dưới dạng chuỗi.

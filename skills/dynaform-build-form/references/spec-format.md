@@ -43,6 +43,8 @@
 | `overrides` | | override theo viewport: `{ "sm": { "styles": { "colSpan": "12" } } }` |
 | `custom` | | CSS thuần + class Tailwind của người dùng cho **mọi** control (lib ≥ 4.6.0) → `properties.custom`: `{ "className": "rounded-xl border p-4", "css": "background:#f8fafc", "control": { "className", "css" }, "label": { "className", "css" } }` — xem `dynaform-components` › Style tuỳ chỉnh |
 | `props` | | passthrough vào `editable_props.properties` (cấu hình sâu: table, file…) |
+| `reason` | `custom-embed` (bắt buộc), `hidden` (nên có) | vì sao control có sẵn / action flow không đáp ứng; không xuất ra JSON, chỉ hiện trong cảnh báo của script |
+| `embed` | `custom-embed` | `{ code, inputs?, outputs?, events?, valueType?, height?, sampleData?, tailwind? }` → `properties.embed` (mặc định sandbox + React + Tailwind). `code` là JS dùng `DfbReact.html\`…\`` → ghi vào `source` và `js`. `inputs: [{ name, field }]`, `outputs: [{ name, to }]` trỏ tới `name` field có thật; `events` khai báo để gắn handler `embed:<tên>`. Chi tiết: `custom-embed.md` |
 
 ## Ánh xạ sang JSON đầu ra
 
@@ -52,6 +54,7 @@
 | `label`, `placeholder`, `required`, `attributes`, `tabs`… | `item_control.editable_props.properties.*` |
 | `colSpan`, `styles` | `item_control.editable_props.styles` |
 | `custom` | `item_control.editable_props.properties.custom` |
+| `embed` | `item_control.editable_props.properties.embed` (`inputs[].field` → `from: { field }`; không có `tailwindCss`) |
 | `required` + `validations` | `item_control.validation_schema[]` (+ `properties.required`) |
 | `options` | `variables.data_source` = `{ connection_type: "hard", connection_config: { value: [...] } }` |
 | `dataSource.api` | `variables.data_source` = `{ connection_type: "api", request_config, response_mapping, connection_config, depends_on? }` |
