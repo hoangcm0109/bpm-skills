@@ -26,7 +26,7 @@
 | `disabled`, `readonly`, `hidden` | | `hidden: true` → `styles.visible = "no"` (dùng với rule `show`) |
 | `colSpan` | | 1–12 (mặc định 12) — số cột control chiếm trong vùng chứa nó; xem `dynaform-layout` |
 | `colStart` | | `"auto"` (mặc định) hoặc 1–12: cột bắt đầu; `colStart + colSpan − 1 ≤ 12` |
-| `alignSelf` | | `"start"` (mặc định) \| `"center"` \| `"end"` \| `"stretch"`: căn dọc trong hàng lưới → `styles.alignSelf` (lib mới hơn v4.7.0). `"end"` = nút thẳng đáy với ô nhập bên cạnh; `start` không ghi ra JSON |
+| `alignSelf` | | `"start"` (mặc định) \| `"center"` \| `"end"` \| `"stretch"`: căn dọc trong hàng lưới → `styles.alignSelf` (lib ≥ 4.8.0). `"end"` = nút thẳng đáy với ô nhập bên cạnh; `start` không ghi ra JSON |
 | `attributes` | | vd `{ "type": "text" }` cho `input` |
 | `content` | | Nội dung HTML cho `text` |
 | `default` | | Giá trị mặc định (`default_values`) |

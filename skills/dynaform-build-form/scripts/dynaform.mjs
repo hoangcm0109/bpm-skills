@@ -650,7 +650,7 @@ function buildGridConfig(g = {}) {
   return { gap: "1rem", rows: 1, stackOnMobile: "yes", ...g, cols, columnWidths: widths };
 }
 
-/** spec.container → styles. Tiêu đề container KHÔNG lưu được vào JSON (lib 4.7.0) — dùng control `text` làm tiêu đề. */
+/** spec.container → styles. Tiêu đề container KHÔNG lưu được vào JSON (lib 4.7.0–4.8.0) — dùng control `text` làm tiêu đề. */
 function containerStyles(k) {
   if (!k) return {};
   return {

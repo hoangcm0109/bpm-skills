@@ -10,10 +10,10 @@ Lib phát hành bằng **git tag** `vX.Y.Z` của repo `fe_dynaform`, `dist/lib`
 ## 1. Cài đặt
 
 ```jsonc
-"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v4.7.0"
+"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v4.8.0"
 ```
 
-(`v4.7.0` là tag mới nhất lúc viết skill. Các prop ghi "từ 4.5.0" ở dưới cần tag ≥ 4.5.0.)
+(`v4.8.0` là tag mới nhất lúc viết skill. Các prop ghi "từ 4.5.0" ở dưới cần tag ≥ 4.5.0.)
 
 - Luôn `git+http://` (http thường → `TAR_BAD_ARCHIVE`) và **pin tag**; không dùng `#main`/nhánh.
 - Peer: `react`, `react-dom` ≥ 18. `@tanstack/react-query`, `@sth87/shadcn-design-system`, `lucide-react` đã bundle trong lib; host không cần bọc `QueryClientProvider` cho lib.
@@ -58,6 +58,7 @@ Props chính: `idForm` (bắt buộc nếu không truyền `form`), `environment
   - `hideSubmitButton` (mặc định `true`): ẩn nút Gửi của runtime; host tự có nút và lấy giá trị bằng `ref.current.onSubmit()` (null = không hợp lệ).
   - `ref`: `DynaformBuilder` là `forwardRef`, handle = `DynamicFormBuilderHandle` của lõi (`onSubmit`, `getFormJson`, undo/redo, `setViewport`…), dùng ở cả editor lẫn preview/release.
   - `isolatedState` (**4.5.1**, preview/release): state runtime riêng; bật khi nhiều form mount cùng trang (modal, task form).
+- **Từ 4.8.0**: `properties.style.alignSelf` (căn dọc control trong hàng lưới), hành động từng dòng của `table` chạy action flow (`actions[].flow`, `$row`), step `confirm`, `dialog.fillFromRow` / `awaitSubmit`; grid giữ đúng ô khi lưu/nạp và không xoá control khi thả; CSS "Ô nhập" của button không còn ăn thanh công cụ canvas. Form lưu bằng bản cũ vẫn chạy (cấu hình hành động hàng cũ tự chuyển thành flow khi bấm).
 - **Từ 4.6.0**: `ref.current.loadFormJson(json, { snapshot?, progress? })` thay toàn bộ form của editor từ host (build dần; editor chỉ đọc `dataFormDesign` lúc mount); canvas có hiệu ứng build dần. Mọi control nhận **CSS thuần + class Tailwind** (`properties.custom`, panel "CSS tuỳ chỉnh" ở tab Thiết kế; host tắt bằng `embedPolicy.allowCustomCss: false`). Control `table-filter` đã **gỡ** (không migrate): form cũ hiện khung cảnh báo tại chỗ đó.
 - `onError` (**4.4.0**, editor): gọi khi lưu form / lưu thành control thất bại; lib đã tự toast message chi tiết của server và `console.error` toàn bộ response. `error` = `{ action, message, status?, details[], body?, cause }` để host ghi log riêng.
 

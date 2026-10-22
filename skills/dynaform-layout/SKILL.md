@@ -14,7 +14,7 @@ Mọi khoá dưới đây là khoá của **spec** (`*.spec.json`) — script `d
 - Control có `colSpan` 1–12 (mặc định **12** = cả hàng) tính **trong vùng chứa nó**, không tính theo cả form. Vùng 6 cột bên trong `columns` vẫn có đủ 12 cột con.
 - Thứ tự mảng `components` = thứ tự hiển thị. Lib xếp như lưới CSS: cộng dồn `colSpan` theo thứ tự; cộng thêm control mà tổng **> 12** thì control đó xuống hàng mới. Không có khái niệm "hàng" khai báo sẵn.
 - `colStart` (`"auto"` hoặc 1–12): đặt cột bắt đầu. Cần `colStart + colSpan − 1 ≤ 12`. Dùng để căn phải (nút) hoặc chừa khoảng trống; còn lại để `auto`.
-- `alignSelf` (`"start"` mặc định | `"center"` | `"end"` | `"stretch"`): căn **dọc** của control trong hàng của nó (lib mới hơn v4.7.0; trước đó mọi ô cố định `start`). Control trong cùng hàng cao khác nhau (ô nhập có nhãn + nút không nhãn) mặc định dính mép trên; `end` đưa nút xuống ngang đáy ô nhập, `center` căn giữa, `stretch` kéo cao bằng hàng. Đổi theo viewport như `colSpan`: `overrides: { sm: { alignSelf: "start" } }`. Giá trị `start` không ghi ra JSON.
+- `alignSelf` (`"start"` mặc định | `"center"` | `"end"` | `"stretch"`): căn **dọc** của control trong hàng của nó (lib ≥ 4.8.0; trước đó mọi ô cố định `start`). Control trong cùng hàng cao khác nhau (ô nhập có nhãn + nút không nhãn) mặc định dính mép trên; `end` đưa nút xuống ngang đáy ô nhập, `center` căn giữa, `stretch` kéo cao bằng hàng. Đổi theo viewport như `colSpan`: `overrides: { sm: { alignSelf: "start" } }`. Giá trị `start` không ghi ra JSON.
 - Nhóm không đầy hàng (vd 6 + 4 = 10) không lỗi nhưng chừa trống bên phải — script cảnh báo.
 - Overlay (`dialog`/`drawer`/`bottom-sheet`) không chiếm chỗ trong lưới; đặt trước nút mở.
 
@@ -152,7 +152,7 @@ Nguyên tắc:
 { "type": "email", "name": "email", "parent": "grp_contact", "label": "Email", "colSpan": 6 },
 { "type": "tel",   "name": "phone", "parent": "grp_contact", "label": "Điện thoại", "colSpan": 6 }
 ```
-(Tiêu đề của chính `container` — `showTitle` — chưa lưu được vào JSON ở lib 4.7.0; dùng `text` làm tiêu đề như trên.)
+(Tiêu đề của chính `container` — `showTitle` — chưa lưu được vào JSON ở lib 4.7.0–4.8.0; dùng `text` làm tiêu đề như trên.)
 
 **Lưới ô đều có gộp ô** — mỗi ô một control (bọc `container` nếu muốn nhiều control trong 1 ô):
 ```jsonc

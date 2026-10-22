@@ -58,7 +58,7 @@ Chọn nhanh: field đứng cạnh nhau trong một nhóm → chỉ cần `colSp
 ### `container`
 - Gom field; **không có** `colSpan` riêng cho con ngoài lưới 12 cột bên trong nó.
 - `container.type`: `"div"` (mặc định), `"card"` (khung thẻ), `"fieldset"` (khung có `legend`). `container.border`: `true|false` (lib mặc định có viền liền); `container.borderType`: `solid|dashed|dotted`.
-- **Tiêu đề container (`showTitle`/`title`) chưa lưu được vào JSON ở lib 4.7.0** (đọc mã: `properties.content.title` bị loại khỏi export). Làm tiêu đề bằng control `text` (`<h3>…</h3>`) đặt làm con đầu tiên.
+- **Tiêu đề container (`showTitle`/`title`) chưa lưu được vào JSON ở lib 4.7.0–4.8.0** (đọc mã: `properties.content.title` bị loại khỏi export). Làm tiêu đề bằng control `text` (`<h3>…</h3>`) đặt làm con đầu tiên.
 - Hợp để đặt rule ẩn/hiện cả nhóm bằng một handler (`field_state` trên `container`).
 
 ### `columns` — `2 columns`, `3 columns`, `4 columns`
