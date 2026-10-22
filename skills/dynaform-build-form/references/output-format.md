@@ -39,7 +39,7 @@ Form có thể nằm phẳng hoặc bọc trong `form_content` (cả hai đều 
       "properties": { "label": "Họ và tên", "placeholder": "", "required": true, "helpText": "", "hidden": false,
                       "attributes": { "type": "text" }, "eventHandlers": [] },
       "styles": { "colSpan": "6" },          // chỉ cần khoá khác mặc định; loader tự trộn lại mặc định
-      "overrides": { "sm": {}, "md": {} }    // tuỳ chọn
+      "overrides": { "sm": { "properties": { "style": { "colSpan": "12" } } } }  // tuỳ chọn; chỉ đọc "sm" (< 768px) và "md" (< 1024px). KHÔNG dùng { "styles": … } — lib bỏ qua
     },
     "logic_rules": [], "behavior": {},
     "validation_schema": [ { "type": "required", "value": "yes", "errorMessage": "…" } ],

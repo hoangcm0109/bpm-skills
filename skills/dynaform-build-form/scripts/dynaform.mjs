@@ -80,21 +80,28 @@ const CONTAINER_KIND = {
   tab: "panels", // properties.tabs[].id  -> parent_tab_id
   steps: "panels", // properties.steps[].id -> parent_tab_id
   columns: "columns", // col-0, col-1, ...
+  grid: "grid", // không có tabId: con lấp các ô theo thứ tự (hàng trước, cột sau), mỗi ô 1 con
+  list: "flat",
+  "nested-list": "flat",
+  "form-loop": "flat",
 };
+/** list / nested-list / form-loop nhận con nhưng builder vẫn xuất CÓ vỏ `item_control` (khác container/tab/steps/columns/grid/overlay). */
+const WRAPPED_CONTAINERS = new Set(["list", "nested-list", "form-loop"]);
+const isUnwrapped = (type) => Boolean(CONTAINER_KIND[type]) && !WRAPPED_CONTAINERS.has(type);
 const OPTION_TYPES = new Set(["select", "radio-group", "checkbox-group", "tree-select"]);
 const VALIDATION_TYPES = new Set([
   "required", "readOnly", "min", "max", "minLength", "maxLength", "contains", "notContains",
   "greater", "lower", "equals", "notEquals", "greaterEqual", "lowerEqual", "email", "url", "regex", "matchField",
 ]);
 const OPERATORS = new Set([
-  "equals", "notEquals", "isEmpty", "isNotEmpty", "greaterThan", "lessThan", "contains", "notContains",
+  "equals", "notEquals", "isEmpty", "isNotEmpty", "greaterThan", "greaterThanOrEqual", "lessThan", "lessThanOrEqual", "contains", "notContains",
 ]);
 const REF_ACTIONS = new Set([
   "show", "hide", "enable", "disable", "require", "optional", "setValue",
   "openModal", "closeModal", "toggleModal", "switchTab", "collapse",
 ]);
 const OTHER_ACTIONS = new Set(["openLink", "callApi", "customScript", "flow"]);
-const EVENTS = new Set(["click", "dblclick", "hover", "change", "load", "open", "close"]);
+const EVENTS = new Set(["click", "dblclick", "hover", "change", "load", "open", "close", "condition"]);
 const NAME_RE = /^[a-z][a-z0-9_]*$/;
 const EMBED_NAME_RE = /^[A-Za-z][\w-]*$/; // tên input / output / event của custom-embed (khớp lib)
 const EMBED_VALUE_TYPES = new Set(["none", "string", "number", "boolean", "array", "object"]);
@@ -191,7 +198,13 @@ export function checkSpec(spec) {
       warnings.push(`${at}: customScript — ưu tiên flow có sẵn step (set_values, call_api, branch…); chỉ dùng script khi không step nào làm được`);
     if (c.type === "custom-embed") checkEmbedSpec(c, at, byName, errors, warnings);
     else if (c.embed !== undefined) errors.push(`${at}: khoá "embed" chỉ dùng cho type custom-embed`);
+    checkHandlerFlows(c, at, byName, errors, warnings);
+    for (const [key, types] of [["grid", ["grid"]], ["list", ["list", "nested-list"]], ["loop", ["form-loop"]], ["container", ["container"]]])
+      if (c[key] !== undefined && !types.includes(c.type)) errors.push(`${at}: khoá "${key}" chỉ dùng cho type ${types.join("/")}`);
+    if (c.type === "grid" && c.grid?.cols !== undefined && !(Number.isInteger(c.grid.cols) && c.grid.cols >= 1 && c.grid.cols <= 6))
+      errors.push(`${at}: grid.cols phải là số nguyên 1..6`);
   });
+  checkLayout(comps, byName, errors, warnings);
   if (!comps.some((c) => c?.type === "submit-button" || c?.type === "button")) warnings.push("form chưa có nút submit");
   return { errors, warnings };
 }
@@ -267,6 +280,251 @@ function buildEmbedConfig(e) {
   return cfg;
 }
 
+// ── Bố cục: colStart / colSpan / overrides / grid ───────────────────────────────────────────
+const VIEWPORTS = new Set(["sm", "md"]); // lib chỉ đọc override md (< 5xl) và sm (< 3xl); giá trị gốc = desktop
+
+/** Chấp nhận dạng gọn `{ sm: { colSpan: 12 } }`, dạng cũ `{ sm: { styles: {...} } }` và dạng của lib `{ sm: { properties: { style } } }`. */
+export function normalizeOverrides(ov) {
+  if (!ov || typeof ov !== "object") return undefined;
+  const out = {};
+  for (const [vp, v] of Object.entries(ov)) {
+    if (!v || typeof v !== "object") continue;
+    const { styles, properties, ...flat } = v;
+    const style = { ...(properties?.style ?? {}), ...(styles ?? {}), ...flat };
+    for (const k of Object.keys(style)) style[k] = typeof style[k] === "number" ? String(style[k]) : style[k];
+    const { style: _drop, ...restProps } = properties ?? {};
+    out[vp] = { properties: { ...restProps, style } };
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+/** Tách con theo (cha, ngăn) để kiểm hàng 12 cột. */
+function checkLayout(comps, byName, errors, warnings) {
+  const groups = new Map();
+  for (const c of comps) {
+    if (!c || typeof c !== "object") continue;
+    const at = `components[${comps.indexOf(c)}] (${c.name})`;
+    if (c.colStart !== undefined && c.colStart !== "auto") {
+      const s = Number(c.colStart);
+      const span = Number(c.colSpan ?? 12);
+      if (!Number.isInteger(s) || s < 1 || s > 12) errors.push(`${at}: colStart phải là "auto" hoặc số nguyên 1..12`);
+      else if (s + span - 1 > 12) errors.push(`${at}: colStart ${s} + colSpan ${span} vượt quá 12 cột`);
+    }
+    for (const [vp, v] of Object.entries(c.overrides ?? {})) {
+      if (!VIEWPORTS.has(vp))
+        warnings.push(`${at}: overrides.${vp} không có tác dụng — lib chỉ đọc "sm" (< 768px) và "md" (< 1024px); giá trị gốc (colSpan) là desktop`);
+      const span = normalizeOverrides({ [vp]: v })?.[vp]?.properties?.style?.colSpan;
+      if (span !== undefined && !(Number.isInteger(+span) && +span >= 1 && +span <= 12)) errors.push(`${at}: overrides.${vp}.colSpan phải là 1..12`);
+    }
+    if (c.parent === undefined) {
+      if (c.type === "dialog" || c.type === "drawer" || c.type === "bottom-sheet") continue; // overlay không chiếm chỗ trong lưới
+    }
+    const key = `${c.parent ?? ""}\u0000${c.tabId ?? ""}`;
+    if (!groups.has(key)) groups.set(key, { parent: c.parent, items: [] });
+    groups.get(key).items.push(c);
+  }
+  for (const { parent, items } of groups.values()) {
+    const p = parent ? byName.get(parent)?.c : null;
+    const where = parent ? `trong "${parent}"` : "ở gốc form";
+    if (p?.type === "grid") {
+      const cols = Number(p.grid?.cols ?? 2);
+      const rows = Number(p.grid?.rows ?? Math.ceil(items.length / cols));
+      let covered = 0;
+      for (const [k, s] of Object.entries(p.grid?.spans ?? {})) covered += Math.max(0, (s.r ?? 1) * (s.c ?? 1) - 1);
+      const cells = rows * cols - covered;
+      if (items.length > cells)
+        errors.push(`grid "${p.name}": ${items.length} con nhưng chỉ có ${cells} ô (${rows} hàng × ${cols} cột${covered ? `, trừ ${covered} ô bị gộp` : ""}) — mỗi ô chứa đúng 1 control; muốn nhiều control trong 1 ô thì bọc bằng container`);
+      continue;
+    }
+    // Xếp hàng như lưới CSS: cộng dồn colSpan, quá 12 thì xuống hàng.
+    const rowsOut = [];
+    let cur = [];
+    let sum = 0;
+    for (const c of items) {
+      const span = Number(c.colSpan ?? 12) || 12;
+      if (c.colStart !== undefined && c.colStart !== "auto") { if (cur.length) rowsOut.push({ cur, sum }); rowsOut.push({ cur: [c], sum: -1 }); cur = []; sum = 0; continue; }
+      if (sum + span > 12 && cur.length) { rowsOut.push({ cur, sum }); cur = []; sum = 0; }
+      cur.push(c); sum += span;
+    }
+    if (cur.length) rowsOut.push({ cur, sum });
+    for (const r of rowsOut)
+      if (r.sum > 0 && r.sum < 12 && r.cur.length > 1)
+        warnings.push(`hàng ${where}: ${r.cur.map((c) => `${c.name}(${c.colSpan ?? 12})`).join(" + ")} = ${r.sum}/12 — hàng chưa đầy, chỉnh colSpan cho đủ 12 hoặc dùng colStart để căn phải`);
+  }
+}
+
+// ── Kiểm tra flow tự viết (events[].flow) ────────────────────────────────────────────────────
+const STEP_TYPES = new Set([
+  "sequence", "parallel", "branch", "try", "for_each", "validate_form", "call_api", "push_table", "set_values", "field_state",
+  "dialog", "run_script", "show_message", "navigate", "emit_event", "embed_command", "reset_form", "submit_form", "open_form",
+  "close_form", "refetch", "switch_tab", "collapse",
+]);
+const LAYOUT_ONLY_STEPS = new Set(["open_form", "close_form", "refetch"]);
+const FLOW_OPERATORS = new Set(["eq", "neq", "gt", "gte", "lt", "lte", "contains", "not_contains", "empty", "not_empty"]);
+const FIELD_STATE_ACTIONS = new Set(["show", "hide", "enable", "disable", "require", "optional"]);
+const BODY_MODES = new Set(["static", "mapping", "form", "tree"]);
+const OVERLAYS = new Set(["dialog", "drawer", "bottom-sheet"]);
+
+/** Sự kiện lib cung cấp cho từng type (khớp COMPONENT_EVENTS + load + condition). Type không có trong bảng: click, hover. */
+const EVENTS_BY_TYPE = {
+  button: ["click", "dblclick", "hover"], "submit-button": ["click"], "reset-button": ["click"],
+  link: ["click", "hover"], text: ["click", "hover"], image: ["click", "hover"],
+  input: ["change"], textarea: ["change"], number: ["change"], email: ["change"], password: ["change"], tel: ["change"], url: ["change"],
+  select: ["change"], "checkbox-group": ["change"], "radio-group": ["change"], "record-picker": ["change"], "record-gallery": ["change"],
+  "stat-cards": ["change"], "sortable-list": ["change"], "custom-embed": [], "date-picker": ["change"], "range-picker": ["change"],
+  "time-picker": ["change"], checkbox: ["change"], switch: ["change"], rate: ["change"], date: ["change"], dialog: ["open", "close"], drawer: ["open", "close"], "bottom-sheet": ["open", "close"],
+};
+export function eventsFor(type) {
+  const own = EVENTS_BY_TYPE[type] ?? ["click", "hover"];
+  return new Set([...own, ...(OVERLAYS.has(type) ? [] : ["load"]), "condition"]);
+}
+
+function checkValueSource(v, at, ctx) {
+  if (typeof v === "string") return; // show_message.message cho phép chuỗi trần
+  if (!v || typeof v !== "object" || !["literal", "ref", "template", "map"].includes(v.type)) {
+    return ctx.errors.push(`${at}: ValueSource phải là { type: "literal"|"ref"|"template"|"map", … }`);
+  }
+  if (v.type === "ref") {
+    if (typeof v.path !== "string" || !v.path.startsWith("$")) return ctx.errors.push(`${at}: ref.path phải bắt đầu bằng "$" (vd $form.current.values.<name>)`);
+    const m = /^\$form\.current\.values\.([A-Za-z_][\w]*)/.exec(v.path);
+    if (m && !ctx.byName.has(m[1])) ctx.errors.push(`${at}: ${v.path} trỏ tới field "${m[1]}" không tồn tại`);
+    const s = /^\$steps\.([\w-]+)/.exec(v.path);
+    if (s && !ctx.stepIds.has(s[1])) ctx.errors.push(`${at}: ${v.path} trỏ tới step "${s[1]}" không có trong flow`);
+  } else if (v.type === "template") {
+    if (typeof v.template !== "string") return ctx.errors.push(`${at}: template.template phải là chuỗi`);
+    for (const m of v.template.matchAll(/\{\{\s*\$form\.current\.values\.([A-Za-z_]\w*)[^}]*\}\}/g))
+      if (!ctx.byName.has(m[1])) ctx.errors.push(`${at}: {{…values.${m[1]}}} trỏ tới field không tồn tại`);
+    for (const m of v.template.matchAll(/\{\{\s*\$steps\.([\w-]+)/g))
+      if (!ctx.stepIds.has(m[1])) ctx.errors.push(`${at}: {{$steps.${m[1]}…}} trỏ tới step không có trong flow`);
+  } else if (v.type === "map") {
+    if (!v.rule || typeof v.rule !== "object") ctx.errors.push(`${at}: map cần rule`);
+  }
+}
+
+function checkCondition(c, at, ctx) {
+  if (!c || typeof c !== "object") return ctx.errors.push(`${at}: condition phải là object`);
+  if (Array.isArray(c.all) || Array.isArray(c.any)) return (c.all ?? c.any).forEach((x, i) => checkCondition(x, `${at}.${c.all ? "all" : "any"}[${i}]`, ctx));
+  if (c.source) return checkValueSource(c.source, `${at}.source`, ctx);
+  if (!c.left || !FLOW_OPERATORS.has(c.operator)) return ctx.errors.push(`${at}: condition cần { left, operator: ${[...FLOW_OPERATORS].join("|")} } hoặc { all|any: [...] } hoặc { source }`);
+  checkValueSource(c.left, `${at}.left`, ctx);
+  if (!["empty", "not_empty"].includes(c.operator)) {
+    if (!c.right) ctx.errors.push(`${at}: operator "${c.operator}" cần right`);
+    else checkValueSource(c.right, `${at}.right`, ctx);
+  }
+}
+
+function collectStepIds(step, out, errors, at) {
+  if (!step || typeof step !== "object") return;
+  if (typeof step.id !== "string" || !step.id) errors.push(`${at}: step thiếu id`);
+  else if (out.has(step.id)) errors.push(`${at}: step id "${step.id}" bị trùng trong cùng handler`);
+  else out.add(step.id);
+  for (const k of ["steps", "catch", "finally"]) if (Array.isArray(step[k])) step[k].forEach((s) => collectStepIds(s, out, errors, at));
+  for (const k of ["then", "else"]) if (step[k] && !Array.isArray(step[k])) collectStepIds(step[k], out, errors, at);
+}
+
+function checkStep(step, at, ctx) {
+  if (!step || typeof step !== "object") return ctx.errors.push(`${at}: step phải là object`);
+  const here = `${at} › ${step.id ?? "?"}(${step.type})`;
+  if (!STEP_TYPES.has(step.type)) return ctx.errors.push(`${here}: step type không hợp lệ (${[...STEP_TYPES].join(", ")})`);
+  const e = (m) => ctx.errors.push(`${here}: ${m}`);
+  const w = (m) => ctx.warnings.push(`${here}: ${m}`);
+  const fieldExists = (n) => step.form || ctx.byName.has(n); // step có `form` alias thuộc layout runtime — không kiểm
+  if (LAYOUT_ONLY_STEPS.has(step.type)) w("chỉ chạy trong layout runtime (nhiều form); trong form đơn sẽ lỗi");
+  switch (step.type) {
+    case "sequence": case "parallel": case "try": case "for_each":
+      if (!Array.isArray(step.steps) || !step.steps.length) e("cần steps: [...] (không rỗng)");
+      if (step.type === "parallel" && step.strategy && !["all", "all_settled", "race"].includes(step.strategy)) e('strategy phải là "all"|"all_settled"|"race"');
+      if (step.type === "for_each") { if (!step.items) e("cần items (ValueSource trả về danh sách)"); else checkValueSource(step.items, `${here}.items`, ctx); }
+      if (step.type === "try" && !step.catch?.length && !step.finally?.length) w("try không có catch/finally — lỗi vẫn làm flow dừng");
+      for (const k of ["steps", "catch", "finally"]) (step[k] ?? []).forEach((s) => checkStep(s, here, ctx));
+      break;
+    case "branch":
+      checkCondition(step.condition, `${here}.condition`, ctx);
+      if (!step.then || Array.isArray(step.then)) e("then phải là MỘT step (dùng sequence để gộp nhiều bước)");
+      else checkStep(step.then, here, ctx);
+      if (step.else) { if (Array.isArray(step.else)) e("else phải là MỘT step"); else checkStep(step.else, here, ctx); }
+      break;
+    case "validate_form":
+      for (const f of step.fields ?? []) if (!fieldExists(f)) e(`fields: "${f}" không tồn tại`);
+      break;
+    case "set_values":
+      if (!Array.isArray(step.mappings) || !step.mappings.length) e("cần mappings: [{ from, to }]");
+      for (const [i, m] of (step.mappings ?? []).entries()) {
+        if (!m?.from) e(`mappings[${i}] thiếu from`); else checkValueSource(m.from, `${here}.mappings[${i}].from`, ctx);
+        if (typeof m?.to !== "string") e(`mappings[${i}] thiếu to (name của field)`);
+        else if (!fieldExists(m.to.split(".")[0].split("[")[0])) e(`mappings[${i}].to "${m.to}" không tồn tại`);
+      }
+      break;
+    case "field_state":
+      if (!FIELD_STATE_ACTIONS.has(step.action)) e(`action phải là ${[...FIELD_STATE_ACTIONS].join("|")}`);
+      if (!Array.isArray(step.targets) || !step.targets.length) e("cần targets: [name, …]");
+      for (const t of step.targets ?? []) if (!fieldExists(t)) e(`targets: "${t}" không tồn tại`);
+      break;
+    case "dialog": {
+      if (!["open", "close", "toggle"].includes(step.action)) e('action phải là "open"|"close"|"toggle"');
+      const t = ctx.byName.get(step.target)?.c;
+      if (!step.form && !t) e(`target "${step.target}" không tồn tại`);
+      else if (t && !OVERLAYS.has(t.type)) e(`target "${step.target}" là ${t.type}, không phải dialog/drawer/bottom-sheet`);
+      break;
+    }
+    case "call_api":
+      if (!step.url && !step.apiRef) e("cần url hoặc apiRef (Data Source id)");
+      if (step.url && /^http:\/\//i.test(step.url)) w("url dùng http:// — chỉ nên https:// hoặc đường dẫn nội bộ");
+      if (step.bodyMode && !BODY_MODES.has(step.bodyMode)) e(`bodyMode phải là ${[...BODY_MODES].join("|")}`);
+      if (step.bodyMode === "mapping" && !Array.isArray(step.bodyMapping)) e("bodyMode mapping cần bodyMapping: [{ source, target }]");
+      if (step.method && !/^(GET|POST|PUT|PATCH|DELETE|HEAD)$/i.test(step.method)) e("method không hợp lệ");
+      for (const k of ["pathMapping", "queryMapping", "headerMapping", "bodyMapping"])
+        for (const [i, m] of (step[k] ?? []).entries()) { if (!m?.source || !m?.target) e(`${k}[${i}] cần { source, target }`); else checkValueSource(m.source, `${here}.${k}[${i}].source`, ctx); }
+      if (step.authConfig?.token) w("authConfig.token là bí mật — dùng token_source: \"system\", đừng ghi token vào form");
+      break;
+    case "push_table":
+      if (!step.tableId) e("cần tableId (name của table hoặc record-gallery — script đổi sang id lúc build)");
+      else if (!ctx.byName.has(step.tableId) && !step.form) w(`tableId "${step.tableId}" không phải name trong spec — runtime cần COMPONENT id`);
+      if (!["rows", "request"].includes(step.mode)) e('mode phải là "rows"|"request"');
+      if (step.mode === "rows" && !step.rows) e("mode rows cần rows (ValueSource)");
+      break;
+    case "show_message":
+      if (step.message === undefined) e("cần message");
+      else checkValueSource(step.message, `${here}.message`, ctx);
+      if (step.level && !["success", "error", "warning", "info"].includes(step.level)) e("level phải là success|error|warning|info");
+      break;
+    case "navigate":
+      if (typeof step.url !== "string" || !step.url) e("cần url");
+      else if (/^\s*(javascript|data|vbscript):/i.test(step.url)) e("url không được là javascript:/data:/vbscript:");
+      else if (/^http:\/\//i.test(step.url)) w("url dùng http:// — chỉ nên https:// hoặc đường dẫn nội bộ");
+      break;
+    case "emit_event":
+      if (!step.eventName) e("cần eventName");
+      break;
+    case "embed_command":
+      if (!ctx.byName.get(step.target) || ctx.byName.get(step.target).c.type !== "custom-embed") e(`target "${step.target}" phải là custom-embed trong spec`);
+      if (!step.command) e("cần command");
+      break;
+    case "run_script":
+      w("run_script — JS thô chạy ở trình duyệt người dùng; chỉ dùng khi step có sẵn không làm được, và hiển thị mã cho người dùng duyệt");
+      if (typeof step.code !== "string" || !step.code.trim()) e("cần code");
+      break;
+    case "switch_tab": case "collapse":
+      w("chưa có tác dụng ở runtime — dùng field_state/set_values thay thế");
+      break;
+  }
+}
+
+/** Kiểm một handler `events[]` của spec: event hợp lệ cho type + toàn bộ cây step của flow tự viết. */
+function checkHandlerFlows(c, at, byName, errors, warnings) {
+  const allowed = eventsFor(c.type);
+  for (const h of c.events ?? []) {
+    if (!h || typeof h !== "object") continue;
+    if (h.event && !allowed.has(h.event) && !/^(control|embed|menu):.+/.test(h.event))
+      warnings.push(`${at}: event "${h.event}" không được lib cung cấp cho type ${c.type} (có: ${[...allowed].join(", ")}) — handler sẽ không chạy`);
+    if (h.flow) {
+      const stepIds = new Set();
+      collectStepIds(h.flow, stepIds, errors, `${at} (flow ${h.event})`);
+      checkStep(h.flow, `${at} (flow ${h.event})`, { byName, errors, warnings, stepIds });
+    }
+  }
+}
+
 // ── Build ───────────────────────────────────────────────────────────────────────────────────
 function buildDataSource(c) {
   const name = c.label ?? c.name;
@@ -299,7 +557,7 @@ function buildDataSource(c) {
 // ── Action → flow step (khớp lib/action-flow/legacy/legacy-actions.ts) ──────────────────────
 const OPERATOR_MAP = {
   equals: "eq", notEquals: "neq", isEmpty: "empty", isNotEmpty: "not_empty",
-  greaterThan: "gt", lessThan: "lt", contains: "contains", notContains: "not_contains",
+  greaterThan: "gt", greaterThanOrEqual: "gte", lessThan: "lt", lessThanOrEqual: "lte", contains: "contains", notContains: "not_contains",
 };
 const INVERSE = { show: "hide", hide: "show", enable: "disable", disable: "enable", require: "optional", optional: "require" };
 const FIELD_STATE = new Set(["show", "hide", "enable", "disable", "require", "optional"]);
@@ -343,7 +601,53 @@ function ruleToHandler(r, name, i) {
   };
 }
 
-function buildItemControl(c, order, ids) {
+/**
+ * Mỗi overlay lưu cấu hình dưới khoá theo `type` (core/controls/overlay.ts): dialog → `properties.dialog`,
+ * drawer → `properties.drawer` (+ `side`), bottom-sheet → `properties.bottomSheet`. Spec đều dùng khoá `dialog`.
+ */
+function overlayProps(c) {
+  if (!c.dialog) return {};
+  if (c.type === "bottom-sheet") return { bottomSheet: c.dialog };
+  if (c.type === "drawer") return { drawer: { side: "right", ...c.dialog } };
+  return { dialog: c.dialog };
+}
+
+function buildGridConfig(g = {}) {
+  const cols = g.cols ?? 2;
+  const widths = Array.isArray(g.columnWidths) ? [...g.columnWidths] : [];
+  while (widths.length < cols) widths.push("1fr");
+  widths.length = cols;
+  return { gap: "1rem", rows: 1, stackOnMobile: "yes", ...g, cols, columnWidths: widths };
+}
+
+/** spec.container → styles. Tiêu đề container KHÔNG lưu được vào JSON (lib 4.7.0) — dùng control `text` làm tiêu đề. */
+function containerStyles(k) {
+  if (!k) return {};
+  return {
+    ...(k.type ? { containerType: k.type } : {}),
+    ...(k.border !== undefined ? { showBorder: k.border ? "yes" : "no" } : {}),
+    ...(k.borderType ? { borderType: k.borderType } : {}),
+  };
+}
+
+/**
+ * Lib tính theo desktop trước: `colSpan` gốc áp cho MỌI cỡ; override `md` áp khi khung < 1024px, `sm` khi < 768px.
+ * Mặc định (`mobile: "stack"`) control nào có colSpan < 12 mà chưa tự khai báo sm.colSpan sẽ tự xuống 12 cột trên mobile;
+ * colStart cũng về "auto" để không lệch.
+ */
+function responsiveOverrides(c, styles, mobile) {
+  const ov = normalizeOverrides(c.overrides) ?? {};
+  if (mobile === "stack") {
+    const sm = ov.sm?.properties?.style ?? {};
+    const needs = {};
+    if (Number(styles.colSpan) < 12 && sm.colSpan === undefined) needs.colSpan = "12";
+    if (styles.colStart && styles.colStart !== "auto" && sm.colStart === undefined) needs.colStart = "auto";
+    if (Object.keys(needs).length) ov.sm = { ...(ov.sm ?? {}), properties: { ...(ov.sm?.properties ?? {}), style: { ...sm, ...needs } } };
+  }
+  return Object.keys(ov).length ? ov : undefined;
+}
+
+function buildItemControl(c, order, ids, mobile = "stack") {
   const reg = TYPE_REGISTRY[c.type];
   const id = ids.get(c.name);
   const props = {
@@ -360,7 +664,10 @@ function buildItemControl(c, order, ids) {
     ...(c.steps ? { steps: c.steps } : {}),
     ...(c.stepsOptions ? { stepsOptions: c.stepsOptions } : {}),
     ...(c.columns ? { columns: { count: 2, gap: "1rem", stackOnMobile: "yes", ...c.columns } } : {}),
-    ...(c.dialog ? { dialog: c.dialog } : {}),
+    ...overlayProps(c),
+    ...(c.type === "grid" ? { grid: buildGridConfig(c.grid) } : {}),
+    ...(c.list || c.type === "list" || c.type === "nested-list" ? { list: { minRows: 1, initialRows: 1, addButtonLabel: "+ Add", ...(c.list ?? {}) } } : {}),
+    ...(c.type === "form-loop" ? { loop: { mode: "variable", dataPath: "", itemAlias: "item", emptyText: "", allowAdd: false, allowRemove: false, addButtonLabel: "+ Add", sampleData: "", ...(c.loop ?? {}) } } : {}),
     ...(c.custom ? { custom: c.custom } : {}),
     ...(c.type === "custom-embed" && c.embed ? { embed: buildEmbedConfig(c.embed) } : {}),
     ...(c.props ?? {}),
@@ -373,7 +680,14 @@ function buildItemControl(c, order, ids) {
     ...(c.rules ?? []).map((r, i) => ruleToHandler(r, c.name, i)),
   ];
   if (handlers.length) props.eventHandlers = handlers;
-  const styles = { colSpan: String(c.colSpan ?? 12), ...(c.type === "custom-embed" ? { showLabel: "no", labelPosition: "top" } : {}), ...(c.styles ?? {}) };
+  const styles = {
+    colSpan: String(c.colSpan ?? 12),
+    ...(c.colStart !== undefined ? { colStart: String(c.colStart) } : {}),
+    ...(c.type === "custom-embed" ? { showLabel: "no", labelPosition: "top" } : {}),
+    ...(c.type === "container" ? containerStyles(c.container) : {}),
+    ...(c.styles ?? {}),
+  };
+  const overrides = responsiveOverrides(c, styles, mobile);
   const required = c.required ? [{ type: "required", value: "yes", errorMessage: c.requiredMessage ?? "" }] : [];
   const validations = [...required, ...(c.validations ?? []).filter((v) => !(c.required && v.type === "required"))];
   const dataLang = `${c.type}-${c.name}`;
@@ -391,9 +705,19 @@ function buildItemControl(c, order, ids) {
     },
     default_values: c.default ?? null,
     locked_props: { properties: {}, styles: {} },
-    editable_props: { properties: props, styles, ...(c.overrides ? { overrides: c.overrides } : {}) },
+    editable_props: { properties: props, styles, ...(overrides ? { overrides } : {}) },
     logic_rules: [], behavior: {}, validation_schema: validations, children_schema: [],
   };
+}
+
+/** Bản sao flow với `push_table.tableId` = name → id sinh lúc build. */
+function swapTableIds(step, ids) {
+  if (!step || typeof step !== "object") return step;
+  const out = { ...step };
+  if (out.type === "push_table" && ids.has(out.tableId)) out.tableId = ids.get(out.tableId);
+  for (const k of ["steps", "catch", "finally"]) if (Array.isArray(out[k])) out[k] = out[k].map((s) => swapTableIds(s, ids));
+  for (const k of ["then", "else"]) if (out[k] && !Array.isArray(out[k])) out[k] = swapTableIds(out[k], ids);
+  return out;
 }
 
 /** UUID tất định theo (seed, key) — dùng cho chế độ stream để mỗi lần build lại vẫn giữ nguyên id. */
@@ -404,10 +728,22 @@ function stableUuid(seed, key) {
 
 /** `opts.stableIds`: id sinh từ name thay vì ngẫu nhiên (build lặp lại cho kết quả giống hệt nhau). */
 export function buildForm(spec, opts = {}) {
-  const comps = spec.components;
   const seed = spec.id ?? spec.name ?? "form";
   const uid = (key) => (opts.stableIds ? stableUuid(seed, key) : randomUUID());
-  const ids = new Map(comps.map((c) => [c.name, uid(`item:${c.name}`)]));
+  const ids = new Map(spec.components.map((c) => [c.name, uid(`item:${c.name}`)]));
+  const mobile = spec.mobile === "keep" ? "keep" : "stack";
+  const kidCount = new Map();
+  for (const c of spec.components) if (c.parent) kidCount.set(c.parent, (kidCount.get(c.parent) ?? 0) + 1);
+  const comps = spec.components.map((c) => {
+    let out = c;
+    if (c.type === "grid" && c.grid?.rows === undefined) {
+      const cols = c.grid?.cols ?? 2;
+      out = { ...out, grid: { ...(c.grid ?? {}), rows: Math.max(1, Math.ceil((kidCount.get(c.name) ?? 0) / cols)) } };
+    }
+    // push_table.tableId cần COMPONENT id (không phải name) — đổi name trong spec sang id vừa sinh.
+    if (c.events?.some((h) => h.flow)) out = { ...out, events: c.events.map((h) => (h.flow ? { ...h, flow: swapTableIds(h.flow, ids) } : h)) };
+    return out;
+  });
   const order = new Map();
   const controls = new Map(); // name -> item_control
   const roots = [];
@@ -415,9 +751,9 @@ export function buildForm(spec, opts = {}) {
     const key = c.parent ?? "";
     const n = (order.get(key) ?? 0) + 1;
     order.set(key, n);
-    const ic = buildItemControl(c, n, ids);
+    const ic = buildItemControl(c, n, ids, mobile);
     controls.set(c.name, ic);
-    const wrapper = CONTAINER_KIND[c.type]
+    const wrapper = isUnwrapped(c.type)
       ? ic // container: không có vỏ ngoài (đúng như builder xuất)
       : {
           id: uid(`wrap:${c.name}`), parent_id: ic.parent_id, data_lang: ic.data_lang, status: "", variable_name: c.name,

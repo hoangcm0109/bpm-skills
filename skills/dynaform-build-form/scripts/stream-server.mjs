@@ -117,7 +117,8 @@ export function computeSnapshot(text, seq) {
   if (chk.errors.length) return { ...base, ok: false, errors: chk.errors, pending, shown: components.length, components };
   return {
     ...base, ok: true, pending, shown: components.length, components,
-    warnings: chk.warnings.filter((w) => w !== "form chưa có nút submit"),
+    // Đang ghi dở: hàng chưa đủ 12 cột và thiếu nút submit là bình thường, chỉ báo khi `complete: true`.
+    warnings: chk.warnings.filter((w) => w !== "form chưa có nút submit" && !w.startsWith("hàng ")),
     form: buildForm(pruned, { stableIds: true }),
   };
 }

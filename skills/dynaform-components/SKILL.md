@@ -1,6 +1,6 @@
 ---
 name: dynaform-components
-description: Danh mục component (type) của dynaform builder và cách chọn đúng type cho từng loại dữ liệu — input, tel, select, date-picker, file, table, container, tab, steps, dialog… Dùng khi cần quyết định dùng component nào (ưu tiên control có sẵn; custom-embed chỉ là lựa chọn cuối, viết bằng React + Tailwind), cấu hình thuộc tính riêng của một component, hoặc khi gặp lỗi "type không có trong registry".
+description: Danh mục component (type) của dynaform builder và cách chọn đúng type cho từng loại dữ liệu — input, tel, select, date-picker, file, table, container, tab, steps, dialog… Mô tả đầy đủ control layout (container, columns 2/3/4, grid, tab, steps, dialog/drawer/bottom-sheet, list, form-loop, sub-form: khoá cấu hình, cách đặt con, lỗi thường gặp). Dùng khi cần quyết định dùng component nào (ưu tiên control có sẵn; custom-embed chỉ là lựa chọn cuối, viết bằng React + Tailwind), cấu hình thuộc tính riêng của một component, hoặc khi gặp lỗi "type không có trong registry".
 ---
 
 # Component dynaform
@@ -37,19 +37,93 @@ Control tự định nghĩa của host (`defineControl`, tiền tố `x-`) cũng
 | Ảnh tĩnh, liên kết, đường kẻ | `image`, `link`, `divider` | `image` ≠ upload (`file`) |
 | Nút | `submit-button` (gửi form), `button` (hành động phụ), `reset-button` | |
 
-## Layout / container (có con)
+## Control layout (có con) — chọn đúng loại, cấu hình đúng khoá
 
-| Type | Dùng để | Ngăn của con (`tabId`) |
-|---|---|---|
-| `container` | nhóm field thành 1 khối/section | — |
-| `tab` | chia tab | id trong `tabs[]` |
-| `steps` | wizard nhiều bước | id trong `steps[]` |
-| `columns` | 2–4 cột cạnh nhau | `col-0`, `col-1`… |
-| `grid` | lưới hàng × cột cố định | theo slot — **nên dựng trong builder** |
-| `dialog` / `drawer` / `bottom-sheet` | overlay; mở bằng action `dialog` | — (variant `form`/`custom` mới có con) |
-| `list` / `nested-list` | danh sách lặp (nhiều mục cùng cấu trúc) | — |
+Control layout chứa control khác. Con khai báo trong spec bằng `parent: "<name cha>"` (+ `tabId` tuỳ loại cha); **cha phải đứng trước con** trong mảng. Bên trong mỗi vùng chứa là một lưới 12 cột riêng — số cột từng con chiếm xem `../dynaform-layout/SKILL.md`.
 
-Chi tiết cách bố cục: skill `dynaform-layout`.
+| Type | Dùng để | Con xác định vị trí bằng | Khoá spec riêng |
+|---|---|---|---|
+| `container` | nhóm field thành 1 khối (có khung/không) | thứ tự mảng + `colSpan` | `container: { type, border, borderType }` |
+| `columns` (2/3/4 cột) | chia vùng thành cột **rộng khác nhau** | `tabId: "col-0".."col-N"` | `columns: { count, spans, gap, stackOnMobile }` |
+| `grid` | bảng ô đều hàng × cột, gộp ô | **thứ tự** (ô lấp dần: hàng trước, cột sau) | `grid: { cols, rows, columnWidths, gap, stackOnMobile, spans }` |
+| `tab` | chia tab | `tabId` = id trong `tabs[]` | `tabs: [{ id, label }]` |
+| `steps` | wizard nhiều bước | `tabId` = id trong `steps[]` | `steps: [{ id, label }]`, `stepsOptions` |
+| `dialog` / `drawer` / `bottom-sheet` | overlay mở bằng action `dialog` | thứ tự mảng (chỉ variant `form`/`custom` có con) | `dialog: { variant, title, … }` |
+| `list` / `nested-list` | thêm/xoá dòng lặp do người dùng | thứ tự mảng (con = cột của một dòng) | `list: { minRows, initialRows, maxRows, addButtonLabel }` |
+| `form-loop` | lặp khối theo mảng dữ liệu có sẵn | thứ tự mảng | `loop: { mode, dataPath, itemAlias, … }` |
+| `sub-form` | nhúng form khác (layout nhiều form) | — (không có con) | `props.subForm: { alias }` |
+
+Chọn nhanh: field đứng cạnh nhau trong một nhóm → chỉ cần `colSpan` trên field. Cột có độ rộng khác nhau (8 + 4) hoặc nhiều control xếp dọc trong một cột → `columns`. Ô đều/gộp ô → `grid`. Tách phần độc lập → `tab`. Tuần tự có kiểm từng bước → `steps`.
+
+### `container`
+- Gom field; **không có** `colSpan` riêng cho con ngoài lưới 12 cột bên trong nó.
+- `container.type`: `"div"` (mặc định), `"card"` (khung thẻ), `"fieldset"` (khung có `legend`). `container.border`: `true|false` (lib mặc định có viền liền); `container.borderType`: `solid|dashed|dotted`.
+- **Tiêu đề container (`showTitle`/`title`) chưa lưu được vào JSON ở lib 4.7.0** (đọc mã: `properties.content.title` bị loại khỏi export). Làm tiêu đề bằng control `text` (`<h3>…</h3>`) đặt làm con đầu tiên.
+- Hợp để đặt rule ẩn/hiện cả nhóm bằng một handler (`field_state` trên `container`).
+
+### `columns` — `2 columns`, `3 columns`, `4 columns`
+- Cùng một type `columns`; `columns.count` = 2–4 (script chọn `renderer_key` DfsColumns2/3/4 theo `count`).
+- `columns.spans` = độ rộng mỗi cột trên lưới **12**, tổng phải **12**: `[6,6]`, `[4,4,4]`, `[3,3,3,3]`, `[8,4]`, `[3,9]`, `[3,6,3]`. Thiếu `spans` thì chia đều.
+- `columns.gap` (mặc định `"1rem"`), `columns.stackOnMobile: "yes"|"no"` (mặc định `yes`: dưới 768px các cột xếp chồng).
+- Con của cột nào khai `tabId` đúng cột đó (`col-0` là cột đầu). **Bắt buộc** — thiếu `tabId` script báo lỗi.
+- Trong mỗi cột, con lại dùng `colSpan` trên lưới 12 cột của chính cột đó (mặc định 12 = đầy cột).
+- Khi nào dùng `columns` thay `colSpan`: cột rộng khác nhau; cột chứa **nhiều control dọc** (vd cột trái ảnh + chú thích); muốn tự xếp chồng cả cột trên mobile.
+
+```jsonc
+{ "type": "columns", "name": "two", "columns": { "count": 2, "spans": [8, 4] } },
+{ "type": "input", "name": "title", "parent": "two", "tabId": "col-0", "label": "Tiêu đề" },
+{ "type": "image", "name": "cover", "parent": "two", "tabId": "col-1" }
+```
+
+### `grid`
+- `grid.cols` (script chấp nhận 1–6), `grid.rows` (mặc định tự tính = ⌈số con / cols⌉), `grid.columnWidths` (mảng CSS, vd `["1fr","2fr","200px"]`, mặc định `1fr` đều), `grid.gap` (mặc định `"1rem"`), `grid.stackOnMobile` (`yes` mặc định).
+- **Con lấp ô theo thứ tự** (slot = hàng × cols + cột), **không có `tabId`**, mỗi ô chứa đúng **1** control; muốn nhiều control trong một ô thì bọc bằng `container`. Script dựng theo thứ tự nên không chừa ô trống ở giữa.
+- Gộp ô: `grid.spans: { "<slot>": { "r": 1, "c": 2 } }` (ô `slot` trải `r` hàng × `c` cột; các ô bị phủ bị bỏ khỏi số ô khả dụng). Số con không được vượt số ô khả dụng.
+- Dùng cho dashboard thẻ số liệu, bảng form dày. Form nhập liệu thường dùng `colSpan` / `columns` hợp hơn.
+
+### `tab`
+- `tabs: [{ "id": "tab-1", "label": "Thông tin" }, …]` (id duy nhất, ổn định — con tham chiếu id này). Mỗi con của tab khai `parent` + `tabId`. Panel trong tab là lưới 12 cột.
+- Muốn chặn người dùng sang phần sau khi phần trước chưa hợp lệ → dùng `steps` + `validateOnNext`, không dùng `tab`.
+- Chuyển tab bằng code (`switch_tab`) **chưa có tác dụng**; người dùng tự bấm.
+
+### `steps`
+- `steps: [{ "id": "step-1", "label": "…" }, …]`; con khai `parent` + `tabId` = id bước.
+- `stepsOptions`: `showPrevious`, `showProgress`, `validateOnNext` (kiểm bước hiện tại trước khi sang bước sau), `defaultPreviousLabel`, `defaultNextLabel`, `finishLabel`, `progressVariant`: `pills` (mặc định) | `numbered` | `dots` | `tabs` | `wizard`.
+- `progressVariant: "wizard"` + `stepsOptions.valueField` (tên field điều khiển bước hiện tại) cho wizard do flow điều khiển (`set_values` ghi vào field đó — một trong số ít trường hợp field ẩn là hợp lý); các variant còn lại tự điều hướng bằng nút Trước/Sau.
+- Bước cuối hiện nút `finishLabel`. Nút gửi form (`submit-button`) tuỳ ý đặt ngay sau `steps`.
+
+### `dialog` / `drawer` / `bottom-sheet`
+- Overlay **không chiếm chỗ** trong lưới; đứng trước nút mở trong mảng. Mở/đóng bằng action `dialog` (`openModal`/`closeModal`/`toggleModal` hoặc step `dialog`), sự kiện `open`/`close`.
+- `dialog.variant`: `confirmation` | `delete` | `form` | `info` | `success` | `warning` | `custom`. **Chỉ `form` / `custom` có con**; các variant còn lại hiển thị `title` + `description`.
+- Khoá hay dùng: `title`, `description`, `size` (`xs|sm|md|lg|xl|2xl|3xl|4xl|full`), `showHeader`, `showCloseButton`, `closeOnEsc`, `closeOnOverlayClick`, `openByDefault`, `footer: { show, buttons: [{ id, label, action: "close"|"submit"|"confirm"|"logic"|"event", variant, color }] }`, `trigger: { type: "button"|"logic", buttonLabel, … }` (`logic` = không có nút riêng, mở bằng flow).
+- Cấu hình nằm ở `properties.dialog` (dialog), `properties.drawer` (drawer, thêm `side`: `left|right|top|bottom`), `properties.bottomSheet` (bottom-sheet: `minHeight`, `maxHeight`, `dragHandle`). Trong spec luôn viết dưới khoá `dialog`; script chuyển đúng khoá.
+- Field bên trong dialog được đăng ký dưới tiền tố của dialog nhưng flow vẫn gọi chúng bằng `name`. Tên có thể trùng tên field gốc (flow tìm từ trong dialog ra ngoài) — tuy nhiên **nên đặt tên duy nhất toàn form**.
+- `load` của control trong dialog chạy lại mỗi lần dialog mở (con được mount lại).
+
+### `list` / `nested-list`
+- Người dùng bấm "+ thêm" để thêm dòng. `list`: mỗi dòng **1 control** (mảng giá trị đơn); `nested-list`: mỗi dòng **nhiều control** (mảng object). Con khai báo các control của một dòng.
+- `list: { minRows, initialRows, maxRows?, addButtonLabel }`.
+
+### `form-loop`
+- Lặp khối con theo **mảng có sẵn**: `loop.mode: "variable"` (mảng nằm ở một field/biến, `loop.dataPath` = đường dẫn) hoặc `"dynamic"` (lấy từ Data Source — cấu hình trong builder). `loop.itemAlias` (tên gợi nhớ), `loop.emptyText`, `loop.allowAdd`/`allowRemove`, `loop.submitFields` (liệt kê field của dòng được gửi lên; bỏ trống = tất cả).
+- Trong dòng, flow đọc dữ liệu dòng bằng `$row.data.<field>`; điều kiện chỉ theo dòng dùng `change` trong dòng, không dùng `condition` (xem `dynaform-logic-events`).
+
+### `sub-form`
+- Nhúng một form khác thành instance riêng (màn hình nhiều form, layout runtime). Script chỉ dựng khung; cấu hình alias/mapping làm trong builder. Không có con.
+
+### Lỗi thường gặp với control layout
+| Lỗi | Cách đúng |
+|---|---|
+| Quên `tabId` cho con của `tab`/`steps`/`columns` | luôn khai `tabId` đúng id/`col-N` |
+| Con đứng trước cha trong mảng | cha trước con |
+| `columns.spans` không tổng 12 | `[6,6]`, `[4,4,4]`, `[8,4]`… |
+| Dùng `grid` rồi cố đặt 2 control vào 1 ô | bọc bằng `container` |
+| Đặt `tabId` cho con của `grid`/`container` | chỉ `tab`/`steps`/`columns` mới có `tabId` |
+| Muốn tiêu đề cho `container` bằng `container.title` | dùng `text` làm tiêu đề |
+| Dialog `confirmation`/`info` có con | nội dung ở `dialog.title/description`; chỉ `form`/`custom` có con |
+| Nghĩ `colSpan: 6` tự xuống hàng trên mobile | lib tính desktop trước; script tự thêm `overrides.sm` (xem `dynaform-layout`) |
+
+Chi tiết bố cục (số cột từng control, responsive, công thức): skill `dynaform-layout`.
 
 ## Control chuyên dụng — tra trước khi nghĩ tới custom-embed
 

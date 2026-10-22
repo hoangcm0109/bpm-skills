@@ -17,6 +17,16 @@
     { "type": "tel", "name": "phone", "label": "Điện thoại", "parent": "more", "tabId": "tab-contact" },
     { "type": "input", "name": "parent_name", "label": "Họ tên phụ huynh", "parent": "more", "tabId": "tab-family" },
 
-    { "type": "submit-button", "name": "btn_submit", "label": "Gửi hồ sơ" }
+    { "type": "columns", "name": "attach_row", "columns": { "count": 2, "spans": [8, 4] } },
+    { "type": "textarea", "name": "note", "label": "Ghi chú", "parent": "attach_row", "tabId": "col-0" },
+    { "type": "image", "name": "photo", "parent": "attach_row", "tabId": "col-1" },
+
+    { "type": "grid", "name": "kpi", "grid": { "cols": 3, "columnWidths": ["1fr", "1fr", "2fr"] } },
+    { "type": "text", "name": "kpi_a", "parent": "kpi", "content": "<b>Hồ sơ</b>" },
+    { "type": "text", "name": "kpi_b", "parent": "kpi", "content": "<b>Đã duyệt</b>" },
+    { "type": "text", "name": "kpi_c", "parent": "kpi", "content": "<b>Ghi chú tổng</b>" },
+
+    { "type": "reset-button", "name": "btn_reset", "label": "Làm lại", "colSpan": 2, "colStart": 9 },
+    { "type": "submit-button", "name": "btn_submit", "label": "Gửi hồ sơ", "colSpan": 2 }
   ]
 }

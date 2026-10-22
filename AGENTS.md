@@ -7,10 +7,10 @@ Repo này là **plugin chứa agent skills**, không phải ứng dụng. Skill 
 | Skill | Dùng khi |
 |---|---|
 | `dynaform-build-form` | dựng/kiểm tra form JSON từ yêu cầu (điểm vào chính) |
-| `dynaform-components` | chọn type component, cấu hình riêng từng loại |
+| `dynaform-components` | chọn type component, control layout (container/columns/grid/tab/steps/overlay/list), cấu hình riêng từng loại |
 | `dynaform-validation` | ràng buộc dữ liệu, matchField, thông báo lỗi |
-| `dynaform-logic-events` | rule hiện/ẩn, event, action engine, flow |
-| `dynaform-layout` | lưới 12 cột, container/tab/steps/columns, theme |
+| `dynaform-logic-events` | event theo control, rule hiện/ẩn, action engine đầy đủ, công thức flow |
+| `dynaform-layout` | lưới 12 cột, số cột từng control, responsive, công thức bố cục, theme |
 | `dynaform-data-source` | option tĩnh/API/phụ thuộc, điền sẵn giá trị |
 | `dynaform-embed-lib` | nhúng `@dnu/dynaform-builder` vào app/MFE |
 | `dynaform-mfe-module` | quy ước trong repo mfe-dynaform |

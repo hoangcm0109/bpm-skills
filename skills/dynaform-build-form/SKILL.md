@@ -73,19 +73,20 @@ trang `/dynaform/form-manager/stream` của mfe-dynaform nhận và vẽ lại s
 **Logic & sự kiện**
 
 - Hiện/ẩn/bắt buộc theo điều kiện → `rules`: `{ match: "AND"|"OR", when: [{ field, operator, value }], then: [{ type, target }] }`.
-  Toán tử: `equals notEquals isEmpty isNotEmpty greaterThan lessThan contains notContains`. `show↔hide`, `enable↔disable`, `require↔optional` tự có nhánh ngược.
-- Nút/sự kiện → `events`: `{ event: "click"|"change"|"load"|"open"|"close", actions: [...] }`.
+  Toán tử: `equals notEquals isEmpty isNotEmpty greaterThan greaterThanOrEqual lessThan lessThanOrEqual contains notContains`. `show↔hide`, `enable↔disable`, `require↔optional` tự có nhánh ngược.
+- Nút/sự kiện → `events`: `{ event: "click"|"change"|"load"|"open"|"close"|"condition"|"embed:<tên>"|"menu:<id>", actions: [...] | flow: {...} }`.
   Action: `show hide enable disable require optional setValue openModal closeModal toggleModal openLink callApi customScript`.
   `switchTab`/`collapse` chưa có tác dụng. `target` luôn là `name`. Mặc định **không** dùng `customScript`.
-- Nhiều bước / rẽ nhánh / try-catch → `events[].flow` (action engine) — đọc `../dynaform-logic-events/SKILL.md` trước khi viết.
+- Nhiều bước / rẽ nhánh / try-catch → `events[].flow` (action engine) — đọc `../dynaform-logic-events/SKILL.md` trước khi viết: nó liệt kê event theo từng control, mọi step với trường bắt buộc, cách đọc giá trị (`$form`, `$steps`, `$event`, `$row`) và 15 công thức (submit, chọn → điền, mở dialog, xoá + làm mới bảng, for_each…). Script kiểm cú pháp flow, tham chiếu `name`/`$steps`, `branch.then` là MỘT step, id step trùng, event có hợp với control không.
 - **Ưu tiên action flow, hạn chế field `hidden`**: truyền dữ liệu giữa các bước bằng `$steps.<id>.output`, `$event.payload`, `set_values` ngay trong flow; không tạo field `hidden` để làm cờ/tín hiệu/bộ nhớ tạm giữa các event hay giữa embed và nút. Control `hidden` chỉ dành cho giá trị **phải nằm trong payload submit** mà không có nguồn hiển thị, hoặc giá trị host nạp sẵn (`dataUserFill`); khi dùng ghi `reason`. (`hidden: true` trên một field thường là *ẩn hiển thị* để rule `show` bật lại — khác với control `hidden`.)
 
 **Bố cục**
 
-- Lưới 12 cột: `colSpan` 1–12 (mặc định 12); 2 field/hàng = 6, 3 field = 4. Mobile: `overrides: { sm: { styles: { colSpan: "12" } } }`.
-- Con khai `parent`; thêm `tabId` khi cha là `tab`/`steps` (id trong `tabs[]`/`steps[]`) hoặc `columns` (`col-0`, `col-1`…; `columns.spans` tổng 12).
+- Mỗi vùng chứa là lưới **12 cột**; `colSpan` 1–12 (mặc định 12 = cả hàng) tính trong vùng đó, `colStart` căn cột bắt đầu. Hàng cộng đủ 12: 6+6, 4+4+4, 3+3+3+3, 8+4, 9+3. Input/select ngắn = 6 hoặc 4; textarea, table, wysiwyg-editor = 12; nút = 12 hoặc 2–4 + `colStart` căn phải. **Bảng cột theo từng control: `../dynaform-layout/SKILL.md` §2.**
+- Responsive **desktop trước**: `colSpan` gốc áp mọi cỡ; đổi theo cỡ bằng `overrides: { md: { colSpan: 6 }, sm: { colSpan: 12 } }` (md < 1024px, sm < 768px). Script tự thêm `sm.colSpan = 12` cho control có colSpan < 12 (tắt: `"mobile": "keep"`). **Đừng** viết `overrides.sm.styles` thẳng vào JSON — lib bỏ qua.
+- Con khai `parent`; thêm `tabId` khi cha là `tab`/`steps` (id trong `tabs[]`/`steps[]`) hoặc `columns` (`col-0`, `col-1`…; `columns.spans` tổng 12). `grid`: con **không** có `tabId`, lấp ô theo thứ tự, mỗi ô 1 con. `container`/`list`/`form-loop`: chỉ `parent`.
 - Cha đứng trước con. `dialog` variant `form`/`custom` mới có con; confirmation/info dùng `dialog.title/description`.
-- Form ngắn: phẳng 2 cột; form dài: `container` theo nhóm; nhiều phần độc lập: `tab`; tuần tự: `steps`. `grid` dựng trong builder.
+- Thang chọn: phẳng + `colSpan` → `container` theo nhóm → `columns` (cột rộng khác nhau, 8+4) → `grid` (ô đều/gộp ô) → `tab` (phần độc lập) → `steps` (tuần tự). Chi tiết từng control layout: `../dynaform-components/SKILL.md` › Control layout.
 
 **Data source**
 
@@ -113,7 +114,8 @@ Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc fi
 
 ## Việc script KHÔNG làm — nói rõ với người dùng
 
-- `grid` (children theo slot), `table`, `matrix`, `list`, `form-loop`, `sub-form`, `record-*`… có cấu hình sâu: script chỉ tạo khung (`props` truyền thẳng vào `editable_props.properties`). Cấu hình chi tiết nên làm trong builder.
+- `table`, `matrix`, `sub-form`, `record-*`, `timeline`, `descriptions`… có cấu hình sâu: script chỉ tạo khung (`props` truyền thẳng vào `editable_props.properties`). Cấu hình chi tiết nên làm trong builder. `grid`, `list`/`nested-list`, `form-loop`, `container` có khoá spec riêng (`grid`, `list`, `loop`, `container`) — xem `references/spec-format.md`.
+- Không dựng được bằng script: gộp ô `grid` bằng thao tác kéo (có thể khai `grid.spans`), tiêu đề `container`. Hiện/ẩn ban đầu của field động cần handler `load` (không dùng `hidden: true`).
 - `custom-embed`: script ghi được code React (`embed.code`) và kiểm cú pháp, nhưng **không biên dịch TSX và không sinh `tailwindCss`** — người dùng phải mở form trong builder → Mã nhúng → Lưu (`references/custom-embed.md`). Nói rõ ở báo cáo cuối.
 - Action `switchTab` / `collapse` hiện chưa có tác dụng ở runtime (action engine) — script cảnh báo.
 - `dynaform.mjs` không gọi mạng, không kiểm tra API/data source có sống không. Chỉ `stream-server.mjs` (tuỳ chọn, chế độ build dần) mở cổng — và chỉ trên `127.0.0.1`.

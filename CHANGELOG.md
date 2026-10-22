@@ -3,6 +3,18 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.5.0 — 2026-10-22 (khớp `@dnu/dynaform-builder` v4.7.0)
+
+Bổ sung kiến thức cho Agent Build Form: bố cục, control layout và toàn bộ event/action.
+
+- **`dynaform-layout` viết lại**: mô hình lưới 12 cột (mỗi vùng chứa là một lưới riêng), `colSpan` + `colStart`, **bảng số cột cho từng loại control**, quy tắc xếp hàng, thang chọn container / columns / grid / tab / steps, 8 công thức (2-3-4 cột, 9+3, nút căn phải, 8+4, nhóm có khung, grid gộp ô), checklist. Ghi rõ lib tính **desktop trước** (`colSpan` gốc áp mọi cỡ; `md` < 1024px, `sm` < 768px theo container query).
+- **Sửa lỗi sai trong skill cũ**: `overrides: { sm: { styles: {…} } }` bị lib bỏ qua — dạng đúng là `overrides.<vp>.properties.style`. Script nay nhận dạng gọn `{ sm: { colSpan: 12 } }` (và dạng cũ) rồi xuất đúng dạng của lib. Ví dụ Tỉnh/Quận trong `example-spec.json` 4+4 sửa thành 6+6.
+- **Script `dynaform.mjs`**: mặc định `mobile: "stack"` (control colSpan < 12 tự xuống 12 cột khi < 768px; `"keep"` để tắt); `colStart`; type `grid` (con lấp ô theo thứ tự, `rows` tự tính, kiểm số ô), `list`/`nested-list`/`form-loop` nhận con; khoá spec `grid`, `list`, `loop`, `container`; overlay ghi đúng khoá theo type (`properties.dialog` / `drawer` + `side` / `bottomSheet`); cảnh báo hàng chưa đủ 12 cột; `overrides.lg` cảnh báo vô tác dụng.
+- **`dynaform-components`**: mục "Control layout" mô tả từng control (container, columns 2/3/4, grid, tab, steps, dialog/drawer/bottom-sheet, list/nested-list, form-loop, sub-form): khoá cấu hình, cách đặt con (`tabId`, theo thứ tự, theo ô), giá trị hợp lệ, lỗi thường gặp. Ghi chú: tiêu đề `container` chưa lưu được vào JSON ở lib 4.7.0 (dùng control `text`).
+- **`dynaform-logic-events` viết lại**: bảng event theo từng loại control (và event nào mang `$event.payload`), `condition`, `embed:*`, `menu:*`; tham chiếu đầy đủ 23 step với trường bắt buộc; `ValueSource` (literal/ref/template/map), mọi root đường dẫn (`$form`, `$steps`, `$row`, `$event`, `$error`, `$runtime`), điều kiện lồng `all`/`any`, `call_api` (auth, mapping, bodyMode, CORS), `push_table`, `for_each`, `parallel`, `try`; 15 công thức (submit, chọn → điền, nạp khi mở, dialog, xoá + làm mới bảng, tìm kiếm, for_each, tải file, embed → flow…); giới hạn đã biết (nút có flow `click` bỏ qua submit mặc định, export code bỏ `load`/flow phức tạp…). Mọi ví dụ được chạy qua script kiểm tra.
+- **Script kiểm flow tự viết**: `events[].flow` được kiểm step type, id trùng, `branch.then` là một step, condition, `set_values`/`field_state`/`dialog` trỏ đúng `name`, `$steps.<id>` có trong flow, `call_api` thiếu `url`/`apiRef`, `navigate` bị `javascript:`…; event không hợp với type cảnh báo. `push_table.tableId` viết bằng name, script đổi sang id lúc build. Thêm toán tử `greaterThanOrEqual`/`lessThanOrEqual`, event `condition`.
+- `stream-server.mjs`: không cảnh báo hàng chưa đủ 12 cột khi đang ghi dở.
+
 ## 0.4.0 — 2026-10-22 (khớp `@dnu/dynaform-builder` v4.7.0)
 
 - **Control có sẵn trước, `custom-embed` là lựa chọn cuối**: `dynaform-build-form` (bước chọn component) và `dynaform-components` có thang chọn 4 bước và bảng "nhu cầu → control chuyên dụng" (`table`, `timeline`, `descriptions`, `record-*`, `stat-cards`, `sortable-list`, `matrix`, `form-loop`, `sub-form`…). Spec `custom-embed` **bắt buộc** có `reason`; thiếu thì script báo lỗi.

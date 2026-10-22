@@ -14,15 +14,15 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 | [`dynaform-build-form`](skills/dynaform-build-form/SKILL.md) | Điểm vào: yêu cầu → spec → form JSON → kiểm tra → nạp. Có script `dynaform.mjs` |
 | [`dynaform-components`](skills/dynaform-components/SKILL.md) | Danh mục component & chọn type |
 | [`dynaform-validation`](skills/dynaform-validation/SKILL.md) | Validation, matchField, thông báo lỗi |
-| [`dynaform-logic-events`](skills/dynaform-logic-events/SKILL.md) | Rule điều kiện, event, action engine |
-| [`dynaform-layout`](skills/dynaform-layout/SKILL.md) | Lưới 12 cột, container/tab/steps, theme |
+| [`dynaform-logic-events`](skills/dynaform-logic-events/SKILL.md) | Event theo từng control, rule điều kiện, action engine đầy đủ, công thức flow (submit, chọn → điền, dialog, bảng…) |
+| [`dynaform-layout`](skills/dynaform-layout/SKILL.md) | Lưới 12 cột, số cột từng control, responsive, container/columns/grid/tab/steps, công thức bố cục, theme |
 | [`dynaform-data-source`](skills/dynaform-data-source/SKILL.md) | Option tĩnh/API/phụ thuộc, giá trị điền sẵn |
 | [`dynaform-embed-lib`](skills/dynaform-embed-lib/SKILL.md) | Cài đặt & nhúng lib vào app/MFE |
 | [`dynaform-mfe-module`](skills/dynaform-mfe-module/SKILL.md) | Quy ước trong repo mfe-dynaform |
 
 ## Cài đặt & cập nhật
 
-Phiên bản hiện tại: **0.4.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v4.7.0`.
+Phiên bản hiện tại: **0.5.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v4.7.0`.
 
 ### Claude Code
 
@@ -50,7 +50,7 @@ Hai lệnh trên cũng có trong menu `/plugin` của Claude Code. Skill mới c
 Kiểm tra đã lên đúng bản:
 
 ```bash
-claude plugin list        # dòng bpm-skills@bpm-skills phải hiện Version: 0.4.0
+claude plugin list        # dòng bpm-skills@bpm-skills phải hiện Version: 0.5.0
 ```
 
 Lưu ý:

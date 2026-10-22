@@ -8,6 +8,7 @@
   "endpoint": "", "method": "POST",// tuỳ chọn: nơi submit (settings.setting)
   "size": "normal",                // xs | sm | normal | lg | xl
   "complete": true,                // tuỳ chọn: chỉ dùng khi build dần (stream-preview.md); bỏ qua khi build thường
+  "mobile": "stack",               // "stack" (mặc định): control colSpan < 12 tự xuống 12 cột khi khung < 768px; "keep": giữ nguyên
   "theme": { "styles": {...}, "colors": {...} }, // bỏ qua = theme mặc định
   "components": [ /* mảng component, THỨ TỰ = thứ tự hiển thị, cha trước con */ ]
 }
@@ -23,7 +24,8 @@
 | `placeholder`, `helpText` | | |
 | `required` | | `true` → thêm validation `required`; `requiredMessage` = thông báo lỗi |
 | `disabled`, `readonly`, `hidden` | | `hidden: true` → `styles.visible = "no"` (dùng với rule `show`) |
-| `colSpan` | | 1–12 (mặc định 12) — xem `dynaform-layout` |
+| `colSpan` | | 1–12 (mặc định 12) — số cột control chiếm trong vùng chứa nó; xem `dynaform-layout` |
+| `colStart` | | `"auto"` (mặc định) hoặc 1–12: cột bắt đầu; `colStart + colSpan − 1 ≤ 12` |
 | `attributes` | | vd `{ "type": "text" }` cho `input` |
 | `content` | | Nội dung HTML cho `text` |
 | `default` | | Giá trị mặc định (`default_values`) |
@@ -37,10 +39,14 @@
 | `tabId` | cha là tab/steps/columns | id panel (`tab-1`, `step-1`, `col-0`…) |
 | `tabs` / `steps` | type tab / steps | `[{ "id", "label" }]` |
 | `stepsOptions` | steps | `{ showPrevious, defaultPreviousLabel, defaultNextLabel, finishLabel, showProgress, validateOnNext, progressVariant }` |
-| `columns` | type columns | `{ "count": 2..4, "spans": [..tổng 12], "gap": "1rem", "stackOnMobile": "yes" }` |
-| `dialog` | type dialog | `{ "variant": "confirmation"\|"form"\|"info"\|"custom", "title", "description" }` |
+| `columns` | type columns | `{ "count": 2..4, "spans": [..tổng 12], "gap": "1rem", "stackOnMobile": "yes" }`; con khai `tabId: "col-0"…` |
+| `grid` | type grid | `{ "cols": 1..6, "rows"?, "columnWidths"?: ["1fr",…], "gap"?, "stackOnMobile"?, "spans"?: { "<slot>": { "r", "c" } } }`; con **không** có `tabId`, lấp ô theo thứ tự, mỗi ô 1 con; `rows` tự tính nếu bỏ |
+| `container` | type container | `{ "type": "div"|"card"|"fieldset", "border": true|false, "borderType": "solid"|"dashed"|"dotted" }` (tiêu đề container: dùng `text`) |
+| `list` | list / nested-list | `{ "minRows", "initialRows", "maxRows"?, "addButtonLabel" }` |
+| `loop` | form-loop | `{ "mode": "variable", "dataPath", "itemAlias", "emptyText", "allowAdd", "allowRemove", "submitFields"? }` |
+| `dialog` | dialog / drawer / bottom-sheet | `{ "variant": "confirmation"\|"form"\|"info"\|"custom", "title", "description" }` |
 | `styles` | | trộn thêm vào `editable_props.styles` (vd `{ "showLabel": "no" }`) |
-| `overrides` | | override theo viewport: `{ "sm": { "styles": { "colSpan": "12" } } }` |
+| `overrides` | | theo viewport, **desktop trước**: `{ "md": { "colSpan": 6 }, "sm": { "colSpan": 12 } }` (md: khung < 1024px, sm: < 768px; thêm được `colStart`, `showLabel`…). Dạng cũ `{ "sm": { "styles": {…} } }` vẫn nhận; không có `lg` |
 | `custom` | | CSS thuần + class Tailwind của người dùng cho **mọi** control (lib ≥ 4.6.0) → `properties.custom`: `{ "className": "rounded-xl border p-4", "css": "background:#f8fafc", "control": { "className", "css" }, "label": { "className", "css" } }` — xem `dynaform-components` › Style tuỳ chỉnh |
 | `props` | | passthrough vào `editable_props.properties` (cấu hình sâu: table, file…) |
 | `reason` | `custom-embed` (bắt buộc), `hidden` (nên có) | vì sao control có sẵn / action flow không đáp ứng; không xuất ra JSON, chỉ hiện trong cảnh báo của script |

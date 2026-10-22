@@ -27,10 +27,10 @@
 
     { "type": "tab", "name": "address_tabs", "label": "Địa chỉ", "tabs": [
         { "id": "tab-home", "label": "Thường trú" }, { "id": "tab-work", "label": "Cơ quan" }] },
-    { "type": "select", "name": "province", "label": "Tỉnh/Thành", "colSpan": 4, "parent": "address_tabs", "tabId": "tab-home",
+    { "type": "select", "name": "province", "label": "Tỉnh/Thành", "colSpan": 6, "parent": "address_tabs", "tabId": "tab-home",
       "dataSource": { "api": { "baseUrl": "https://provinces.open-api.vn", "endpoint": "/api/p/",
         "labelField": "name", "valueField": "code" } } },
-    { "type": "select", "name": "district", "label": "Quận/Huyện", "colSpan": 4, "parent": "address_tabs", "tabId": "tab-home",
+    { "type": "select", "name": "district", "label": "Quận/Huyện", "colSpan": 6, "parent": "address_tabs", "tabId": "tab-home",
       "dataSource": { "api": { "baseUrl": "https://provinces.open-api.vn", "endpoint": "/api/p/{province_code}?depth=2",
         "pathParams": { "province_code": "{$province}" }, "dependsOn": ["province"],
         "responsePath": "districts", "labelField": "name", "valueField": "code" } } },
