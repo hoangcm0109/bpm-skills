@@ -1,0 +1,102 @@
+{
+  "name": "Trung tâm xử lý hồ sơ",
+  "description": "Ví dụ action flow: tìm kiếm → làm mới bảng, chọn → điền từ API, nạp song song khi mở, rẽ nhánh, xử lý hàng loạt (confirm + for_each), xác nhận xoá trong dialog, tải file, phát sự kiện cho host",
+  "components": [
+    { "type": "text", "name": "head", "content": "<h2>Trung tâm xử lý hồ sơ</h2>" },
+
+    { "type": "container", "name": "grp_filter" },
+    { "type": "input", "name": "keyword", "label": "Từ khoá", "placeholder": "Mã hoặc tên hồ sơ", "colSpan": 5, "parent": "grp_filter" },
+    { "type": "select", "name": "status", "label": "Trạng thái", "colSpan": 3, "parent": "grp_filter",
+      "options": [{ "label": "Tất cả", "value": "" }, { "label": "Chờ duyệt", "value": "pending" }, { "label": "Đã duyệt", "value": "approved" }] },
+    { "type": "button", "name": "btn_clear", "label": "Xoá lọc", "colSpan": 2, "alignSelf": "end", "parent": "grp_filter",
+      "events": [{ "event": "click", "flow": { "id": "clear", "type": "set_values", "mappings": [
+        { "from": { "type": "literal", "value": "" }, "to": "keyword" },
+        { "from": { "type": "literal", "value": "" }, "to": "status" } ] } }] },
+    { "type": "button", "name": "btn_search", "label": "Tìm kiếm", "colSpan": 2, "alignSelf": "end", "parent": "grp_filter",
+      "events": [{ "event": "click", "flow": { "id": "search", "type": "push_table", "tableId": "requests_table", "mode": "request",
+        "bodyMode": "mapping", "bodyMapping": [
+          { "source": { "type": "ref", "path": "$form.current.values.keyword" }, "target": "q" },
+          { "source": { "type": "ref", "path": "$form.current.values.status" }, "target": "status" } ] } }] },
+
+    { "type": "table", "name": "requests_table" },
+
+    { "type": "container", "name": "grp_detail",
+      "events": [{ "event": "load", "flow": { "id": "boot", "type": "try",
+        "steps": [
+          { "id": "both", "type": "parallel", "strategy": "all", "steps": [
+            { "id": "dept", "type": "call_api", "url": "https://api.example.com/departments/current", "method": "GET",
+              "authConfig": { "type": "bearer", "token_source": "system" } },
+            { "id": "unit", "type": "call_api", "url": "https://api.example.com/units/current", "method": "GET",
+              "authConfig": { "type": "bearer", "token_source": "system" } } ] },
+          { "id": "fill", "type": "set_values", "mappings": [
+            { "from": { "type": "ref", "path": "$steps.dept.output.data.name" }, "to": "dept_name" },
+            { "from": { "type": "ref", "path": "$steps.unit.output.data.name" }, "to": "unit_name" } ] }
+        ],
+        "catch": [{ "id": "err", "type": "show_message", "level": "error", "message": "Không nạp được thông tin đơn vị: {{$error.message}}" }] } }] },
+    { "type": "text", "name": "grp_detail_title", "parent": "grp_detail", "content": "<h3>Thông tin xử lý</h3>" },
+    { "type": "input", "name": "dept_name", "label": "Khoa/Phòng (tự nạp khi mở form)", "colSpan": 6, "parent": "grp_detail", "readonly": true },
+    { "type": "input", "name": "unit_name", "label": "Đơn vị (tự nạp khi mở form)", "colSpan": 6, "parent": "grp_detail", "readonly": true },
+
+    { "type": "select", "name": "student_id", "label": "Sinh viên", "colSpan": 6, "parent": "grp_detail",
+      "options": [{ "label": "SV123456 — Nguyễn Văn A", "value": "sv123456" }, { "label": "SV654321 — Trần Thị B", "value": "sv654321" }],
+      "events": [{ "event": "change", "flow": { "id": "fill", "type": "try",
+        "steps": [
+          { "id": "get", "type": "call_api", "url": "https://api.example.com/students/{id}", "method": "GET",
+            "authConfig": { "type": "bearer", "token_source": "system" },
+            "pathMapping": [{ "source": { "type": "ref", "path": "$form.current.values.student_id" }, "target": "id", "required": true }] },
+          { "id": "set", "type": "set_values", "mappings": [
+            { "from": { "type": "ref", "path": "$steps.get.output.data.full_name" }, "to": "full_name" },
+            { "from": { "type": "ref", "path": "$steps.get.output.data.email" }, "to": "email" } ] }
+        ],
+        "catch": [{ "id": "err", "type": "show_message", "level": "error", "message": "Không tải được sinh viên: {{$error.message}}" }] } }] },
+    { "type": "input", "name": "full_name", "label": "Họ và tên", "colSpan": 6, "parent": "grp_detail", "readonly": true },
+    { "type": "email", "name": "email", "label": "Email", "colSpan": 6, "parent": "grp_detail", "readonly": true },
+
+    { "type": "select", "name": "account_type", "label": "Đối tượng", "colSpan": 6, "parent": "grp_detail",
+      "options": [{ "label": "Cá nhân", "value": "personal" }, { "label": "Doanh nghiệp", "value": "company" }],
+      "events": [{ "event": "change", "flow": { "id": "route", "type": "branch",
+        "condition": { "all": [
+          { "left": { "type": "ref", "path": "$form.current.values.account_type" }, "operator": "eq", "right": { "type": "literal", "value": "company" } } ] },
+        "then": { "id": "yes", "type": "field_state", "action": "show", "targets": ["tax_code"] },
+        "else": { "id": "no", "type": "field_state", "action": "hide", "targets": ["tax_code"] } } }] },
+    { "type": "input", "name": "tax_code", "label": "Mã số thuế", "colSpan": 6, "parent": "grp_detail",
+      "events": [{ "event": "load", "flow": { "id": "init", "type": "field_state", "action": "hide", "targets": ["tax_code"] } }] },
+
+    { "type": "dialog", "name": "delete_dialog", "label": "Xác nhận xoá",
+      "dialog": { "variant": "custom", "title": "Xoá hồ sơ", "description": "Thao tác không thể hoàn tác.", "size": "sm" } },
+    { "type": "input", "name": "delete_id", "label": "Mã hồ sơ cần xoá", "parent": "delete_dialog" },
+    { "type": "button", "name": "btn_confirm_delete", "label": "Xoá", "parent": "delete_dialog",
+      "events": [{ "event": "click", "flow": { "id": "del", "type": "try",
+        "steps": [
+          { "id": "call", "type": "call_api", "url": "https://api.example.com/requests/{id}", "method": "DELETE",
+            "authConfig": { "type": "bearer", "token_source": "system" },
+            "pathMapping": [{ "source": { "type": "ref", "path": "$form.current.values.delete_id" }, "target": "id", "required": true }] },
+          { "id": "close", "type": "dialog", "action": "close", "target": "delete_dialog" },
+          { "id": "refresh", "type": "push_table", "tableId": "requests_table", "mode": "request", "keepPage": true },
+          { "id": "ok", "type": "show_message", "level": "success", "message": "Đã xoá hồ sơ" } ],
+        "catch": [{ "id": "err", "type": "show_message", "level": "error", "message": "Xoá thất bại: {{$error.message}}" }] } }] },
+
+    { "type": "button", "name": "btn_delete", "label": "Xoá hồ sơ…", "colSpan": 3,
+      "events": [{ "event": "click", "flow": { "id": "open", "type": "dialog", "action": "open", "target": "delete_dialog" } }] },
+    { "type": "button", "name": "btn_bulk", "label": "Duyệt tất cả chờ duyệt", "colSpan": 3,
+      "events": [{ "event": "click", "flow": { "id": "bulk", "type": "sequence", "steps": [
+        { "id": "ask", "type": "confirm", "title": "Duyệt hàng loạt", "message": "Duyệt tất cả hồ sơ đang chờ duyệt?", "confirmLabel": "Duyệt" },
+        { "id": "list", "type": "call_api", "url": "https://api.example.com/requests?status=pending", "method": "GET",
+          "authConfig": { "type": "bearer", "token_source": "system" } },
+        { "id": "each", "type": "for_each", "items": { "type": "ref", "path": "$steps.list.output.data.items" }, "continueOnError": true,
+          "steps": [{ "id": "one", "type": "call_api", "url": "https://api.example.com/requests/{id}/approve", "method": "POST",
+            "authConfig": { "type": "bearer", "token_source": "system" },
+            "pathMapping": [{ "source": { "type": "ref", "path": "$row.data.id" }, "target": "id", "required": true }] }] },
+        { "id": "reload", "type": "push_table", "tableId": "requests_table", "mode": "request", "keepPage": true },
+        { "id": "report", "type": "show_message", "level": "info", "message": "Đã duyệt {{$steps.each.output.succeeded}}/{{$steps.each.output.total}} hồ sơ" }
+      ] } }] },
+    { "type": "input", "name": "report_id", "label": "Mã báo cáo", "colSpan": 3 },
+    { "type": "button", "name": "btn_export", "label": "Tải báo cáo", "colSpan": 3, "alignSelf": "end",
+      "events": [{ "event": "click", "flow": { "id": "dl", "type": "navigate",
+        "url": "https://api.example.com/reports/{{$form.current.values.report_id}}/export",
+        "download": { "authConfig": { "type": "bearer", "token_source": "system" }, "fileName": "bao-cao.xlsx" } } }] },
+    { "type": "button", "name": "btn_notify", "label": "Báo cho ứng dụng chủ", "colSpan": 3,
+      "events": [{ "event": "click", "flow": { "id": "emit", "type": "emit_event", "eventName": "dynaform:request-processed",
+        "payload": { "student_id": { "type": "ref", "path": "$form.current.values.student_id" } } } }] }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "Liên hệ tư vấn",
+  "description": "Ví dụ nhỏ nhất đủ dùng: 2 cột, select tĩnh, textarea, validation, nút gửi có flow validate → API → thông báo",
+  "endpoint": "https://api.example.com/contacts",
+  "method": "POST",
+  "components": [
+    { "type": "text", "name": "title_text", "content": "<h2>Liên hệ tư vấn</h2><p>Chúng tôi phản hồi trong 1 ngày làm việc.</p>" },
+
+    { "type": "input", "name": "full_name", "label": "Họ và tên", "placeholder": "Nguyễn Văn A", "colSpan": 6,
+      "required": true, "requiredMessage": "Vui lòng nhập họ và tên",
+      "validations": [{ "type": "minLength", "value": 3, "errorMessage": "Họ và tên tối thiểu 3 ký tự" }] },
+    { "type": "tel", "name": "phone", "label": "Số điện thoại", "placeholder": "0912345678", "colSpan": 6,
+      "required": true, "requiredMessage": "Vui lòng nhập số điện thoại",
+      "validations": [{ "type": "regex", "value": "^0\\d{9}$", "errorMessage": "Số điện thoại gồm 10 số, bắt đầu bằng 0" }] },
+    { "type": "email", "name": "email", "label": "Email", "colSpan": 6,
+      "validations": [{ "type": "email", "errorMessage": "Email chưa đúng định dạng" }] },
+    { "type": "select", "name": "topic", "label": "Chủ đề cần tư vấn", "colSpan": 6, "required": true,
+      "requiredMessage": "Vui lòng chọn chủ đề",
+      "options": [
+        { "label": "Tuyển sinh", "value": "admission" },
+        { "label": "Học phí", "value": "tuition" },
+        { "label": "Học bổng", "value": "scholarship" },
+        { "label": "Khác", "value": "other" }
+      ] },
+    { "type": "textarea", "name": "message", "label": "Nội dung", "placeholder": "Bạn cần hỗ trợ điều gì?",
+      "validations": [{ "type": "maxLength", "value": 500, "errorMessage": "Tối đa 500 ký tự" }] },
+
+    { "type": "reset-button", "name": "btn_reset", "label": "Làm lại", "colSpan": 2, "colStart": 9 },
+    { "type": "submit-button", "name": "btn_submit", "label": "Gửi liên hệ", "colSpan": 2,
+      "events": [{ "event": "click", "flow": { "id": "submit", "type": "sequence", "steps": [
+        { "id": "valid", "type": "validate_form", "notify": true },
+        { "id": "send", "type": "try",
+          "steps": [
+            { "id": "post", "type": "call_api", "url": "https://api.example.com/contacts", "method": "POST", "bodyMode": "form",
+              "authConfig": { "type": "bearer", "token_source": "system" } },
+            { "id": "ok", "type": "show_message", "level": "success", "message": "Đã gửi liên hệ, chúng tôi sẽ phản hồi sớm." },
+            { "id": "clear", "type": "reset_form" }
+          ],
+          "catch": [{ "id": "fail", "type": "show_message", "level": "error", "message": "Gửi thất bại: {{$error.message}}" }] }
+      ] } }] }
+  ]
+}

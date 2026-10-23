@@ -1,0 +1,73 @@
+{
+  "name": "Đơn xin nghỉ học",
+  "description": "Ví dụ rule điều kiện: hiện/ẩn (ẩn lúc mở bằng load + field_state, không dùng hidden tĩnh), bắt buộc/tuỳ chọn, bật/tắt, AND/OR, isEmpty, so sánh số, setValue",
+  "components": [
+    { "type": "text", "name": "head", "content": "<h2>Đơn xin nghỉ học</h2>" },
+
+    { "type": "select", "name": "leave_type", "label": "Loại nghỉ", "colSpan": 6, "required": true, "requiredMessage": "Vui lòng chọn loại nghỉ",
+      "options": [
+        { "label": "Nghỉ ốm", "value": "sick" },
+        { "label": "Việc gia đình", "value": "family" },
+        { "label": "Thi/hội thảo", "value": "event" },
+        { "label": "Khác", "value": "other" }
+      ] },
+    { "type": "number", "name": "days", "label": "Số ngày nghỉ", "colSpan": 6, "dataType": "number", "required": true,
+      "requiredMessage": "Vui lòng nhập số ngày nghỉ" },
+
+    { "type": "file", "name": "medical_proof", "label": "Giấy khám bệnh",
+      "events": [{ "event": "load", "flow": { "id": "init", "type": "field_state", "action": "hide", "targets": ["medical_proof"] } }],
+      "rules": [
+        { "name": "Nghỉ ốm hoặc >= 3 ngày → cần giấy tờ", "match": "OR",
+          "when": [
+            { "field": "leave_type", "operator": "equals", "value": "sick" },
+            { "field": "days", "operator": "greaterThanOrEqual", "value": "3" }
+          ],
+          "then": [{ "type": "show", "target": "medical_proof" }, { "type": "require", "target": "medical_proof" }] }
+      ] },
+
+    { "type": "textarea", "name": "other_reason", "label": "Lý do cụ thể",
+      "events": [{ "event": "load", "flow": { "id": "init", "type": "field_state", "action": "hide", "targets": ["other_reason"] } }],
+      "rules": [
+        { "name": "Chọn Khác → hiện lý do", "match": "AND",
+          "when": [{ "field": "leave_type", "operator": "equals", "value": "other" }],
+          "then": [{ "type": "show", "target": "other_reason" }, { "type": "require", "target": "other_reason" }] }
+      ] },
+
+    { "type": "container", "name": "grp_guardian",
+      "events": [{ "event": "load", "flow": { "id": "init", "type": "field_state", "action": "hide", "targets": ["grp_guardian"] } }],
+      "rules": [
+        { "name": "Việc gia đình → hiện nhóm phụ huynh", "match": "AND",
+          "when": [{ "field": "leave_type", "operator": "equals", "value": "family" }],
+          "then": [{ "type": "show", "target": "grp_guardian" }] }
+      ] },
+    { "type": "input", "name": "guardian_name", "label": "Họ tên phụ huynh", "colSpan": 6, "parent": "grp_guardian" },
+    { "type": "tel", "name": "guardian_phone", "label": "Điện thoại phụ huynh", "colSpan": 6, "parent": "grp_guardian" },
+
+    { "type": "switch", "name": "has_substitute", "label": "Đã nhờ bạn ghi bài hộ", "dataType": "boolean", "colSpan": 6 },
+    { "type": "input", "name": "substitute_name", "label": "Tên bạn ghi bài hộ", "colSpan": 6,
+      "rules": [
+        { "name": "Chưa nhờ ai → khoá ô nhập", "match": "AND",
+          "when": [{ "field": "has_substitute", "operator": "equals", "value": "false" }],
+          "then": [{ "type": "disable", "target": "substitute_name" }] }
+      ] },
+
+    { "type": "textarea", "name": "note", "label": "Ghi chú thêm" },
+    { "type": "input", "name": "summary", "label": "Tóm tắt (tự điền)", "colSpan": 8,
+      "rules": [
+        { "name": "Chọn nghỉ ốm → đặt sẵn tóm tắt", "match": "AND",
+          "when": [{ "field": "leave_type", "operator": "equals", "value": "sick" }],
+          "then": [{ "type": "setValue", "target": "summary", "value": "Nghỉ ốm có giấy khám" }] }
+      ] },
+
+    { "type": "submit-button", "name": "btn_submit", "label": "Gửi đơn", "colSpan": 4,
+      "rules": [
+        { "name": "Chưa chọn loại nghỉ → khoá nút gửi", "match": "AND",
+          "when": [{ "field": "leave_type", "operator": "isEmpty" }],
+          "then": [{ "type": "disable", "target": "btn_submit" }] }
+      ],
+      "events": [{ "event": "click", "flow": { "id": "submit", "type": "sequence", "steps": [
+        { "id": "valid", "type": "validate_form", "notify": true },
+        { "id": "ok", "type": "show_message", "level": "success", "message": "Đã gửi đơn xin nghỉ." }
+      ] } }] }
+  ]
+}

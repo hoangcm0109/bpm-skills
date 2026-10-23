@@ -1,0 +1,56 @@
+{
+  "name": "Quản lý người dùng",
+  "description": "Ví dụ hành động từng dòng của table chạy action flow: xoá (confirm → API → tải lại bảng), sửa (dialog điền sẵn từ dòng, chờ xác nhận → API), xem (navigate). Cột dữ liệu của bảng cấu hình thêm trong builder",
+  "components": [
+    { "type": "text", "name": "head", "content": "<h2>Quản lý người dùng</h2>" },
+
+    { "type": "input", "name": "keyword", "label": "Tìm người dùng", "placeholder": "Tên hoặc email", "colSpan": 8 },
+    { "type": "button", "name": "btn_search", "label": "Tìm kiếm", "colSpan": 4, "alignSelf": "end",
+      "events": [{ "event": "click", "flow": { "id": "search", "type": "push_table", "tableId": "users_table", "mode": "request",
+        "bodyMode": "mapping", "bodyMapping": [{ "source": { "type": "ref", "path": "$form.current.values.keyword" }, "target": "q" }] } }] },
+
+    { "type": "dialog", "name": "edit_dialog", "label": "Sửa người dùng",
+      "dialog": { "variant": "form", "title": "Sửa người dùng", "size": "md",
+        "footer": { "show": true, "buttons": [
+          { "id": "cancel", "label": "Huỷ", "action": "close" },
+          { "id": "save", "label": "Lưu", "action": "submit" } ] } } },
+    { "type": "input", "name": "name", "label": "Họ tên", "parent": "edit_dialog", "required": true, "requiredMessage": "Vui lòng nhập họ tên" },
+    { "type": "email", "name": "email", "label": "Email", "parent": "edit_dialog", "required": true, "requiredMessage": "Vui lòng nhập email",
+      "validations": [{ "type": "email", "errorMessage": "Email chưa đúng định dạng" }] },
+
+    { "type": "table", "name": "users_table",
+      "props": { "table": { "actionColumn": { "enabled": true, "title": "Thao tác", "actions": [
+        { "id": "view", "label": "Xem", "type": "view", "variant": "ghost",
+          "flow": { "id": "flow", "type": "navigate", "url": "/users/{{$row.key}}" } },
+        { "id": "edit", "label": "Sửa", "type": "custom", "variant": "outline",
+          "flow": { "id": "flow", "type": "sequence", "steps": [
+            { "id": "open", "type": "dialog", "action": "open", "target": "edit_dialog", "fillFromRow": true, "awaitSubmit": true },
+            { "id": "save", "type": "try",
+              "steps": [
+                { "id": "put", "type": "call_api", "method": "PUT", "url": "https://api.example.com/users/{id}", "bodyMode": "mapping",
+                  "authConfig": { "type": "bearer", "token_source": "system" },
+                  "pathMapping": [{ "source": { "type": "ref", "path": "$row.data.id" }, "target": "id", "required": true }],
+                  "bodyMapping": [
+                    { "source": { "type": "ref", "path": "$steps.open.output.values.name" }, "target": "name" },
+                    { "source": { "type": "ref", "path": "$steps.open.output.values.email" }, "target": "email" } ] },
+                { "id": "reload", "type": "push_table", "tableId": "users_table", "mode": "request", "keepPage": true },
+                { "id": "ok", "type": "show_message", "level": "success", "message": "Đã cập nhật {{$row.data.name}}" }
+              ],
+              "catch": [{ "id": "fail", "type": "show_message", "level": "error", "message": "Cập nhật thất bại: {{$error.message}}" }] }
+          ] } },
+        { "id": "del", "label": "Xoá", "type": "delete", "variant": "danger",
+          "flow": { "id": "flow", "type": "sequence", "steps": [
+            { "id": "ask", "type": "confirm", "title": "Xoá người dùng", "message": "Xoá {{$row.data.name}}?", "destructive": true, "confirmLabel": "Xoá" },
+            { "id": "api", "type": "try",
+              "steps": [
+                { "id": "call", "type": "call_api", "method": "DELETE", "url": "https://api.example.com/users/{id}",
+                  "authConfig": { "type": "bearer", "token_source": "system" },
+                  "pathMapping": [{ "source": { "type": "ref", "path": "$row.data.id" }, "target": "id", "required": true }] },
+                { "id": "reload", "type": "push_table", "tableId": "users_table", "mode": "request", "keepPage": true },
+                { "id": "ok", "type": "show_message", "level": "success", "message": "Đã xoá" }
+              ],
+              "catch": [{ "id": "fail", "type": "show_message", "level": "error", "message": "Xoá thất bại: {{$error.message}}" }] }
+          ] } }
+      ] } } } }
+  ]
+}

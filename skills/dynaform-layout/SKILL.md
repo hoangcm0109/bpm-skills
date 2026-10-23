@@ -185,5 +185,5 @@ Bỏ qua = theme mặc định. UI form phải đọc được ở cả light/da
 7. Overlay đứng trước nút mở nó.
 8. Nút đứng cạnh ô nhập có nhãn: `alignSelf: "end"` (không dùng khoảng trắng / `text` rỗng để đẩy nút xuống).
 
-Ví dụ chạy được: `skills/dynaform-build-form/assets/example-layout.spec.json`.
+Ví dụ chạy được: `skills/dynaform-build-form/assets/example-layout.spec.json` và `assets/example-layout-recipes.spec.json` (11 công thức bố cục: 2-3-4 cột, 9+3, ô nhập + nút `alignSelf`, hàng bộ lọc, responsive `overrides`, `columns` 8+4, `grid` gộp ô, nút căn phải) — giải thích trong `references/examples.md`.
 Tài liệu lib: `docs/CONTAINER_DRAG_DROP.md`, `docs/CANVAS_NAVIGATION.md`, `public/templates/sample/*.json` (mẫu form thật).

@@ -33,6 +33,11 @@ Repo này là **plugin chứa agent skills**, không phải ứng dụng. Skill 
   node skills/dynaform-build-form/scripts/dynaform.mjs build skills/dynaform-build-form/assets/example-spec.json --out /tmp/form.json
   node skills/dynaform-build-form/scripts/dynaform.mjs validate /tmp/form.json
   ```
+- Ví dụ: mỗi skill có `references/examples.md`; skill dựng form còn có spec chạy được ở `skills/<tên>/assets/*.spec.json`. Sửa nội dung skill hoặc script thì cập nhật ví dụ tương ứng và build lại **toàn bộ** spec ví dụ — không được có `ERROR`; `WARN` chỉ chấp nhận khi là nhắc cố định (vd `awaitSubmit`):
+  ```bash
+  for f in skills/*/assets/example-*.json; do node skills/dynaform-build-form/scripts/dynaform.mjs build "$f" --out /tmp/form.json || echo "FAIL $f"; done
+  ```
+  Ví dụ dùng URL giả `https://api.example.com`, dữ liệu giả, không token. Ví dụ code (TSX) phải bám export/props thật của lib hoặc file thật của `mfe-dynaform`.
 - Thêm skill mới: tạo `skills/<tên>/SKILL.md`, cập nhật bảng trên và `README.md`. Không cần đăng ký trong manifest (skill được nạp theo thư mục `skills/`).
 - Đổi version: cập nhật đồng bộ `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`, và ghi một mục vào `CHANGELOG.md`. Claude Code chỉ cập nhật cho người dùng khi `version` tăng; cách người dùng cập nhật nằm ở `README.md` → "Cài đặt & cập nhật".
 - Khi lib `@dnu/dynaform-builder` ra tag mới: đối chiếu `fe_dynaform/.claude/memory-logs/` và `docs/DYNAFORM_BUILDER_INTEGRATION.md`, cập nhật tag mẫu trong `dynaform-embed-lib` và dòng "khớp lib" trong README.

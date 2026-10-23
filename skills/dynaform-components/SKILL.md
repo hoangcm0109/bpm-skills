@@ -190,6 +190,12 @@ Mọi control (nhập liệu, content, layout, overlay) nhận `custom` trong sp
 - **Đừng tự điền `tailwindCss` / `twHash`**: builder tự sinh khi form được nạp vào editor (`loadFormJson` / Open JSON / mở editor). Form chưa qua editor chỉ hiện CSS thuần cho tới khi được lưu từ builder — nên sau khi dựng bằng script, mở form trong builder một lần và Save.
 - Host tắt được bằng `embedPolicy.allowCustomCss: false`. Chi tiết: `docs/CUSTOM_STYLE.md` trong fe_dynaform.
 
+## Ví dụ chạy được
+
+- `assets/example-input-catalog.spec.json` — mỗi control nhập liệu/hiển thị một lần (copy từng dòng sang form thật).
+- `assets/example-layout-controls.spec.json` — container card + `custom`, `list`, `nested-list`, `form-loop`, `dialog` (confirmation/form), `drawer`, `bottom-sheet`.
+- `references/examples.md` — giải thích từng ví dụ, cách đặt con theo loại cha, lỗi hay gặp.
+
 ## Tài liệu sâu trong fe_dynaform (đọc khi cần)
 
 `docs/DATA_TABLE.md`, `docs/CUSTOM_STYLE.md`, `docs/COLLECTION_CONTROLS.md`, `docs/FILE_UPLOAD_CONFIG_GUIDE.md`, `docs/CUSTOM_EMBED.md`, `docs/CONTROL_OVERRIDES.md`, `docs/TIMELINE.md`, `docs/WYSIWYG_EDITOR_GUIDE.md`.

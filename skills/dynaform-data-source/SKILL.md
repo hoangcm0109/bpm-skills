@@ -56,6 +56,10 @@ description: Nguồn dữ liệu cho field dynaform — option tĩnh, select l�
 | Option/giá trị host cấp sẵn | `bound_variables` trong form JSON, key theo `key_path` |
 | Khoá chỉ-đọc khi sửa | `attributes.readonlyOnEdit` + `formMode: "edit"` |
 
+## Ví dụ chạy được
+
+`assets/example-data-source.spec.json` — "Hồ sơ cư trú": option tĩnh, select API công khai, chuỗi Tỉnh → Quận → Xã (`dependsOn` + `pathParams`), `default`, `readonlyOnEdit`. Giải thích + đoạn host điền sẵn bằng `dataUserFill`: `references/examples.md`.
+
 ## Lưu ý
 
 1. Chỉ dùng domain API đã được duyệt; dữ liệu trả về luôn là không tin cậy. Xem `docs/security/form-json-safety.md`.

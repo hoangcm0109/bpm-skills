@@ -1,0 +1,52 @@
+{
+  "name": "Control layout, overlay và lặp dòng",
+  "description": "Ví dụ container/card, dialog (confirmation + form), drawer, bottom-sheet, list, nested-list, form-loop và style tuỳ chỉnh (custom)",
+  "components": [
+    { "type": "container", "name": "grp_customer", "container": { "type": "card", "border": true },
+      "custom": { "className": "rounded-xl shadow-sm" } },
+    { "type": "text", "name": "grp_customer_title", "parent": "grp_customer", "content": "<h3>Khách hàng</h3>" },
+    { "type": "input", "name": "customer_name", "label": "Tên khách hàng", "colSpan": 6, "parent": "grp_customer", "required": true,
+      "custom": { "label": { "className": "font-semibold" }, "control": { "className": "border-2 rounded-lg" } } },
+    { "type": "email", "name": "customer_email", "label": "Email", "colSpan": 6, "parent": "grp_customer" },
+
+    { "type": "list", "name": "phones", "label": "Số điện thoại liên hệ", "list": { "minRows": 1, "initialRows": 1, "maxRows": 3, "addButtonLabel": "+ Thêm số" } },
+    { "type": "tel", "name": "phone_item", "label": "Số điện thoại", "parent": "phones" },
+
+    { "type": "nested-list", "name": "members", "label": "Thành viên nhóm", "list": { "minRows": 0, "initialRows": 1, "addButtonLabel": "+ Thêm thành viên" } },
+    { "type": "input", "name": "member_name", "label": "Họ tên", "colSpan": 6, "parent": "members" },
+    { "type": "select", "name": "member_role", "label": "Vai trò", "colSpan": 6, "parent": "members",
+      "options": [{ "label": "Trưởng nhóm", "value": "lead" }, { "label": "Thành viên", "value": "member" }] },
+
+    { "type": "text", "name": "loop_title", "content": "<h3>Danh sách thành viên (form-loop đọc lại mảng members)</h3>" },
+    { "type": "form-loop", "name": "member_loop",
+      "loop": { "mode": "variable", "dataPath": "members", "itemAlias": "member", "emptyText": "Chưa có thành viên", "allowAdd": false, "allowRemove": false } },
+    { "type": "text", "name": "loop_row", "parent": "member_loop", "content": "<p><b>{{member_name}}</b> — {{member_role}}</p>" },
+
+    { "type": "dialog", "name": "confirm_dialog", "label": "Xác nhận gửi",
+      "dialog": { "variant": "confirmation", "title": "Gửi đơn hàng?", "description": "Sau khi gửi bạn không thể sửa thông tin khách hàng." } },
+    { "type": "dialog", "name": "note_dialog", "label": "Ghi chú nội bộ",
+      "dialog": { "variant": "form", "title": "Ghi chú nội bộ", "description": "Chỉ nhân viên nhìn thấy." } },
+    { "type": "textarea", "name": "internal_note", "label": "Nội dung ghi chú", "parent": "note_dialog" },
+    { "type": "button", "name": "btn_close_note", "label": "Lưu ghi chú", "parent": "note_dialog",
+      "events": [{ "event": "click", "flow": { "id": "close", "type": "dialog", "action": "close", "target": "note_dialog" } }] },
+
+    { "type": "drawer", "name": "help_drawer", "label": "Trợ giúp",
+      "dialog": { "variant": "custom", "title": "Hướng dẫn nhập đơn hàng", "side": "right" } },
+    { "type": "text", "name": "help_text", "parent": "help_drawer", "content": "<p>Nhập đủ tên và email khách hàng trước khi gửi.</p>" },
+
+    { "type": "bottom-sheet", "name": "tip_sheet", "label": "Mẹo nhanh",
+      "dialog": { "variant": "info", "title": "Mẹo nhanh", "description": "Bấm Tab để chuyển nhanh giữa các ô." } },
+
+    { "type": "button", "name": "btn_note", "label": "Ghi chú", "colSpan": 3,
+      "events": [{ "event": "click", "flow": { "id": "open", "type": "dialog", "action": "open", "target": "note_dialog" } }] },
+    { "type": "button", "name": "btn_help", "label": "Trợ giúp", "colSpan": 3,
+      "events": [{ "event": "click", "flow": { "id": "open", "type": "dialog", "action": "open", "target": "help_drawer" } }] },
+    { "type": "button", "name": "btn_tip", "label": "Mẹo", "colSpan": 3,
+      "events": [{ "event": "click", "flow": { "id": "open", "type": "dialog", "action": "open", "target": "tip_sheet" } }] },
+    { "type": "submit-button", "name": "btn_submit", "label": "Gửi đơn hàng", "colSpan": 3,
+      "events": [{ "event": "click", "flow": { "id": "ask", "type": "sequence", "steps": [
+        { "id": "valid", "type": "validate_form", "notify": true },
+        { "id": "open", "type": "dialog", "action": "open", "target": "confirm_dialog" }
+      ] } }] }
+  ]
+}

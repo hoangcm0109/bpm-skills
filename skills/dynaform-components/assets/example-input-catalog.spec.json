@@ -1,0 +1,49 @@
+{
+  "name": "Danh mục control nhập liệu",
+  "description": "Mỗi loại control nhập liệu/hiển thị một lần, đúng cấu hình tối thiểu — dùng để copy từng dòng sang form thật",
+  "components": [
+    { "type": "text", "name": "t_text", "content": "<h2>Văn bản & số</h2>" },
+    { "type": "input", "name": "c_input", "label": "Input — văn bản 1 dòng", "colSpan": 6, "placeholder": "Mã hồ sơ" },
+    { "type": "textarea", "name": "c_textarea", "label": "Textarea — nhiều dòng", "colSpan": 6, "placeholder": "Mô tả chi tiết" },
+    { "type": "number", "name": "c_number", "label": "Number — số", "colSpan": 4, "dataType": "number" },
+    { "type": "email", "name": "c_email", "label": "Email", "colSpan": 4, "validations": [{ "type": "email", "errorMessage": "Email chưa đúng định dạng" }] },
+    { "type": "tel", "name": "c_tel", "label": "Tel — số điện thoại (không có type phone)", "colSpan": 4 },
+    { "type": "password", "name": "c_password", "label": "Password", "colSpan": 6 },
+    { "type": "url", "name": "c_url", "label": "URL", "colSpan": 6, "placeholder": "https://" },
+
+    { "type": "divider", "name": "d1" },
+    { "type": "text", "name": "t_choice", "content": "<h2>Lựa chọn</h2>" },
+    { "type": "select", "name": "c_select", "label": "Select — chọn 1 trong danh sách", "colSpan": 6,
+      "options": [{ "label": "Hà Nội", "value": "hn" }, { "label": "Đà Nẵng", "value": "dn" }, { "label": "TP. Hồ Chí Minh", "value": "hcm" }] },
+    { "type": "radio-group", "name": "c_radio", "label": "Radio group — chọn 1, hiện sẵn", "colSpan": 6,
+      "options": [{ "label": "Có", "value": "yes" }, { "label": "Không", "value": "no" }] },
+    { "type": "checkbox-group", "name": "c_checkbox_group", "label": "Checkbox group — chọn nhiều",
+      "options": [{ "label": "Email", "value": "email" }, { "label": "SMS", "value": "sms" }, { "label": "Thông báo đẩy", "value": "push" }] },
+    { "type": "checkbox", "name": "c_checkbox", "label": "Checkbox — đồng ý điều khoản", "colSpan": 6 },
+    { "type": "switch", "name": "c_switch", "label": "Switch — bật/tắt", "colSpan": 6, "dataType": "boolean" },
+
+    { "type": "divider", "name": "d2" },
+    { "type": "text", "name": "t_datetime", "content": "<h2>Ngày giờ & thanh trượt</h2>" },
+    { "type": "date-picker", "name": "c_date", "label": "Date picker — ngày", "colSpan": 4 },
+    { "type": "time-picker", "name": "c_time", "label": "Time picker — giờ", "colSpan": 4 },
+    { "type": "range-picker", "name": "c_range", "label": "Range picker — khoảng ngày", "colSpan": 4 },
+    { "type": "range-slider", "name": "c_slider", "label": "Range slider — thanh trượt", "colSpan": 6, "dataType": "number" },
+    { "type": "calendar", "name": "c_calendar", "label": "Calendar — lịch hiện sẵn", "colSpan": 6 },
+
+    { "type": "divider", "name": "d3" },
+    { "type": "text", "name": "t_adv", "content": "<h2>Tệp, chữ ký, soạn thảo</h2>" },
+    { "type": "file", "name": "c_file", "label": "File — tệp đính kèm (giới hạn cấu hình trong builder)" },
+    { "type": "signature", "name": "c_signature", "label": "Signature — chữ ký" },
+    { "type": "wysiwyg-editor", "name": "c_editor", "label": "WYSIWYG editor — văn bản định dạng" },
+
+    { "type": "divider", "name": "d4" },
+    { "type": "text", "name": "t_static", "content": "<h2>Nội dung tĩnh</h2>" },
+    { "type": "text", "name": "c_text", "content": "<p>Text — đoạn văn <b>HTML</b>, không thu dữ liệu.</p>" },
+    { "type": "link", "name": "c_link", "label": "Link — liên kết", "colSpan": 6 },
+    { "type": "image", "name": "c_image", "colSpan": 6 },
+
+    { "type": "reset-button", "name": "btn_reset", "label": "Reset button", "colSpan": 4 },
+    { "type": "button", "name": "btn_plain", "label": "Button — hành động phụ", "colSpan": 4 },
+    { "type": "submit-button", "name": "btn_submit", "label": "Submit button", "colSpan": 4 }
+  ]
+}

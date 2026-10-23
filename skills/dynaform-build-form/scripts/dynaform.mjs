@@ -681,7 +681,8 @@ function buildItemControl(c, order, ids, mobile = "stack") {
   const reg = TYPE_REGISTRY[c.type];
   const id = ids.get(c.name);
   const props = {
-    label: c.label ?? c.name,
+    // A text block is its own content: an unset label stays empty, never the variable name.
+    label: c.label ?? (c.type === "text" ? "" : c.name),
     helpText: c.helpText ?? "",
     hidden: c.hidden === true,
     ...(c.placeholder !== undefined ? { placeholder: c.placeholder } : {}),
@@ -715,6 +716,7 @@ function buildItemControl(c, order, ids, mobile = "stack") {
     ...(c.colStart !== undefined ? { colStart: String(c.colStart) } : {}),
     ...(c.alignSelf !== undefined && c.alignSelf !== "start" ? { alignSelf: c.alignSelf } : {}),
     ...(c.type === "custom-embed" ? { showLabel: "no", labelPosition: "top" } : {}),
+    ...(c.type === "text" ? { showLabel: "no" } : {}),
     ...(c.type === "container" ? containerStyles(c.container) : {}),
     ...(c.styles ?? {}),
   };

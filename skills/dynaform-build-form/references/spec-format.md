@@ -20,7 +20,7 @@
 |---|---|---|
 | `type` | ✅ | Type trong registry (xem `dynaform-components`) |
 | `name` | ✅ | `variables.name` — snake_case, duy nhất; mọi tham chiếu dùng khoá này |
-| `label` | | Nhãn hiển thị (tiếng Việt) |
+| `label` | | Nhãn hiển thị (tiếng Việt). Với `text`: mặc định không có nhãn và `showLabel: "no"` (nội dung chính là chữ); muốn hiện nhãn thì đặt `label` khác tên biến + `styles: { "showLabel": "yes" }` (lib không in nhãn của Text nếu nó trùng tên biến) |
 | `placeholder`, `helpText` | | |
 | `required` | | `true` → thêm validation `required`; `requiredMessage` = thông báo lỗi |
 | `disabled`, `readonly`, `hidden` | | `hidden: true` → `styles.visible = "no"` (dùng với rule `show`) |

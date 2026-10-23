@@ -1,0 +1,63 @@
+{
+  "name": "Công thức bố cục form",
+  "description": "Mỗi nhóm là một công thức bố cục của dynaform-layout: 2 cột, 3 cột, 9+3, ô nhập + nút (alignSelf), hàng bộ lọc, giữ cột trên mobile, columns 8+4, grid gộp ô, nút căn phải",
+  "mobile": "stack",
+  "components": [
+    { "type": "text", "name": "r1_title", "content": "<h3>1. Hai cột đều (6 + 6)</h3>" },
+    { "type": "input", "name": "r1_full_name", "label": "Họ và tên", "colSpan": 6 },
+    { "type": "tel", "name": "r1_phone", "label": "Số điện thoại", "colSpan": 6 },
+
+    { "type": "text", "name": "r2_title", "content": "<h3>2. Ba cột đều (4 + 4 + 4)</h3>" },
+    { "type": "select", "name": "r2_province", "label": "Tỉnh/Thành", "colSpan": 4,
+      "options": [{ "label": "Hà Nội", "value": "hn" }, { "label": "Đà Nẵng", "value": "dn" }] },
+    { "type": "select", "name": "r2_district", "label": "Quận/Huyện", "colSpan": 4,
+      "options": [{ "label": "Quận 1", "value": "q1" }, { "label": "Quận 2", "value": "q2" }] },
+    { "type": "select", "name": "r2_ward", "label": "Phường/Xã", "colSpan": 4,
+      "options": [{ "label": "Phường A", "value": "a" }, { "label": "Phường B", "value": "b" }] },
+
+    { "type": "text", "name": "r3_title", "content": "<h3>3. Dòng dài + ô ngắn (9 + 3)</h3>" },
+    { "type": "input", "name": "r3_address", "label": "Địa chỉ", "colSpan": 9 },
+    { "type": "input", "name": "r3_zip", "label": "Mã bưu chính", "colSpan": 3 },
+
+    { "type": "text", "name": "r4_title", "content": "<h3>4. Ô nhập + nút cạnh nhau — nút thẳng đáy ô nhập (alignSelf: end)</h3>" },
+    { "type": "input", "name": "r4_promo", "label": "Mã khuyến mại", "colSpan": 9 },
+    { "type": "button", "name": "r4_apply", "label": "Áp dụng", "colSpan": 3, "alignSelf": "end" },
+
+    { "type": "text", "name": "r5_title", "content": "<h3>5. Hàng bộ lọc (6 + 3 + 3)</h3>" },
+    { "type": "select", "name": "r5_class", "label": "Lớp học", "colSpan": 6,
+      "options": [{ "label": "Tất cả lớp", "value": "" }, { "label": "Lớp A", "value": "a" }, { "label": "Lớp B", "value": "b" }] },
+    { "type": "button", "name": "r5_clear", "label": "Xoá bộ lọc", "colSpan": 3, "alignSelf": "end" },
+    { "type": "button", "name": "r5_apply", "label": "Áp dụng", "colSpan": 3, "alignSelf": "end" },
+
+    { "type": "text", "name": "r6_title", "content": "<h3>6. Giữ 2 cột trên mobile cho cặp rất ngắn (overrides.sm)</h3>" },
+    { "type": "date-picker", "name": "r6_date", "label": "Ngày", "colSpan": 6, "overrides": { "sm": { "colSpan": 6 } } },
+    { "type": "time-picker", "name": "r6_time", "label": "Giờ", "colSpan": 6, "overrides": { "sm": { "colSpan": 6 } } },
+
+    { "type": "text", "name": "r7_title", "content": "<h3>7. Đổi cột theo cỡ khung (4 → 6 trên tablet → 12 trên mobile)</h3>" },
+    { "type": "number", "name": "r7_a", "label": "Số lượng", "colSpan": 4, "dataType": "number", "overrides": { "md": { "colSpan": 6 }, "sm": { "colSpan": 12 } } },
+    { "type": "number", "name": "r7_b", "label": "Đơn giá", "colSpan": 4, "dataType": "number", "overrides": { "md": { "colSpan": 6 }, "sm": { "colSpan": 12 } } },
+    { "type": "number", "name": "r7_c", "label": "Chiết khấu (%)", "colSpan": 4, "dataType": "number", "overrides": { "md": { "colSpan": 12 }, "sm": { "colSpan": 12 } } },
+
+    { "type": "text", "name": "r8_title", "content": "<h3>8. Nhóm có khung + tiêu đề (container card)</h3>" },
+    { "type": "container", "name": "r8_group", "container": { "type": "card", "border": true } },
+    { "type": "text", "name": "r8_group_title", "parent": "r8_group", "content": "<h4>Liên hệ</h4>" },
+    { "type": "email", "name": "r8_email", "label": "Email", "colSpan": 6, "parent": "r8_group" },
+    { "type": "tel", "name": "r8_tel", "label": "Điện thoại", "colSpan": 6, "parent": "r8_group" },
+
+    { "type": "text", "name": "r9_title", "content": "<h3>9. Hai cột rộng khác nhau (columns 8 + 4)</h3>" },
+    { "type": "columns", "name": "r9_main", "columns": { "count": 2, "spans": [8, 4], "gap": "1.5rem" } },
+    { "type": "input", "name": "r9_title_input", "label": "Tiêu đề", "parent": "r9_main", "tabId": "col-0" },
+    { "type": "textarea", "name": "r9_content", "label": "Nội dung", "parent": "r9_main", "tabId": "col-0" },
+    { "type": "text", "name": "r9_side", "parent": "r9_main", "tabId": "col-1", "content": "<p><b>Gợi ý:</b> tiêu đề ngắn gọn, dưới 80 ký tự.</p>" },
+
+    { "type": "text", "name": "r10_title", "content": "<h3>10. Lưới ô đều có gộp ô (grid 3 cột, ô đầu trải 2 cột)</h3>" },
+    { "type": "grid", "name": "r10_kpi", "grid": { "cols": 3, "rows": 2, "gap": "1rem", "columnWidths": ["1fr", "1fr", "1fr"], "spans": { "0": { "r": 1, "c": 2 } } } },
+    { "type": "text", "name": "r10_a", "parent": "r10_kpi", "content": "<b>Hồ sơ mới</b> — ô trải 2 cột" },
+    { "type": "text", "name": "r10_b", "parent": "r10_kpi", "content": "<b>Đã duyệt</b>" },
+    { "type": "text", "name": "r10_c", "parent": "r10_kpi", "content": "<b>Từ chối</b>" },
+
+    { "type": "text", "name": "r11_title", "content": "<h3>11. Nút căn phải (colStart 9 + 2 + 2)</h3>" },
+    { "type": "reset-button", "name": "r11_reset", "label": "Làm lại", "colSpan": 2, "colStart": 9 },
+    { "type": "submit-button", "name": "r11_submit", "label": "Gửi", "colSpan": 2 }
+  ]
+}

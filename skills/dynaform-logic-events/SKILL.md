@@ -407,7 +407,15 @@ Khai trong spec ở `props.table.actionColumn.actions[]` (cấu hình cột / d�
 - `required` thay đổi động: dùng `field_state` `require`/`optional` (đừng đặt `required: true` cứng cho control cần bật/tắt — `../dynaform-validation/SKILL.md`).
 - Gỡ lỗi: builder có **Sơ đồ + chạy thử + trace từng step** (`docs/ACTION_ENGINE.md`); mỗi lần gọi API test trong editor nhập giá trị mẫu cho các field flow đọc.
 
-## 9. Quy tắc chung
+## 9. Ví dụ chạy được
+
+Spec đầy đủ (build + validate bằng `dynaform.mjs`), giải thích trong `references/examples.md`:
+
+- `assets/example-rules.spec.json` — rule điều kiện: hiện/ẩn, bắt buộc, bật/tắt, `AND`/`OR`, `isEmpty`, so sánh số, `setValue`; ẩn lúc mở bằng `load` + `field_state`.
+- `assets/example-flows.spec.json` — flow: tìm kiếm → làm mới bảng, chọn → điền từ API, nạp song song khi mở, `branch`, `confirm` + `for_each`, xác nhận xoá trong dialog, tải file, `emit_event`.
+- `assets/example-table-row-actions.spec.json` — hành động từng dòng của `table` (xem / sửa bằng dialog chờ xác nhận / xoá có xác nhận).
+
+## 10. Quy tắc chung
 
 1. Mọi `target` / `field` là **`name`**, phải tồn tại trong spec; script từ chối tham chiếu treo.
 2. Dialog đứng **trước** nút mở nó; `dialog` variant confirmation/info đặt nội dung ở `dialog.title/description`.

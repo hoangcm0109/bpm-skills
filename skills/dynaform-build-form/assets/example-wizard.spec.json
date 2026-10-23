@@ -1,0 +1,64 @@
+{
+  "name": "Đăng ký tham dự hội thảo",
+  "description": "Ví dụ wizard 3 bước: steps + validateOnNext, rule hiện/ẩn, matchField, dialog thành công, nút gửi chạy flow",
+  "components": [
+    { "type": "text", "name": "head", "content": "<h2>Đăng ký tham dự hội thảo</h2>" },
+
+    { "type": "steps", "name": "wizard", "steps": [
+        { "id": "step-person", "label": "Người tham dự" },
+        { "id": "step-event", "label": "Phiên tham dự" },
+        { "id": "step-confirm", "label": "Xác nhận" }
+      ],
+      "stepsOptions": { "showPrevious": true, "showProgress": true, "validateOnNext": true, "progressVariant": "numbered",
+        "defaultPreviousLabel": "Quay lại", "defaultNextLabel": "Tiếp tục", "finishLabel": "Hoàn tất" } },
+
+    { "type": "input", "name": "full_name", "label": "Họ và tên", "colSpan": 6, "parent": "wizard", "tabId": "step-person",
+      "required": true, "requiredMessage": "Vui lòng nhập họ và tên" },
+    { "type": "email", "name": "email", "label": "Email", "colSpan": 6, "parent": "wizard", "tabId": "step-person",
+      "required": true, "requiredMessage": "Vui lòng nhập email",
+      "validations": [{ "type": "email", "errorMessage": "Email chưa đúng định dạng" }] },
+    { "type": "tel", "name": "phone", "label": "Số điện thoại", "colSpan": 4, "parent": "wizard", "tabId": "step-person",
+      "validations": [{ "type": "regex", "value": "^0\\d{9}$", "errorMessage": "Số điện thoại gồm 10 số, bắt đầu bằng 0" }] },
+    { "type": "radio-group", "name": "attendee_type", "label": "Bạn tham dự với tư cách", "colSpan": 8, "parent": "wizard", "tabId": "step-person",
+      "required": true, "requiredMessage": "Vui lòng chọn một mục",
+      "options": [
+        { "label": "Sinh viên", "value": "student" },
+        { "label": "Giảng viên", "value": "lecturer" },
+        { "label": "Doanh nghiệp", "value": "company" }
+      ] },
+    { "type": "input", "name": "company_name", "label": "Tên doanh nghiệp", "colSpan": 12, "parent": "wizard", "tabId": "step-person",
+      "events": [{ "event": "load", "flow": { "id": "init", "type": "field_state", "action": "hide", "targets": ["company_name"] } }],
+      "rules": [{ "name": "Hiện khi là doanh nghiệp", "match": "AND",
+        "when": [{ "field": "attendee_type", "operator": "equals", "value": "company" }],
+        "then": [{ "type": "show", "target": "company_name" }, { "type": "require", "target": "company_name" }] }] },
+
+    { "type": "checkbox-group", "name": "sessions", "label": "Phiên muốn tham dự", "parent": "wizard", "tabId": "step-event",
+      "required": true, "requiredMessage": "Chọn ít nhất một phiên",
+      "options": [
+        { "label": "Phiên 1 — Chuyển đổi số trong giáo dục", "value": "s1" },
+        { "label": "Phiên 2 — Dữ liệu và học tập thích ứng", "value": "s2" },
+        { "label": "Phiên 3 — Thực hành AI trong lớp học", "value": "s3" }
+      ] },
+    { "type": "date-picker", "name": "arrival_date", "label": "Ngày đến dự kiến", "colSpan": 6, "parent": "wizard", "tabId": "step-event" },
+    { "type": "textarea", "name": "note", "label": "Yêu cầu đặc biệt", "parent": "wizard", "tabId": "step-event" },
+
+    { "type": "text", "name": "confirm_note", "parent": "wizard", "tabId": "step-confirm",
+      "content": "<p>Vui lòng kiểm tra lại thông tin trước khi gửi đăng ký.</p>" },
+    { "type": "checkbox", "name": "agree", "label": "Tôi đồng ý cho ban tổ chức liên hệ qua email", "parent": "wizard", "tabId": "step-confirm",
+      "required": true, "requiredMessage": "Bạn cần đồng ý để tiếp tục" },
+
+    { "type": "dialog", "name": "done_dialog", "label": "Đăng ký thành công",
+      "dialog": { "variant": "success", "title": "Đăng ký thành công", "description": "Thư xác nhận sẽ được gửi tới email của bạn." } },
+    { "type": "submit-button", "name": "btn_submit", "label": "Gửi đăng ký", "colSpan": 4,
+      "events": [{ "event": "click", "flow": { "id": "submit", "type": "sequence", "steps": [
+        { "id": "valid", "type": "validate_form", "notify": true },
+        { "id": "send", "type": "try",
+          "steps": [
+            { "id": "post", "type": "call_api", "url": "https://api.example.com/events/registrations", "method": "POST", "bodyMode": "form",
+              "authConfig": { "type": "bearer", "token_source": "system" } },
+            { "id": "open", "type": "dialog", "action": "open", "target": "done_dialog" }
+          ],
+          "catch": [{ "id": "fail", "type": "show_message", "level": "error", "message": "Đăng ký thất bại: {{$error.message}}" }] }
+      ] } }] }
+  ]
+}

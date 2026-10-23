@@ -151,4 +151,7 @@ Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc fi
 - `references/output-format.md` — cấu trúc JSON builder xuất (để đọc/sửa JSON có sẵn).
 - `assets/example-spec.json` — ví dụ chạy được: container, tab, select phụ thuộc API, matchField, rule hiển thị, dialog.
 - `assets/example-layout.spec.json` — ví dụ **chỉ bố cục**: container (6/6 + 12), `columns` 3 cột, `tab` — mẫu để dựng layout form.
+- `assets/example-contact.spec.json` — form nhỏ nhất đủ dùng: 2 cột, select tĩnh, validation, nút gửi chạy flow (validate → API → thông báo).
+- `assets/example-wizard.spec.json` — wizard `steps` 3 bước + `validateOnNext`, rule hiện/ẩn, dialog thành công, gửi bằng flow.
+- `references/examples.md` — **ví dụ đầy đủ từ yêu cầu → spec → báo cáo**, bảng đọc lỗi của script, và danh mục ví dụ của mọi skill con (components, validation, logic-events, layout, data-source, embed-lib, mfe-module).
 - Nguồn sự thật của lib: repo `fe_dynaform` (`src/models/FormComponent.ts` `toGroupJSON`, `src/lib/builder-core/transform/transform-form-components.ts`; thư mục này tên cũ là `dynamic-form-builder` trước 4.4.1).

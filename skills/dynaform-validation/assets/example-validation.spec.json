@@ -1,0 +1,92 @@
+{
+  "name": "Đăng ký tài khoản sinh viên",
+  "description": "Ví dụ validation đủ loại rule theo từng kiểu control: regex, độ dài, so khớp field, khoảng số, URL, rule bắt buộc theo điều kiện",
+  "components": [
+    { "type": "container", "name": "grp_account" },
+    { "type": "text", "name": "grp_account_title", "parent": "grp_account", "content": "<h3>Tài khoản</h3>" },
+
+    { "type": "input", "name": "student_code", "label": "Mã sinh viên", "placeholder": "SV123456", "colSpan": 6, "parent": "grp_account",
+      "required": true, "requiredMessage": "Vui lòng nhập mã sinh viên",
+      "validations": [{ "type": "regex", "value": "^SV\\d{6}$", "errorMessage": "Mã sinh viên gồm SV + 6 chữ số, ví dụ SV123456" }] },
+    { "type": "input", "name": "full_name", "label": "Họ và tên", "colSpan": 6, "parent": "grp_account",
+      "required": true, "requiredMessage": "Vui lòng nhập họ và tên",
+      "validations": [
+        { "type": "minLength", "value": 3, "errorMessage": "Họ và tên tối thiểu 3 ký tự" },
+        { "type": "maxLength", "value": 80, "errorMessage": "Họ và tên tối đa 80 ký tự" },
+        { "type": "notContains", "value": "@", "errorMessage": "Họ và tên không được chứa ký tự @" }
+      ] },
+
+    { "type": "email", "name": "email", "label": "Email trường cấp", "colSpan": 6, "parent": "grp_account",
+      "required": true, "requiredMessage": "Vui lòng nhập email",
+      "validations": [
+        { "type": "email", "errorMessage": "Email chưa đúng định dạng" },
+        { "type": "regex", "value": "@dainam\\.edu\\.vn$", "errorMessage": "Chỉ nhận email @dainam.edu.vn" }
+      ] },
+    { "type": "email", "name": "confirm_email", "label": "Nhập lại email", "colSpan": 6, "parent": "grp_account",
+      "required": true, "requiredMessage": "Vui lòng nhập lại email",
+      "validations": [{ "type": "matchField", "value": "email", "errorMessage": "Hai email chưa giống nhau" }] },
+
+    { "type": "password", "name": "password", "label": "Mật khẩu", "colSpan": 6, "parent": "grp_account",
+      "required": true, "requiredMessage": "Vui lòng nhập mật khẩu",
+      "validations": [
+        { "type": "minLength", "value": 8, "errorMessage": "Mật khẩu tối thiểu 8 ký tự" },
+        { "type": "maxLength", "value": 64, "errorMessage": "Mật khẩu tối đa 64 ký tự" },
+        { "type": "regex", "value": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$", "errorMessage": "Mật khẩu cần có chữ hoa, chữ thường và số" }
+      ] },
+    { "type": "password", "name": "confirm_password", "label": "Nhập lại mật khẩu", "colSpan": 6, "parent": "grp_account",
+      "required": true, "requiredMessage": "Vui lòng nhập lại mật khẩu",
+      "validations": [{ "type": "matchField", "value": "password", "errorMessage": "Mật khẩu nhập lại không khớp" }] },
+
+    { "type": "container", "name": "grp_profile" },
+    { "type": "text", "name": "grp_profile_title", "parent": "grp_profile", "content": "<h3>Hồ sơ học tập</h3>" },
+
+    { "type": "tel", "name": "phone", "label": "Số điện thoại", "colSpan": 4, "parent": "grp_profile",
+      "required": true, "requiredMessage": "Vui lòng nhập số điện thoại",
+      "validations": [{ "type": "regex", "value": "^0\\d{9}$", "errorMessage": "Số điện thoại gồm 10 số, bắt đầu bằng 0" }] },
+    { "type": "number", "name": "age", "label": "Tuổi", "colSpan": 4, "parent": "grp_profile", "dataType": "number",
+      "validations": [
+        { "type": "greater", "value": 17, "errorMessage": "Tuổi phải lớn hơn 17" },
+        { "type": "lower", "value": 60, "errorMessage": "Tuổi phải nhỏ hơn 60" }
+      ] },
+    { "type": "number", "name": "credits", "label": "Số tín chỉ đăng ký", "colSpan": 4, "parent": "grp_profile", "dataType": "number",
+      "required": true, "requiredMessage": "Vui lòng nhập số tín chỉ",
+      "validations": [
+        { "type": "min", "value": 10, "errorMessage": "Tối thiểu 10 tín chỉ" },
+        { "type": "max", "value": 24, "errorMessage": "Tối đa 24 tín chỉ" }
+      ] },
+    { "type": "number", "name": "gpa", "label": "Điểm trung bình (thang 4)", "colSpan": 4, "parent": "grp_profile", "dataType": "number",
+      "validations": [
+        { "type": "greaterEqual", "value": 0, "errorMessage": "Điểm không âm" },
+        { "type": "lowerEqual", "value": 4, "errorMessage": "Điểm tối đa là 4" }
+      ] },
+    { "type": "url", "name": "portfolio_url", "label": "Liên kết hồ sơ năng lực", "colSpan": 8, "parent": "grp_profile",
+      "validations": [{ "type": "url", "errorMessage": "Liên kết phải bắt đầu bằng https://" }] },
+
+    { "type": "select", "name": "account_type", "label": "Loại hồ sơ", "colSpan": 6, "parent": "grp_profile", "required": true,
+      "requiredMessage": "Vui lòng chọn loại hồ sơ",
+      "options": [{ "label": "Sinh viên", "value": "student" }, { "label": "Doanh nghiệp bảo trợ", "value": "company" }] },
+    { "type": "input", "name": "tax_code", "label": "Mã số thuế", "colSpan": 6, "parent": "grp_profile",
+      "events": [{ "event": "load", "flow": { "id": "init", "type": "field_state", "action": "hide", "targets": ["tax_code"] } }],
+      "validations": [{ "type": "regex", "value": "^\\d{10}(-\\d{3})?$", "errorMessage": "Mã số thuế gồm 10 số (hoặc 10 số-3 số)" }],
+      "rules": [{ "name": "Doanh nghiệp: hiện và bắt buộc mã số thuế", "match": "AND",
+        "when": [{ "field": "account_type", "operator": "equals", "value": "company" }],
+        "then": [{ "type": "show", "target": "tax_code" }, { "type": "require", "target": "tax_code" }] }] },
+
+    { "type": "textarea", "name": "note", "label": "Ghi chú", "colSpan": 12,
+      "validations": [
+        { "type": "maxLength", "value": 200, "errorMessage": "Ghi chú tối đa 200 ký tự" },
+        { "type": "notContains", "value": "http", "errorMessage": "Không chèn đường dẫn vào ghi chú" }
+      ] },
+    { "type": "number", "name": "human_check", "label": "Xác nhận bạn không phải robot: 3 + 4 = ?", "colSpan": 6, "dataType": "number",
+      "required": true, "requiredMessage": "Vui lòng nhập kết quả",
+      "validations": [{ "type": "equals", "value": 7, "errorMessage": "Kết quả chưa đúng" }] },
+    { "type": "checkbox", "name": "agree", "label": "Tôi cam đoan thông tin trên là đúng sự thật", "colSpan": 12,
+      "required": true, "requiredMessage": "Bạn cần xác nhận để gửi hồ sơ" },
+
+    { "type": "submit-button", "name": "btn_submit", "label": "Gửi hồ sơ", "colSpan": 3,
+      "events": [{ "event": "click", "flow": { "id": "submit", "type": "sequence", "steps": [
+        { "id": "valid", "type": "validate_form", "notify": true },
+        { "id": "ok", "type": "show_message", "level": "success", "message": "Thông tin hợp lệ — sẵn sàng gửi." }
+      ] } }] }
+  ]
+}

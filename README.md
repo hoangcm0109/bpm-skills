@@ -22,7 +22,7 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 
 ## Cài đặt & cập nhật
 
-Phiên bản hiện tại: **0.6.1** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v4.8.0`.
+Phiên bản hiện tại: **0.6.2** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v4.8.0`.
 
 ### Claude Code
 
@@ -50,7 +50,7 @@ Hai lệnh trên cũng có trong menu `/plugin` của Claude Code. Skill mới c
 Kiểm tra đã lên đúng bản:
 
 ```bash
-claude plugin list        # dòng bpm-skills@bpm-skills phải hiện Version: 0.6.1
+claude plugin list        # dòng bpm-skills@bpm-skills phải hiện Version: 0.6.2
 ```
 
 Lưu ý:
@@ -98,6 +98,26 @@ node skills/dynaform-build-form/scripts/dynaform.mjs validate form.json
 ```
 
 Yêu cầu Node ≥ 18, không cần cài package.
+
+### Ví dụ đầy đủ của từng skill
+
+Mỗi skill có `references/examples.md` (giải thích) và, với skill dựng form, các spec chạy được ở `assets/*.spec.json`:
+
+| Skill | Spec chạy được | Giải thích |
+|---|---|---|
+| `dynaform-build-form` | `example-spec`, `example-layout`, `example-contact`, `example-wizard` | `references/examples.md` |
+| `dynaform-components` | `example-input-catalog`, `example-layout-controls` | `references/examples.md` |
+| `dynaform-validation` | `example-validation` | `references/examples.md` |
+| `dynaform-logic-events` | `example-rules`, `example-flows`, `example-table-row-actions` | `references/examples.md` |
+| `dynaform-layout` | `example-layout-recipes` | `references/examples.md` |
+| `dynaform-data-source` | `example-data-source` | `references/examples.md` |
+| `dynaform-embed-lib` | — (13 ví dụ TSX) | `references/examples.md` |
+| `dynaform-mfe-module` | — (domain mới từ endpoint tới route) | `references/examples.md` |
+
+```bash
+# build toàn bộ spec ví dụ (mỗi dòng phải báo OK)
+for f in skills/*/assets/example-*.json; do node skills/dynaform-build-form/scripts/dynaform.mjs build "$f" --out /tmp/form.json || echo "FAIL $f"; done
+```
 
 ## Bảo mật
 

@@ -125,4 +125,8 @@ JSON từ `dynaform-build-form` → `data.dataFormDesign` (hoặc dán qua Open 
 
 Thư mục nguồn của lib (từ 4.4.1): `src/lib/builder-core/` (`DynamicFormBuilder`, modes, SDK events, transform, embed) và `src/lib/builder-host/` (`DynaformBuilder`: REST + react-query + save). Hai thư mục này **không** trùng nhau: host render core, không ngược lại. Export public và tên package không đổi.
 
+## 8. Ví dụ đầy đủ
+
+`references/examples.md` — 13 ví dụ TSX bám đúng props thật của lib: cài đặt + CSS, Provider, màn editor, release có nút riêng + `ref.onSubmit()`, nhiều form trên một trang (`isolatedState`), `DynamicFormBuilder` thuần, `config.http` (axios), `controls` / `rawControl` / `defineControl`, `loadFormJson`, `embedPolicy`, lib build local, `onError`.
+
 Tài liệu gốc: `docs/DYNAFORM_BUILDER_INTEGRATION.md`, `docs/DYNAMIC_FORM_BUILDER_INTEGRATION.md`, `docs/SDK_EVENTS.md`, `docs/lib-release-guide.md`.

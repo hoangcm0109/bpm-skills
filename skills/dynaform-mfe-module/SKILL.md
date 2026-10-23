@@ -52,6 +52,10 @@ Chạy được cả **standalone** và **trong shell** — mọi thay đổi ph
 3. Chạy `pnpm typecheck`; kiểm tra standalone (`pnpm start`) và, nếu đụng shell, `start:federated`.
 4. Không đổi version `@dnu/dynaform-builder`, không thêm thư viện mới khi chưa được yêu cầu.
 
+## Ví dụ đầy đủ
+
+`references/examples.md` — thêm một domain mới đi hết chuỗi endpoint → type → service → query → mutation → hook trang → schema Zod → dialog `SectionedFormLayout` (tab mode) → page `DataTableCustom` → route, kèm `FormEditorPage` dùng `DynaformBuilder` và checklist trước khi báo xong. Mô phỏng đúng file thật của domain `application`.
+
 ## Liên quan
 
 Dựng nội dung form: `dynaform-build-form`. Nhúng/props lib: `dynaform-embed-lib`.

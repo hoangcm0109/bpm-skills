@@ -3,6 +3,13 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.6.2 — 2026-10-23 (ví dụ đầy đủ cho từng skill + control `text` không in tên biến)
+
+- **Ví dụ đầy đủ cho cả 8 skill**: mỗi skill có `references/examples.md`; 12 spec mới chạy được (build + validate sạch bằng `dynaform.mjs`): `dynaform-build-form` (`example-contact`, `example-wizard`), `dynaform-components` (`example-input-catalog`, `example-layout-controls`), `dynaform-validation` (`example-validation`), `dynaform-logic-events` (`example-rules`, `example-flows`, `example-table-row-actions`), `dynaform-layout` (`example-layout-recipes`), `dynaform-data-source` (`example-data-source`). `dynaform-embed-lib` có 13 ví dụ TSX bám export thật của lib; `dynaform-mfe-module` có ví dụ thêm domain mới từ endpoint tới route (mô phỏng domain `application` của mfe-dynaform). Mỗi `SKILL.md` link tới ví dụ; `AGENTS.md` + `README.md` ghi lệnh build toàn bộ spec ví dụ.
+- Ví dụ ẩn/hiện field dùng `load` + `field_state: hide` rồi rule hiện lại (không dùng `hidden: true` tĩnh — theo `docs/ACTION_ENGINE.md` không bật lại được bằng logic).
+- **`dynaform.mjs`**: `text` không còn tự gán `label` = tên biến (nhãn rỗng khi spec không đặt `label`) và mặc định `styles.showLabel: "no"`. Trước đây dòng tên biến (`form_title`, `sec_info_title`…) hiện phía trên nội dung Text. Muốn hiện nhãn: `label` + `styles: { "showLabel": "yes" }`.
+- Lib `fe_dynaform`: Text có nhãn trùng tên biến của chính nó thì không in nhãn (form đã lưu trước đó hết hiện `form_title`…; nhãn đặt chủ ý vẫn hiện). `spec-format.md` ghi chú lại.
+
 ## 0.6.1 — 2026-10-22 (khớp `@dnu/dynaform-builder` v4.8.0)
 
 - Lib đã phát hành tag **`v4.8.0`** (gồm `alignSelf`, step `confirm`, `dialog.fillFromRow` / `awaitSubmit`, hành động hàng của table chạy flow, sửa grid và CSS button): tag mẫu `v4.8.0` ở `dynaform-embed-lib` (kèm mục "Từ 4.8.0"), `dynaform-mfe-module`, README; ghi chú "lib mới hơn v4.7.0 / chưa có tag" đổi thành "lib ≥ 4.8.0". `dynaform-mfe-module` nêu rõ module có thể còn ở tag cũ — kiểm `package.json` của mfe-dynaform.

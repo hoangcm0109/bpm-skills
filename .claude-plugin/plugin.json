@@ -1,6 +1,6 @@
 {
   "name": "bpm-skills",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Agent skills cho hệ sinh thái BPM của Dai Nam University: dựng form dynaform (@dnu/dynaform-builder), nhúng thư viện vào MFE và làm việc trong mfe-dynaform.",
   "author": {
     "name": "Hoang Chu Minh"

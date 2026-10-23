@@ -38,6 +38,10 @@ Validation là mảng `validations` trên từng component (spec) ↔ `item_cont
 4. `email`/`url`/`tel`: ưu tiên dùng đúng `type` component (đã có kiểu dữ liệu), thêm rule khi cần thông báo riêng.
 5. Với form dùng `SectionedFormLayout` ở app host (react-hook-form), validation của host là việc khác — xem `dynaform-mfe-module`.
 
+## Ví dụ chạy được
+
+`assets/example-validation.spec.json` — form "Đăng ký tài khoản sinh viên" dùng đủ rule theo từng kiểu control (regex, độ dài, `matchField`, khoảng số, `url`, bắt buộc theo điều kiện). Giải thích + bảng "rule nào đi với control nào": `references/examples.md`.
+
 ## Kiểm tra
 
 `node skills/dynaform-build-form/scripts/dynaform.mjs validate <file>` báo `validation type không hợp lệ` và `matchField trỏ tới field không tồn tại`.

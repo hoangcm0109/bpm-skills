@@ -1,0 +1,32 @@
+{
+  "name": "Hồ sơ cư trú",
+  "description": "Ví dụ nguồn dữ liệu: option tĩnh, select từ API công khai, chuỗi phụ thuộc Tỉnh → Quận → Xã (dependsOn + pathParams), giá trị mặc định, ô chỉ-đọc khi sửa",
+  "components": [
+    { "type": "text", "name": "head", "content": "<h2>Hồ sơ cư trú</h2>" },
+
+    { "type": "input", "name": "resident_code", "label": "Mã hồ sơ", "colSpan": 6,
+      "attributes": { "readonlyOnEdit": true } },
+    { "type": "select", "name": "gender", "label": "Giới tính", "colSpan": 6, "default": "male",
+      "options": [{ "label": "Nam", "value": "male" }, { "label": "Nữ", "value": "female" }, { "label": "Khác", "value": "other" }] },
+
+    { "type": "select", "name": "province", "label": "Tỉnh/Thành", "colSpan": 4, "required": true, "requiredMessage": "Vui lòng chọn tỉnh/thành",
+      "dataSource": { "api": { "baseUrl": "https://provinces.open-api.vn", "endpoint": "/api/p/", "method": "GET",
+        "responsePath": "", "labelField": "name", "valueField": "code" } } },
+    { "type": "select", "name": "district", "label": "Quận/Huyện", "colSpan": 4, "required": true, "requiredMessage": "Vui lòng chọn quận/huyện",
+      "dataSource": { "api": { "baseUrl": "https://provinces.open-api.vn", "endpoint": "/api/p/{province_code}?depth=2",
+        "pathParams": { "province_code": "{$province}" }, "dependsOn": ["province"],
+        "responsePath": "districts", "labelField": "name", "valueField": "code" } } },
+    { "type": "select", "name": "ward", "label": "Phường/Xã", "colSpan": 4,
+      "dataSource": { "api": { "baseUrl": "https://provinces.open-api.vn", "endpoint": "/api/d/{district_code}?depth=2",
+        "pathParams": { "district_code": "{$district}" }, "dependsOn": ["district"],
+        "responsePath": "wards", "labelField": "name", "valueField": "code" } } },
+
+    { "type": "input", "name": "address_detail", "label": "Số nhà, đường", "colSpan": 12 },
+
+    { "type": "submit-button", "name": "btn_submit", "label": "Lưu hồ sơ", "colSpan": 3,
+      "events": [{ "event": "click", "flow": { "id": "submit", "type": "sequence", "steps": [
+        { "id": "valid", "type": "validate_form", "notify": true },
+        { "id": "ok", "type": "show_message", "level": "success", "message": "Đã lưu hồ sơ cư trú." }
+      ] } }] }
+  ]
+}
