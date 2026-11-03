@@ -27,7 +27,7 @@ Control tự định nghĩa của host (`defineControl`, tiền tố `x-`) cũng
 | Ngày | `date-picker`; khoảng ngày → `range-picker`; lịch hiện sẵn → `calendar` | |
 | Giờ | `time-picker` | |
 | Thanh trượt | `range-slider` | |
-| Tệp đính kèm | `file` | cấu hình giới hạn qua `props.fileValidations` — nên chỉnh trong builder |
+| Tệp đính kèm | `file` | cấu hình qua `props.fileValidations`; xem mục "Tệp đính kèm (`file`)" (xem trước, `localOnly`, multipart) |
 | Chữ ký | `signature` | |
 | Soạn thảo văn bản định dạng | `wysiwyg-editor` | |
 | Giá trị phải nằm trong payload submit mà không có nguồn hiển thị | `hidden` | **hạn chế** — không dùng làm cờ/tín hiệu giữa các event; xem "Ưu tiên action flow" ở `dynaform-logic-events` |
@@ -148,7 +148,41 @@ Chi tiết bố cục (số cột từng control, responsive, công thức): ski
 Cột hành động nằm ở `props.table.actionColumn` (`enabled`, `title`, `iconOnly`, `actions[]`). Mỗi hành động: `id`, `label`, `actionKey`, `type` (`edit` | `delete` | `view` | `custom`), `variant` (`outline` | `ghost` | `filled` | `danger`), `icon?`, `tooltip?`, `placement` (`inline` | `menu`), `hiddenWhen` / `disabledWhen` (biểu thức JS theo `row`) và **`flow`** — action flow chạy khi bấm với `$row.data.<cột>`, `$row.key`, `$row.index`.
 Hỏi xác nhận, gọi API, mở dialog (điền sẵn từ dòng, chờ xác nhận), điều hướng, tải lại bảng đều là **step trong flow** — không dùng trường cũ `confirm` / `dialogTarget` / `dataSourceId` / `redirectUrl` cho form mới. Công thức và ví dụ chạy được: `../dynaform-logic-events/SKILL.md` §7.16.
 
+**Bấm cả dòng (lib ≥ 5.3.0)**: `props.table.rowClickActionKey` = `actionKey` của một hành động trong `actionColumn.actions` → bấm vào dòng chạy đúng flow của hành động đó (chỉ ở preview/release; nút, link, ô nhập trong dòng giữ hành vi riêng; hành động đang `hiddenWhen`/`disabledWhen` cho dòng thì không chạy). Dùng cho "bấm dòng → xem chi tiết".
+
+**Cột nhiều dòng (lib ≥ 5.5.0)**: `cellType: "lines"` + `linesExpression` — mẫu `template` không ghép được từng phần tử của mảng, cột này thì có. `linesExpression` là biểu thức JS (biến `value`, `row`, `get(path)`), trả **mảng**; mỗi phần tử là chuỗi hoặc `{ prefix?, text, tone? }` (`tone`: `green` | `red` | `amber`…, tô màu phần `text`; `prefix` giữ màu thường). Ví dụ "tiến trình duyệt theo từng phòng ban":
+
+```jsonc
+{ "key": "approval", "title": "Tiến trình duyệt", "cellType": "lines", "ellipsis": false,
+  "linesExpression": "get('payload_json.approval_workflow.departments').map(d => ({ prefix: d.department + ' -', text: d.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt', tone: d.status === 'approved' ? 'green' : 'amber' }))" }
+```
+
+Biểu thức chạy bằng `new Function` ở **phạm vi toàn cục** — chỉ thấy `value`, `row`, `get`, không thấy field của form. Cần dữ liệu ngoài (vd bảng tra mã → tên) thì để một step `run_script` gán vào `window.<tên>` rồi `push_table` làm mới bảng; biểu thức lỗi → ô trống + cảnh báo console.
+
 Ngoài ra, nhiều nhu cầu chỉ là **diện mạo**: dùng `custom` (class Tailwind / CSS cho khung ngoài, ô nhập, nhãn) trước khi nghĩ tới viết control mới.
+
+## Nút (`button`, `submit-button`, `reset-button`)
+
+- **Biểu tượng**: `styles.icon` (tên icon lucide, vd `"Search"`, `"Plus"`, `"Save"`, `"ArrowRight"`), `styles.iconPosition` (`"left"` mặc định | `"right"`).
+- **Kiểu / màu**: `props.variant` (`"solid"` | `"outline"`…) và `props.color` (`primary`, `secondary`, `accent`, `destructive`, `muted`, `success`, `error`, `warning`). Màu theo theme của host — **không có xanh dương** trong design system, và theme thường có `primary` đen, `secondary` xám nhạt (nút `outline` + `secondary` gần như vô hình trên nền trắng → dùng `outline` + `primary`).
+- **Màu riêng** (vd xanh dương): `props.custom.control.css` — CSS thuần nhắm **chính nút**, `&` là nút, có `:hover`: `"&{background-color:#2563eb;border-color:#2563eb;color:#fff}&:hover{background-color:#1d4ed8}"`. **Đừng** dùng `attributes.style`: lib áp nó cả lên ô lưới chứa nút nên nguyên ô bị tô màu.
+- **Độ rộng (lib ≥ 5.6.0)**: mặc định nút **đầy ô lưới** (`w-full`). `styles.buttonWidth: "auto"` → nút chỉ rộng vừa nhãn (tối thiểu `min-w-28`); kèm `styles.buttonAlign: "start"` | `"center"` | `"end"` để căn nút trong ô (cần lib ≥ 5.6.1 để `end`/`center` căn đúng). Bố cục nhiều nút cạnh nhau: xem công thức "cụm nút" ở `dynaform-layout`.
+- **`reset-button` không có `attributes.type`** (spec/builder không ghi): lib < 5.6.4 render `<button>` không type nên trình duyệt coi là **submit** → bấm "Xoá bộ lọc" vừa chạy flow vừa gửi form (hiện modal "Dữ liệu form đã gửi"). Lib ≥ 5.6.4 mặc định `reset`. Với lib cũ, đặt `attributes: { "type": "reset" }` (hoặc dùng `button` + step `reset_form`).
+- Nút chạy flow `click` (`events: [{ event: "click", flow }]`) bỏ qua đường submit/validate mặc định của lib — validate, gọi API, thông báo đều là step trong flow.
+
+## Tệp đính kèm (`file`)
+
+`props.fileValidations`: `maxFileSize` (MB), `maxFiles`, `allowedExtensions`, `uploadApiUrl`, `uploadMethod`, `uploadFieldName`, `uploadAuth` (`{ "type": "bearer", "token_source": "system" }`), `responseDataPath` (đường dẫn giá trị lưu trong response upload, vd `data.file_upload`), `previewDomain` (ghép với tên/đường dẫn file ra URL tuyệt đối), **`localOnly`**.
+
+- **Xem trước (lib ≥ 5.6.3)**: bấm biểu tượng mắt trên file đã tải mở dialog — **PDF** và ảnh trong `iframe` (PDF được tải về thành blob `application/pdf` rồi nhúng, vì server file hay trả `Content-Disposition`/`X-Frame-Options` làm iframe hiện trang "buồn"; không tải được do CORS thì nhúng thẳng URL), **DOC/DOCX, XLS/XLSX, PPT/PPTX** qua `https://view.officeapps.live.com/op/view.aspx?src=<URL mã hoá>` (**URL file phải truy cập công khai**), định dạng khác → liên kết "Mở trong tab mới". Dialog luôn có liên kết mở tab mới. File `localOnly` xem được PDF/ảnh (blob nội bộ), file Office báo "chưa được tải lên".
+- **Giá trị có sẵn hiện vào danh sách** (lib ≥ 5.6.3): giá trị đặt từ ngoài (`default`, `set_values` ở flow nạp bản ghi) hiện thành file trong danh sách (để xem/xoá); chỉ điền khi danh sách đang trống. Tên file lấy từ đoạn cuối của URL.
+- Nút xem / tải / xoá trong danh sách file không còn gửi form (lib ≥ 5.6.5; trước đó chúng là `<button>` không type nên bấm vào kích hoạt submit + toast "Vui lòng sửa N lỗi").
+- **`localOnly` (lib ≥ 5.4.0)**: không upload, lib giữ `File` trong trình duyệt và form chỉ lưu chuỗi `local-file://<id>` (validation, reset, `set_values`, submit vẫn là chuỗi thường). Gửi file thật bằng step `call_api` có `bodyEncoding: "multipart"` (xem `dynaform-logic-events`). Mất file (tải lại trang) → bước gửi báo lỗi, chọn lại.
+
+## Hiện/ẩn và khoá control bằng logic
+
+- `disable` / `enable` (rule `then`, step `field_state`) đặt `attributes.disabled` lúc chạy. **`select` chỉ nhận được từ lib ≥ 5.6.2** — trước đó select bỏ qua `attributes.disabled` (chỉ nhìn `validations.readOnly`, trạng thái tải, select cha) nên rule khoá không có tác dụng, còn `input`/`checkbox`/`radio`/`date-picker` thì khoá bình thường. Select đang khoá hiện mờ 50%, không mở được.
+- Control bị `field_state hide` / rule ẩn **giải phóng cả ô lưới** của nó (lib ≥ 5.3.0): trước đây control tự không vẽ gì nhưng ô chứa vẫn chiếm chỗ, để hở một khoảng trong hàng.
 
 ## Khi nào mới dùng `custom-embed`
 

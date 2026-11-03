@@ -3,6 +3,18 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.7.0 — 2026-11-03 (khớp `@dnu/dynaform-builder` v5.2.0 + bản chưa tag 5.3.0 → 5.6.5)
+
+Đồng bộ với các thay đổi lib làm khi dựng module học bổng bằng JSON thuần (Rule → Cấu hình học bổng → Chiến dịch).
+
+- **`dynaform-embed-lib`**: tag mẫu `v5.2.0`; peer dependencies mới từ **5.0.0** (host phải tự cài `lucide-react`, `@sth87/shadcn-design-system`, `@tanstack/react-query`, `@dnd-kit/*`, `zod`, `react-hook-form`); tóm tắt 4.8.1 → 5.2.0; mục "Từ 5.3.0" liệt kê từng bản 5.3.0 → 5.6.5 và cách dùng bản chưa tag qua tgz của shell (cài khi dev server chạy làm shell lỗi `ENOENT style.css` → phải restart).
+- **`dynaform-components`**: `table.rowClickActionKey` (bấm dòng), cột `cellType: "lines"` + `linesExpression` (kèm giới hạn phạm vi toàn cục của biểu thức); mục **Nút** (icon, `variant`/`color`, màu riêng qua `custom.control.css` — không dùng `attributes.style`, `buttonWidth`/`buttonAlign`, lỗi `reset-button` thành submit < 5.6.4); mục **Tệp đính kèm** (xem trước PDF/Office, `localOnly`, giá trị có sẵn hiện vào danh sách, nút file không còn submit); mục khoá/ẩn control bằng logic (`select` nhận `disabled` từ 5.6.2, control ẩn giải phóng ô lưới).
+- **`dynaform-layout`**: công thức "cụm nút sát nhau" (container + CSS flex cho lưới trong) và `styles.buttonWidth` cho nút.
+- **`dynaform-logic-events`**: `call_api.bodyEncoding: "multipart"` + công thức §7.12b gửi file `localOnly`.
+- **`dynaform-build-form`** (`references/spec-format.md`): khoá `styles` / `props` mới cho nút, bảng, file.
+- **`dynaform-mfe-module`**: mục "Màn hình dựng bằng JSON thuần" (Runner, cầu điều hướng `mfe:shell:navigate`, pipeline `scripts/scholarship-forms`: `push.mjs`, `button-style.mjs`, `breadcrumb.mjs`); tag lib `v5.2.0`.
+- Không đổi `dynaform.mjs`.
+
 ## 0.6.2 — 2026-10-23 (ví dụ đầy đủ cho từng skill + control `text` không in tên biến)
 
 - **Ví dụ đầy đủ cho cả 8 skill**: mỗi skill có `references/examples.md`; 12 spec mới chạy được (build + validate sạch bằng `dynaform.mjs`): `dynaform-build-form` (`example-contact`, `example-wizard`), `dynaform-components` (`example-input-catalog`, `example-layout-controls`), `dynaform-validation` (`example-validation`), `dynaform-logic-events` (`example-rules`, `example-flows`, `example-table-row-actions`), `dynaform-layout` (`example-layout-recipes`), `dynaform-data-source` (`example-data-source`). `dynaform-embed-lib` có 13 ví dụ TSX bám export thật của lib; `dynaform-mfe-module` có ví dụ thêm domain mới từ endpoint tới route (mô phỏng domain `application` của mfe-dynaform). Mỗi `SKILL.md` link tới ví dụ; `AGENTS.md` + `README.md` ghi lệnh build toàn bộ spec ví dụ.

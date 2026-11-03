@@ -44,7 +44,7 @@ Số dưới là **gợi ý thiết kế** để form đều và đọc được
 | `image` | **4**–**6** (ảnh đại diện cạnh form) hoặc **12** (banner) | |
 | `divider` | **12** | |
 | `link` | theo ngữ cảnh (thường 12 hoặc cạnh nút) | |
-| `button` / `submit-button` / `reset-button` | **12** (nút full), hoặc **3**–**4** + `colStart` để căn phải | Xem công thức "nút căn phải" |
+| `button` / `submit-button` / `reset-button` | **12** (nút full), hoặc **3**–**4** + `colStart` để căn phải | Xem công thức "nút căn phải" và "cụm nút sát nhau"; lib ≥ 5.6.0 có `styles.buttonWidth: "auto"` để nút không bị kéo dài hết ô |
 | `container`, `tab`, `steps`, `columns`, `grid`, `list`, `nested-list`, `form-loop`, `sub-form` | **12** | Khối bố cục chiếm cả hàng; cột bên trong chia riêng |
 | `dialog`, `drawer`, `bottom-sheet` | (không chiếm chỗ) | |
 | `hidden` | (không hiển thị) | Hạn chế dùng — xem `dynaform-logic-events` |
@@ -136,6 +136,16 @@ Nguyên tắc:
 { "type": "submit-button", "name": "btn_submit", "label": "Gửi",     "colSpan": 2 }
 ```
 (`colStart: 9` + 2 + 2 → các cột 9–12. Script tự đưa về cột `auto` + `colSpan 12` trên mobile.) Hoặc đơn giản hơn: mỗi nút `colSpan` 12 nếu form hẹp.
+
+**Cụm nút sát nhau (lib ≥ 5.6.0)** — mỗi nút nằm trong một ô lưới 12 cột riêng, nên nhiều nút `colSpan` nhỏ cạnh nhau **cách xa** nhau khi khung rộng (khoảng cách = phần dư của ô). Muốn các nút sát nhau, gom cụm vào một `container` không viền và đổi lưới bên trong thành flex bằng CSS của chính container; nút bên trong `colSpan: 12`, rộng vừa nhãn:
+```jsonc
+{ "type": "container", "name": "grp_actions", "colSpan": 4, "colStart": 9,
+  "container": { "type": "div", "border": false },
+  "custom": { "css": "& .grid-cols-12{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:flex-end;gap:.75rem}" } },
+{ "type": "reset-button", "name": "btn_reset", "label": "Xoá bộ lọc",  "parent": "grp_actions", "colSpan": 12, "styles": { "buttonWidth": "auto", "buttonAlign": "start" } },
+{ "type": "button",       "name": "btn_search", "label": "Tìm kiếm",   "parent": "grp_actions", "colSpan": 12, "styles": { "buttonWidth": "auto", "buttonAlign": "start" } }
+```
+`justify-content: flex-end` cho cụm nằm cuối hàng (đi cùng `colStart`), `flex-start` cho cụm đứng đầu hàng. Container chiếm đúng vùng cột của cả cụm (`colSpan` = tổng các nút, tối đa `13 − colStart`). Nút lẻ (không đi cùng ai): `colSpan` nhỏ + `styles.buttonWidth: "auto"` + `buttonAlign: "end"` để dính mép phải ô. Chi tiết về độ rộng/căn nút: `dynaform-components` › Nút.
 
 **Cột nội dung 8 + 4** — form bên trái, tóm tắt bên phải (khác độ rộng → dùng `columns`):
 ```jsonc

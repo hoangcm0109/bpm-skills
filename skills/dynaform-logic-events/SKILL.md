@@ -185,6 +185,7 @@ Script chỉ tham chiếu tới `name` đã có trong spec và `$steps.<id>` có
 | `authConfig` | `{ type: "none"\|"bearer"\|"basic"\|"api_key", token_source: "system"\|"manual", token? }` — **dùng `token_source: "system"`**; không ghi token vào form |
 | `pathMapping` / `queryMapping` / `headerMapping` | `[{ source: ValueSource, target, required? }]`. `pathMapping` thay `{id}` trong `url`; `required: true` → lỗi nếu giá trị rỗng |
 | `bodyMode` | `static` (dùng `body` nguyên văn) \| `mapping` (`bodyMapping: [{source,target}]`) \| `form` (**cả form**, đúng dạng payload submit) \| `tree` (Recursive Mapping Builder — làm trong builder) |
+| `bodyEncoding` | `json` (mặc định) \| `multipart` (lib ≥ 5.4.0): gửi `multipart/form-data` (trình duyệt tự đặt Content-Type + boundary). Mỗi khoá cấp 1 của body: `null`/`undefined` bỏ qua; chuỗi `local-file://…` (file của control `file` có `localOnly`) hoặc `Blob` → phần file; object/mảng → JSON text; còn lại → chuỗi. Mất file → lỗi "chọn lại" |
 | `applyResponseMapping` | chỉ với `apiRef`: ghi response vào field theo Response Mapping của Data Source |
 | output | `$steps.<id>.output` = payload đã bóc; đọc `…output.data.items[0].name` |
 
@@ -336,6 +337,20 @@ rồi dùng `rules`/`condition` để hiện ra khi điều kiện đúng.
 { "event": "click", "flow": { "id": "dl", "type": "navigate", "url": "https://api.example.com/reports/{{$form.current.values.report_id}}/export",
   "download": { "authConfig": { "type": "bearer", "token_source": "system" }, "fileName": "bao-cao.xlsx" } } }
 ```
+
+### 7.12b Gửi file bằng multipart (lib ≥ 5.4.0)
+
+Control `file` đặt `props.fileValidations.localOnly: true` (không upload, form chỉ giữ `local-file://<id>`), rồi flow gửi cùng các trường khác trong một request:
+```jsonc
+{ "id": "import", "type": "call_api", "method": "POST", "url": "https://api.example.com/v1/import",
+  "authConfig": { "type": "bearer", "token_source": "system" },
+  "bodyMode": "mapping", "bodyEncoding": "multipart",
+  "bodyMapping": [
+    { "source": { "type": "ref", "path": "$form.current.values.campaign_code" }, "target": "campaign_code" },
+    { "source": { "type": "ref", "path": "$form.current.values.import_file" },  "target": "file" }
+  ] }
+```
+Không đặt `Content-Type` trong `headers` (sẽ làm mất boundary). Server nhận phần `file` như upload thường.
 
 ### 7.13 Custom-embed phát sự kiện → flow (không dùng field ẩn)
 

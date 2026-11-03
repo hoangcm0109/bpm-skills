@@ -22,7 +22,7 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 
 ## Cài đặt & cập nhật
 
-Phiên bản hiện tại: **0.6.2** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v4.8.0`.
+Phiên bản hiện tại: **0.7.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v5.2.0` và các bản chưa tag 5.3.0–5.6.5.
 
 ### Claude Code
 

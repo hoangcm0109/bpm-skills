@@ -42,8 +42,17 @@ Chạy được cả **standalone** và **trong shell** — mọi thay đổi ph
 - **Không có dialog tạo form** trong module (đã gỡ `CreateFormDialog`): trang danh sách chỉ có nút "Đi tới workspace để tạo form", mở `{REACT_APP_BPM_URL}/workflow/workspaces` ở tab mới (`resolveBpmUrl()` trong `lib/runtimeConfig.ts`, `BPM_WORKSPACES_PATH` trong `constants/formManager.ts`). Chưa cấu hình `REACT_APP_BPM_URL` thì nút ẩn. Form mới được tạo bên trong một workspace của BPM, không tạo từ mfe-dynaform.
 - Chỉ mở editor cho version **`draft`**; mở với `id` + môi trường của version đang chọn.
 - Môi trường & publish: `ENDPOINTS.formDesign.{publish,changeStatus,edit,crossEnv}`; pipeline lấy từ `flow_publish` của form.
-- Tag lib mới nhất: `v4.8.0`; module có thể còn ở tag cũ hơn (đã thấy `v4.7.0`) — kiểm tra `package.json` của mfe-dynaform trước khi nói về version.
+- Tag lib mới nhất: `v5.2.0` (các bản 5.3.0–5.6.5 chưa gắn tag, chỉ có qua tgz của shell); module có thể còn ở tag cũ hơn (đã thấy `v4.7.0`, `v5.2.0`) — kiểm tra `package.json` của mfe-dynaform trước khi nói về version.
 - Sửa version lib: đổi tag trong `package.json` rồi cài lại; thử thay đổi lib chưa release bằng `pnpm start:linked` (xem `dynaform-embed-lib`).
+
+## Màn hình dựng bằng JSON thuần (module học bổng)
+
+Nhóm màn hình `scholarship/*` (Rule, Cấu hình học bổng, Chiến dịch) **không có code trang riêng**: mỗi màn là một form dynaform chạy release.
+
+- `pages/scholarship/ScholarshipRunnerPage.tsx` mở `DynaformBuilder mode="release"` theo `screen` (map ở `constants/scholarship.ts`: path + `mode`, id form theo môi trường ở `constants/scholarshipForms.generated.json`); route params + query vào form qua `dataUserFill = { ...query, mode, id }` (flow không có `$route`).
+- Điều hướng giữa màn hình: step `emit_event` với sự kiện `mfe:shell:navigate` (`payload.path`, `id?`, `query?`) — shell và Runner cùng nghe và gọi `navigate` SPA, không reload.
+- Form sinh từ spec: `scripts/scholarship-forms/specs/*.spec.mjs` → `node scripts/scholarship-forms/push.mjs [--dry-run] [--only <màn>]` → build (`dynaform.mjs`) → `POST /api/v1/form-designs/save` (`expected_revision` lấy từ `draft_revision`). Placeholder `{{@KEY}}` trong spec lấy từ `env.json`. Các bước chạy trước/sau build, sửa một chỗ là đổi mọi form: `button-style.mjs` (icon/kiểu/màu/độ rộng nút theo nhãn + gom cụm nút sát nhau), `breadcrumb.mjs` (chèn embed breadcrumb bấm được trước `page_title`, nhãn cấp cuối đổi theo `mode`), `tailwind.mjs` (biên dịch Tailwind cho embed).
+- Sau khi đổi lib (`yarn build:lib:shell` ở `fe_dynaform`) → `pnpm install` ở shell → **restart shell** mới thấy; Runner `:9268` dùng tag cũ nên không có tính năng mới.
 
 ## Quy trình sửa
 

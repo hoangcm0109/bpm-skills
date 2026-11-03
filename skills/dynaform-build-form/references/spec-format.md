@@ -46,10 +46,10 @@
 | `list` | list / nested-list | `{ "minRows", "initialRows", "maxRows"?, "addButtonLabel" }` |
 | `loop` | form-loop | `{ "mode": "variable", "dataPath", "itemAlias", "emptyText", "allowAdd", "allowRemove", "submitFields"? }` |
 | `dialog` | dialog / drawer / bottom-sheet | `{ "variant": "confirmation"\|"form"\|"info"\|"custom", "title", "description" }` |
-| `styles` | | trộn thêm vào `editable_props.styles` (vd `{ "showLabel": "no" }`) |
+| `styles` | | trộn thêm vào `editable_props.styles` (vd `{ "showLabel": "no" }`). Nút: `icon`, `iconPosition` (`left`\|`right`), `buttonWidth` (`full`\|`auto`), `buttonAlign` (`start`\|`center`\|`end`) — xem `dynaform-components` › Nút |
 | `overrides` | | theo viewport, **desktop trước**: `{ "md": { "colSpan": 6 }, "sm": { "colSpan": 12 } }` (md: khung < 1024px, sm: < 768px; thêm được `colStart`, `showLabel`…). Dạng cũ `{ "sm": { "styles": {…} } }` vẫn nhận; không có `lg` |
 | `custom` | | CSS thuần + class Tailwind của người dùng cho **mọi** control (lib ≥ 4.6.0) → `properties.custom`: `{ "className": "rounded-xl border p-4", "css": "background:#f8fafc", "control": { "className", "css" }, "label": { "className", "css" } }` — xem `dynaform-components` › Style tuỳ chỉnh |
-| `props` | | passthrough vào `editable_props.properties` (cấu hình sâu: table, file…) |
+| `props` | | passthrough vào `editable_props.properties` (cấu hình sâu: table, file…; nút: `variant`, `color`, `custom.control.css`; bảng: `table.rowClickActionKey`, cột `cellType: "lines"`; file: `fileValidations.localOnly`) |
 | `reason` | `custom-embed` (bắt buộc), `hidden` (nên có) | vì sao control có sẵn / action flow không đáp ứng; không xuất ra JSON, chỉ hiện trong cảnh báo của script |
 | `embed` | `custom-embed` | `{ code, inputs?, outputs?, events?, valueType?, height?, sampleData?, tailwind? }` → `properties.embed` (mặc định sandbox + React + Tailwind). `code` là JS dùng `DfbReact.html\`…\`` → ghi vào `source` và `js`. `inputs: [{ name, field }]`, `outputs: [{ name, to }]` trỏ tới `name` field có thật; `events` khai báo để gắn handler `embed:<tên>`. Chi tiết: `custom-embed.md` |
 
