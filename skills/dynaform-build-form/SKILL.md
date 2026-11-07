@@ -1,6 +1,7 @@
 ---
 name: dynaform-build-form
-description: Dựng một form dynaform (FormDesignJson của @dnu/dynaform-builder) từ yêu cầu nghiệp vụ — viết spec gọn, chạy script sinh JSON, kiểm tra và nạp vào builder/runtime. Dùng khi người dùng nói "tạo form", "dựng form đăng ký/khảo sát/…", "sinh JSON form", "build form dynaform", "thiết kế form bằng AI", "cho xem form hiện dần/stream/build tới đâu hiện tới đó". Đây là skill điểm vào duy nhất cần gọi: đã gồm bảng tra nhanh về component, validation, logic/event, bố cục và data source; chỉ đọc thêm skill chi tiết khi cần.
+description: >-
+  Dựng một form dynaform (FormDesignJson của @dnu/dynaform-builder) từ yêu cầu nghiệp vụ — viết spec gọn, chạy script sinh JSON, kiểm tra và nạp vào builder/runtime. Dùng khi người dùng nói "tạo form", "dựng form đăng ký/khảo sát/…", "sinh JSON form", "build form dynaform", "thiết kế form bằng AI", "cho xem form hiện dần/stream/build tới đâu hiện tới đó". Đây là skill điểm vào duy nhất cần gọi: đã gồm bảng tra nhanh về component, validation, logic/event, bố cục và data source; chỉ đọc thêm skill chi tiết khi cần.
 ---
 
 # Dựng form dynaform

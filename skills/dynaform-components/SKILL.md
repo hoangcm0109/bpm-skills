@@ -1,6 +1,7 @@
 ---
 name: dynaform-components
-description: Danh mục component (type) của dynaform builder và cách chọn đúng type cho từng loại dữ liệu — input, tel, select, date-picker, file, table, container, tab, steps, dialog… Mô tả đầy đủ control layout (container, columns 2/3/4, grid, tab, steps, dialog/drawer/bottom-sheet, list, form-loop, sub-form: khoá cấu hình, cách đặt con, lỗi thường gặp). Dùng khi cần quyết định dùng component nào (ưu tiên control có sẵn; custom-embed chỉ là lựa chọn cuối, viết bằng React + Tailwind), cấu hình thuộc tính riêng của một component, hoặc khi gặp lỗi "type không có trong registry".
+description: >-
+  Danh mục component (type) của dynaform builder và cách chọn đúng type cho từng loại dữ liệu — input, tel, select, date-picker, file, table, container, tab, steps, dialog… Mô tả đầy đủ control layout (container, columns 2/3/4, grid, tab, steps, dialog/drawer/bottom-sheet, list, form-loop, sub-form: khoá cấu hình, cách đặt con, lỗi thường gặp). Dùng khi cần quyết định dùng component nào (ưu tiên control có sẵn; custom-embed chỉ là lựa chọn cuối, viết bằng React + Tailwind), cấu hình thuộc tính riêng của một component, hoặc khi gặp lỗi "type không có trong registry".
 ---
 
 # Component dynaform
