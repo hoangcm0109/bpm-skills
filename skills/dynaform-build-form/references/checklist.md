@@ -62,4 +62,5 @@ Không có công cụ kiểm tự động — đi hết danh sách này **trên 
 
 - [ ] JSON **hợp lệ về cú pháp** (không dư dấu phẩy, không comment `//`, ngoặc cân).
 - [ ] Có nút gửi (`submit-button` hoặc `button` có flow) nếu form cần gửi; không có hai `submit-button`.
+- [ ] Nếu sẽ lưu qua MCP `save_form_design`: mỗi phần tử gốc của `form_components` có vỏ ngoài `kind: "component"`, `data_lang` (không rỗng, = `<type>-<name>`), `sort_order`, `variable_name` (`form-json.md` §13); không truyền `id` khi tạo mới.
 - [ ] Báo cáo (SKILL.md bước 7) nêu rõ: các field, logic/flow, phần chưa làm được, mọi `custom-embed` / `hidden` / script / URL có trong form, field thu thập dữ liệu cá nhân.

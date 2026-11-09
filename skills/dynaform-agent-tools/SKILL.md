@@ -22,13 +22,16 @@ Giao thức giữa gateway và editor (SSE) và cách host nối vào: [`referen
 Đọc (`/query/v1`): `list_form_designs`, `get_form_design`, `list_form_versions`, `list_item_controls`, `list_form_submissions`.
 Ghi (`/command/v1`): `save_form_design`, `clone_form_design`, `create_form_draft`, `publish_form_draft`.
 
-- Truy cập qua MCP của multi-tenant server: `POST <host>/mcp/dynaform-service` (tên tool y hệt; `tools/list` là nguồn đúng). Hoặc gọi REST trực tiếp theo bảng ở `references/server-tools.md`.
+- Truy cập qua MCP connector `dynaform-service` (tên tool y hệt; `tools/list` của connector là nguồn đúng). Source MCP cũ trong repo `dynaform-service` đã bị xoá (commit `927f207`), nên không còn endpoint `/api/v1/mcp` để dựa vào. Đường REST tương ứng: xem `references/server-tools.md`.
 - Auth: thiết kế gốc là `Authorization: Bearer <token người dùng>` chuyển tiếp nguyên trạng. Với MCP multi-tenant, token nằm trong `config.auth` của connection `dynaform-service`; token hết hạn ⇒ tool trả `401` — cấp lại token ở connection, không sửa tool.
 - **Luồng sửa form**: `create_form_draft(id=<version hiện tại>)` → `save_form_design(id=<id draft>, expected_revision=<revision đã đọc>, …)` → `publish_form_draft(id=<id draft>, base_version=<version đã thấy>)`.
 - `save_form_design` không có `id` ⇒ **tạo mới**; có `id` ⇒ cập nhật và **phải** kèm `expected_revision` (lấy từ `get_form_design`) để không ghi đè người khác.
+- `form_components` gửi lên `save_form_design` **không** phải JSON dán vào builder: mỗi control gốc cần vỏ ngoài `{ kind, data_lang, sort_order, variable_name, item_control }`, thiếu `data_lang` ⇒ `400 form_components.N.data_lang should not be empty`. Định dạng đầy đủ: `../dynaform-build-form/references/form-json.md` §13.
 - `publish_form_draft` gặp `409 VERSION_CONFLICT` ⇒ DEV đã có version mới hơn. **Chỉ** gửi lại với `force=true` khi người dùng đã xác nhận rõ.
 - `get_form_design` được ghi audit `form.view` dưới tên chủ token — đừng gọi vòng lặp không cần thiết.
 - Kết quả bị cắt ở 60 000 ký tự: thu hẹp bằng `page`/`limit`/`search`/`environment`.
+- **Không có tool xoá form.** Vòng đời CRUD: Create = `save_form_design` (không `id`), Read = `get_form_design`/`list_*`, Update = luồng sửa ở trên, Delete = không hỗ trợ.
+- Môi trường dùng enum `DEV|STG|PROD|TEST|UAT|LAB`. `CORE` là môi trường đã bỏ (đã gộp vào `DEV`); source backend hiện tại từ chối `CORE`. Mô tả tool trên connector có thể vẫn liệt kê `CORE` — không truyền, dùng `DEV` hoặc bỏ trống.
 
 ## 2. Client tool — chạy trong editor
 

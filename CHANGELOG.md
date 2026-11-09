@@ -3,6 +3,27 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.10.0 — 2026-11-09 (khớp `@dnu/dynaform-builder` v5.6.7)
+
+Đối chiếu tag `v5.6.7` (annotated tag → commit `4c47fe2d`, `package.json` ghi `5.6.7`) với skill đang đồng bộ tới 5.6.5. Repo lib chỉ có tag `v5.2.0` rồi `v5.6.7`; các bản 5.3.0–5.6.6 không có tag riêng.
+
+- **`dynaform-embed-lib`**: tag mẫu `#v5.6.7`; bỏ các câu "chưa gắn tag" cho 5.3.0 → 5.6.5 (nay đã nằm trong tag); thêm mục 5.6.6 → 5.6.7 (không tách được từng bản vì git chỉ có một commit release); thêm ghi chú **cache theo `mode`** của `DynaformBuilder` (preview/release giữ cache 60 giây, editor luôn tải mới — vừa lưu mà mở `release` ngay có thể thấy bản cũ); ghi host nào ghim tag nào (`mfe-dynaform` `v5.6.7`, `mfe-shell-app` tgz 5.6.7, `mfe-workflow` `v4.8.2`).
+- **`dynaform-components`**: mục `tab` thêm **`tabs[].hideWhen`** (ẩn tab theo điều kiện, lib ≥ 5.6.7): `match` AND/OR, `when[]` với toán tử kiểu rule (`equals`, `isEmpty`…, khác toán tử flow), editor luôn hiện đủ tab, builder chưa có UI. Ghi rõ điều **chưa kiểm**: control trong tab đang ẩn có tham gia validation/submit hay không.
+- **`dynaform-build-form`** `references/form-json.md` §5: dòng `tab` nhắc `hideWhen`.
+- **`dynaform-mfe-module`**: tag mới nhất `v5.6.7`; Runner dùng lib theo tag trong `package.json`.
+- **`README.md`**: dòng "khớp lib" → `v5.6.7`.
+- **Đã có sẵn từ lần đồng bộ 5.6.5, không phải sửa**: `rowClickActionKey`, `bodyEncoding: "multipart"`, `localOnly`, ô `lines`, `buttonWidth`/`buttonAlign`, `reset-button`, xem trước file, `select` bị khoá — đối chiếu với diff commit release cho thấy khớp.
+- **`docs/` của lib không đổi** giữa `v5.2.0` và `v5.6.7`, nên không có gì phải chuyển từ tài liệu tích hợp.
+- **Agent bridge vẫn chưa có tag**: `createSseRunAgentTurn` không có trong `v5.6.7` (chỉ là thay đổi chưa commit ở working tree của `fe_dynaform`). `dynaform-agent-tools` giữ nguyên yêu cầu "cần bản lib có bridge".
+
+## 0.9.1 — 2026-11-09 (sửa: lưu form qua MCP `save_form_design` bị 400 thiếu `data_lang`)
+
+- **Lỗi**: agent làm theo `form-json.md` §2 và gửi `form_components: [{ "item_control": {…} }]` vào `save_form_design` ⇒ server trả `400 form_components.N.data_lang should not be empty`. Nguyên nhân: `SaveFormDesignDto` của `dynaform-service` xếp phần tử có `item_control` (không có `slug`/`renderer_key` ở cấp ngoài) vào `ComponentInputDto`, bắt buộc `data_lang` ở **vỏ ngoài**.
+- **`dynaform-build-form`**: `references/form-json.md` thêm §13 (vỏ ngoài `{ kind, data_lang, sort_order, variable_name, item_control }`, tham số cấp form, trường server tự thêm, phạm vi đã kiểm / chưa kiểm); `SKILL.md` bước 6 + bảng "Bẫy hay gặp"; `references/checklist.md` mục H.
+- **`dynaform-agent-tools`**: `SKILL.md` và `references/server-tools.md` ghi chú vỏ ngoài cho `form_components`.
+- Đã kiểm thực tế trên DEV (tạo mới → `get_form_design`): form login 5 control phẳng; form có `container` + 2 con trong `children_schema` (con cũng cần vỏ ngoài) và nút `click` có `eventHandlers` (`validate_form` → `show_message`). Dữ liệu đọc lại trả container gốc dạng flat. **Chưa kiểm** `tab`/`steps`/`columns`, `grid`, `dialog`, `select` có `data_source`, `custom-embed`.
+- `CORE`: ghi chú sửa lại cho khớp backend — môi trường đã bỏ, source hiện tại từ chối `CORE`; mô tả tool trên connector có thể vẫn liệt kê `CORE`, không truyền.
+
 ## 0.9.0 — 2026-11-09 (bỏ toàn bộ script: skill chỉ còn tài liệu markdown)
 
 - **Xoá `skills/dynaform-build-form/scripts/`** (`dynaform.mjs`, `stream-server.mjs`) và 12 file `assets/*.spec.json`: repo không còn file thực thi nào, giảm bề mặt tấn công khi cài skill (xem `SECURITY.md`). Bỏ luôn chế độ "build dần" (`stream-preview.md`).

@@ -86,6 +86,15 @@ Chọn nhanh: field đứng cạnh nhau trong một nhóm → chỉ cần `colSp
 
 ### `tab`
 - `tabs: [{ "id": "tab-1", "label": "Thông tin" }, …]` (id duy nhất, ổn định — con tham chiếu id này). Mỗi con của tab khai `parent` + `tabId`. Panel trong tab là lưới 12 cột.
+- **Ẩn tab theo điều kiện (lib ≥ 5.6.7)**: mỗi phần tử `tabs[]` có thể thêm `hideWhen: { "match": "AND" | "OR", "when": [{ "field": "<name>", "operator": "...", "value": "..." }] }` — tab và panel của nó bị bỏ khỏi thanh tab trong lúc điều kiện đúng. `match` mặc định `AND`; `when` rỗng = luôn hiện. `field` là `name` của field; `operator` dùng tên của **rule** (`equals` `notEquals` `isEmpty` `isNotEmpty` `greaterThan` `lessThan` `contains` `notContains`), **không** phải toán tử flow (`eq`/`neq`…); so sánh dạng chuỗi (số cho `greaterThan`/`lessThan`; `contains` không phân biệt hoa thường). Tab đang mở mà bị ẩn thì nhảy sang tab hiện đầu tiên. **Editor luôn hiện đủ mọi tab** nên chỉ thấy hiệu quả ở preview/release. Builder **không có UI** cho `hideWhen` (chỉ viết trong JSON; đổi nhãn/kéo thả tab trong builder giữ nguyên nó). Chưa kiểm: giá trị/validation của control nằm trong tab đang ẩn có còn được tính khi gửi form hay không — đừng giả định, thử ở preview.
+  ```json
+  "tabs": [
+    { "id": "general", "label": "Thông tin chung" },
+    { "id": "result", "label": "Kết quả", "hideWhen": { "match": "OR", "when": [
+      { "field": "ui_state", "operator": "equals", "value": "pending" },
+      { "field": "ui_state", "operator": "isEmpty" } ] } }
+  ]
+  ```
 - Muốn chặn người dùng sang phần sau khi phần trước chưa hợp lệ → dùng `steps` + `validateOnNext`, không dùng `tab`.
 - Chuyển tab bằng code (`switch_tab`) **chưa có tác dụng**; người dùng tự bấm.
 

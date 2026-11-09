@@ -145,7 +145,7 @@ Theo type — mỗi khoá nằm cùng cấp trong `properties`:
 
 | Cho type | Khoá |
 |---|---|
-| `tab` / `steps` | `tabs` / `steps` + `stepsOptions` `{ showPrevious, defaultPreviousLabel, defaultNextLabel, finishLabel, showProgress, validateOnNext, progressVariant }` |
+| `tab` / `steps` | `tabs` (mỗi tab có thể thêm `hideWhen`, lib ≥ 5.6.7 — chỉ `tab`; xem `dynaform-components` › `tab`) / `steps` + `stepsOptions` `{ showPrevious, defaultPreviousLabel, defaultNextLabel, finishLabel, showProgress, validateOnNext, progressVariant }` |
 | `columns` | `columns` `{ count, spans, gap, stackOnMobile }` |
 | `grid` | `grid` `{ cols (1..6), rows, columnWidths: ["1fr",…] (đủ `cols` phần tử), gap: "1rem", stackOnMobile: "yes", spans?: { "<ô>": { r, c } } }`; `rows` = ⌈số con ÷ cols⌉ nếu không gộp ô |
 | `list` / `nested-list` | `list` `{ minRows: 1, initialRows: 1, addButtonLabel: "+ Add", maxRows? }` |
@@ -279,3 +279,27 @@ Lối thoát **cuối cùng** (khi mọi control có sẵn không đáp ứng); 
 
 Giá trị mặc định của mọi thuộc tính (loader trộn lại), `parent_id`, `locked_props`, `logic_rules`, `behavior`, vỏ ngoài (`status`, `page`, `kind`…), `variables.data_source: {}` khi không có nguồn.
 Khi người dùng mở JSON trong builder và Save, builder xuất lại bản đầy đủ — đó là bản nên lưu lên backend.
+
+## 13. Gói JSON khi lưu qua MCP `save_form_design`
+
+Định dạng ở §1–§2 là của **loader lib** (dán vào builder). Backend (`SaveFormDesignDto` của `dynaform-service`) kiểm tra chặt hơn: mỗi phần tử **gốc** của `form_components` phải có **vỏ ngoài** kèm `data_lang` ở cấp ngoài. Gửi `{ "item_control": {…} }` trần sẽ bị `400`:
+`form_components.0.data_lang should not be empty, form_components.0.data_lang must be a string`.
+
+```jsonc
+{ "kind": "component",
+  "data_lang": "input-username",      // = item_control.data_lang = "<type>-<name>"; BẮT BUỘC, không rỗng
+  "sort_order": 2,                    // = item_control.sort_order
+  "variable_name": "username",        // = item_control.variables.name
+  "item_control": { /* nguyên khối §2 */ } }
+```
+
+Quy tắc khi gọi tool:
+- Tham số cấp form: `name`, `data_lang` (`"vi"` — của **form**, khác `data_lang` của control), `settings`, `form_components`; thêm `environment: "DEV"` nếu cần nêu rõ. **Không** truyền `id` khi tạo mới (có `id` = cập nhật, phải kèm `expected_revision`). Không truyền `CORE` (đã bỏ).
+- Chỉ truyền `settings` + `form_components` (+ `name`, `description`); không gửi nguyên tài liệu §1 có `id` ở gốc. Server tự cấp `id` form, `application_code`, `code`, `status: "draft"` — `settings.setting.id` giữ nguyên giá trị đã gửi, **không** tự đồng bộ theo id server cấp.
+- Server tự thêm vào bản lưu: `source`, `path_relationship`, `logic_rules: []`, `children_schema: []`, `validation_rules: null`. Không cần viết.
+- Đã kiểm thực tế (2026-11-09, DEV) với 5 control phẳng: `text`, `input`, `password`, `checkbox`, `submit-button` — lưu được, `get_form_design` trả đủ `validation_schema`/`editable_props`.
+- **Cây lồng**: con của `container` nằm trong `item_control.children_schema` của cha, và **mỗi con cũng phải có vỏ ngoài** `{ kind, data_lang, sort_order, variable_name, item_control }` (`sort_order` đếm lại từ 1 trong từng cha). Đã kiểm (2026-11-09, DEV): container + 2 con `input`/`password` lưu được; server tự điền `parent_id`, `source: "children_schema"`, `path_relationship: "<id cha>/<id con>"`.
+- **`eventHandlers`** đặt trong `item_control.editable_props.properties` như §8 — đã kiểm với nút `click` chạy flow `validate_form` → `show_message`, đọc lại còn nguyên cấu trúc.
+- **Dữ liệu đọc lại khác dữ liệu gửi lên**: `get_form_design` trả container ở gốc dạng **flat** (không còn `item_control` bọc), còn control lá và con trong `children_schema` trả dạng wrapper. Muốn sửa form có sẵn thì giữ nguyên `id` của từng control và khi gửi lại vẫn bọc vỏ ngoài như trên.
+- **Chưa kiểm**: `tab`/`steps`/`columns` (`parent_tab_id`), `grid`, `dialog`, `select` có `data_source`, `custom-embed`. Gặp `400`, đọc `err_mess` (nêu rõ `form_components.<chỉ số>.<trường>`) và đối chiếu `SaveFormDesignDto` trong `dynaform-service` thay vì đoán.
+- Đường khác server chấp nhận: "V2 flat" — phần tử gốc chính là item_control (có `slug`/`renderer_key` ở cấp trên, không có `item_control` bọc). Chưa kiểm; dùng vỏ ngoài ở trên.

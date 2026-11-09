@@ -32,6 +32,7 @@ Chỉ cần gọi skill này (`/bpm-skills:dynaform-build-form <yêu cầu>`) ho
    - Trong builder: nút *Open JSON* (`open-json-dialog`) → dán JSON → xem lại trên canvas, chỉnh tay nếu cần rồi Save (builder xuất lại bản đầy đủ — bản nên lưu).
    - Trong app host: truyền vào `data.dataFormDesign` của `DynamicFormBuilder` (mode `editor` | `preview` | `release`), hoặc `form={…}` của `DynaformBuilder` (lib ≥ 4.5.0) — xem `../dynaform-embed-lib/SKILL.md`.
    - Lưu thành form trên backend: module mfe-dynaform **không còn dialog tạo form** — form mới được tạo trong workspace của BPM (nút "Đi tới workspace để tạo form" mở `{REACT_APP_BPM_URL}/workflow/workspaces`); sau đó mở editor của form đó và dán JSON (xem `../dynaform-mfe-module/SKILL.md`). Không tự gọi API ghi nếu người dùng chưa yêu cầu.
+   - Lưu qua MCP `save_form_design` (khi người dùng yêu cầu rõ): **bọc mỗi control gốc trong vỏ ngoài** `{ kind, data_lang, sort_order, variable_name, item_control }` — xem `references/form-json.md` §13. Thiếu `data_lang` ở vỏ ngoài ⇒ server trả `400`.
 7. **Báo cáo**: liệt kê field đã dựng (name, type, bắt buộc), logic/event đã gắn, phần chưa làm được hoặc cần người dùng cấu hình thêm (data source thật, URL API, quyền). Nêu riêng: mỗi `custom-embed` đã dùng (kèm lý do control có sẵn không đáp ứng và bước "mở builder → Lưu" để sinh Tailwind) và mỗi field `hidden` còn giữ (kèm lý do). Nói rõ **chưa có công cụ kiểm tự động**: JSON mới chỉ được tự kiểm theo checklist, nên mở trong builder/preview để xác nhận.
 
 ## Bảng tra nhanh
@@ -137,6 +138,7 @@ Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc fi
 | Viết JSX thô, `import`, class ghép `p-${n}` trong mã embed | thẻ `html\`…\``, không import, viết đủ tên class |
 | Field `hidden` làm cờ/tín hiệu giữa các event | `set_values` / `$steps.<id>.output` / `$event.payload` trong một flow |
 | Sao chép cả khối từ ví dụ rồi quên đổi `id` | UUID v4 mới cho mọi control; kiểm lại không trùng |
+| Gửi `{ "item_control": … }` trần vào `save_form_design` → `400 form_components.N.data_lang should not be empty` | bọc vỏ ngoài `kind` + `data_lang` + `sort_order` + `variable_name` (`form-json.md` §13) |
 
 ## Tham chiếu
 

@@ -1,6 +1,7 @@
 # 9 server tool của dynaform-service (MCP)
 
-> Sinh từ `dynaform-service/docs/dynaform-mcp-tools.json`. Danh sách thật của một server: gọi `tools/list` — nếu khác bảng này thì tin `tools/list`.
+> Nguồn: schema của connector `dynaform-service` đang kết nối. Danh sách thật của một server: gọi `tools/list` — nếu khác bảng này thì tin `tools/list`.
+> Đồng bộ lần cuối 2026-11-09. Source MCP cũ `src/modules/mcp` đã xoá khỏi `dynaform-service` (commit `927f207`); không còn file mô tả MCP trong repo đó.
 
 Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi: `/command/v1`.
 
@@ -75,7 +76,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 
 - **REST**: `POST https://test-forms.dnu.edu.vn/command/v1/form-designs/save`
 - **Annotations**: readOnly=false, destructive=true, idempotent=false, openWorld=false
-- **Bật bằng**: `MCP_ENABLE_WRITE=true` (server dynaform-service nội bộ; MCP multi-tenant đăng ký sẵn)
+- **Bật bằng**: không cần cờ. Connector `dynaform-service` hiện tại đã đăng ký sẵn tool ghi (cờ `MCP_ENABLE_WRITE` thuộc bản MCP cũ đã xoá)
 - **Mô tả**: Upsert form design ở DEV. Không truyền id ⇒ TẠO MỚI (trạng thái nháp). Có id ⇒ CẬP NHẬT, khi lưu bản nháp phải kèm expected_revision (lấy từ get_form_design) để tránh ghi đè. form_components là cây component/item control theo schema của dynaform-builder; server validate lại toàn bộ và trả lỗi 400 kèm chi tiết. Có ghi audit form.save.
 
 | Tham số | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
@@ -102,7 +103,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 | `variable_schema` | object | không |  |  |
 | `object_source_spec` | object | không |  |  |
 | `layout_runtime` | object | không |  |  |
-| `form_components` | array<object> | không |  | Cây component / item control / sub-form |
+| `form_components` | array<object> | không |  | Cây component / item control / sub-form. Mỗi phần tử gốc cần vỏ ngoài `{ kind, data_lang, sort_order, variable_name, item_control }` — thiếu `data_lang` ⇒ 400 (xem `dynaform-build-form/references/form-json.md` §13) |
 | `object_source_configs` | array<object> | không |  |  |
 | `hook_configs` | array<object> | không |  |  |
 | `integrations` | array<object> | không |  |  |
@@ -111,7 +112,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 
 - **REST**: `POST https://test-forms.dnu.edu.vn/command/v1/form-designs/{id}/clone`
 - **Annotations**: readOnly=false, destructive=false, idempotent=false, openWorld=false
-- **Bật bằng**: `MCP_ENABLE_WRITE=true` (server dynaform-service nội bộ; MCP multi-tenant đăng ký sẵn)
+- **Bật bằng**: không cần cờ. Connector `dynaform-service` hiện tại đã đăng ký sẵn tool ghi (cờ `MCP_ENABLE_WRITE` thuộc bản MCP cũ đã xoá)
 - **Mô tả**: Clone form thành FORM MỚI ĐỘC LẬP (lineage mới, dạng DRAFT ở DEV) từ version ở môi trường cao nhất form nguồn đã đạt. Không sửa form nguồn. Có ghi audit form.clone.
 
 | Tham số | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
@@ -131,7 +132,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 
 - **REST**: `POST https://test-forms.dnu.edu.vn/command/v1/form-designs/{id}/draft`
 - **Annotations**: readOnly=false, destructive=false, idempotent=true, openWorld=false
-- **Bật bằng**: `MCP_ENABLE_WRITE=true` (server dynaform-service nội bộ; MCP multi-tenant đăng ký sẵn)
+- **Bật bằng**: không cần cờ. Connector `dynaform-service` hiện tại đã đăng ký sẵn tool ghi (cờ `MCP_ENABLE_WRITE` thuộc bản MCP cũ đã xoá)
 - **Mô tả**: Tạo bản nháp CHƯA ĐÁNH VERSION ở DEV từ version `id` (DEV/STG/PROD đều được). Mỗi form chỉ có 1 bản nháp: đã có thì trả lại bản đó với existed=true. Sau đó sửa nội dung bằng save_form_design (kèm expected_revision) rồi phát hành bằng publish_form_draft. Có ghi audit form.create_draft.
 
 | Tham số | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
@@ -142,7 +143,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 
 - **REST**: `POST https://test-forms.dnu.edu.vn/command/v1/form-designs/{id}/publish-draft`
 - **Annotations**: readOnly=false, destructive=true, idempotent=false, openWorld=false
-- **Bật bằng**: `MCP_ENABLE_WRITE=true` (server dynaform-service nội bộ; MCP multi-tenant đăng ký sẵn)
+- **Bật bằng**: không cần cờ. Connector `dynaform-service` hiện tại đã đăng ký sẵn tool ghi (cờ `MCP_ENABLE_WRITE` thuộc bản MCP cũ đã xoá)
 - **Mô tả**: Phát hành bản nháp ở DEV: đánh version (MAX+1) và đưa về ARCHIVED (không tự kích hoạt). DEV đã có version mới hơn base_version ⇒ lỗi 409 VERSION_CONFLICT; chỉ gửi lại force=true KHI người dùng đã xác nhận rõ. Không đẩy lên STG/PROD. Có ghi audit form.publish_draft.
 
 | Tham số | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
@@ -150,4 +151,11 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 | `id` | string | **có** | format uuid | id bản nháp (UUID) |
 | `base_version` | integer | không | ≥ 0 | Version mới nhất client thấy lúc mở nháp |
 | `force` | boolean | không |  | true ⇒ phát hành dù DEV có version mới hơn |
+
+## Ghi chú phạm vi
+
+- **Không có tool xoá form**: connector không có tool delete, và backend `dynaform-service` không có route DELETE trong `form-design.command.controller.ts`.
+- **Chưa có tool cho** `edit`, `status`, `rollback`, `publish` trực tiếp, `by-bpm/...` đang có trong backend `form-design.command.controller.ts`.
+- `CORE` là môi trường đã bỏ (gộp vào `DEV`). Source backend hiện tại (`env-datasource.resolver.ts`) từ chối `CORE`; mô tả/enum tool trên connector có thể vẫn ghi `CORE` — không truyền, dùng `DEV` hoặc bỏ trống.
+- `save_form_design`: `form_components` đòi vỏ ngoài `{ kind, data_lang, sort_order, variable_name, item_control }` cho mỗi phần tử gốc (đã kiểm 2026-11-09 với form login 5 control phẳng); xem `dynaform-build-form/references/form-json.md` §13.
 

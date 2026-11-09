@@ -10,10 +10,10 @@ Lib phát hành bằng **git tag** `vX.Y.Z` của repo `fe_dynaform`, `dist/lib`
 ## 1. Cài đặt
 
 ```jsonc
-"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v5.2.0"
+"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v5.6.7"
 ```
 
-(`v5.2.0` là tag mới nhất lúc viết skill. Các prop ghi "từ 4.5.0" ở dưới cần tag ≥ 4.5.0. Các bản **5.3.0 → 5.6.5** chưa gắn tag — xem "Từ 5.3.0" bên dưới.)
+(`v5.6.7` là tag mới nhất lúc viết skill, `package.json` ở tag ghi `5.6.7`. Các prop ghi "từ 4.5.0" ở dưới cần tag ≥ 4.5.0. Repo chỉ có tag `v5.2.0` rồi nhảy tới `v5.6.7` — **không có tag riêng cho 5.3.0 → 5.6.6**; mọi tính năng của các bản đó nằm trong `v5.6.7`, xem "Từ 5.3.0" bên dưới.)
 
 - Luôn `git+http://` (http thường → `TAR_BAD_ARCHIVE`) và **pin tag**; không dùng `#main`/nhánh.
 - Peer (**từ 5.0.0**, `feat!`): `react`, `react-dom` ≥ 18, `lucide-react` ≥ 0.562 < 2, `@sth87/shadcn-design-system` ≥ 0.2.7 < 0.4, `@tanstack/react-query` ^5, `@dnd-kit/core` ^6.1, `@dnd-kit/sortable` ^10, `@dnd-kit/utilities` ^3.2.2, `zod` ^4, `react-hook-form` ^7.56 — **host phải tự cài** (trước 5.0.0 các gói này bundle trong lib; lib ≤ 4.x không cần khai). Host không cần bọc `QueryClientProvider` riêng cho lib.
@@ -52,6 +52,7 @@ Tự gọi API (form-design, item-controls, variables, save…) rồi render eng
 Props chính: `idForm` (bắt buộc nếu không truyền `form`), `environment` (`DEV|STG|PROD`… — có thì GET kèm `?environment=`), `onSaved`, `onSaveDraft`, `onSaveAsControl`,
 `onError`, `onClose`, `onSubmitForm`, `onNext`/`onPrev`, `onCreateVariable`, `dataVariableExisting`, `embedPolicy`, `onMessage`, `debugTrace`, `showCloseButton`, `className`.
 - Remount khi `idForm` hoặc `environment` đổi.
+- **Cache theo `mode` (lib ≥ 5.6.7)**: `preview`/`release` giữ form đã tải trong cache (xem lại thì hiện ngay; quá **60 giây** thì tải lại ngầm rồi thay nội dung khi xong; bỏ khỏi cache sau 10 phút), form nhúng (`loadFormById`) cũng được dùng chung request và giữ 60 giây (lỗi không được giữ). `editor` **không** dùng cache — luôn tải mới, vì editor không hydrate lại từ dữ liệu cũ; danh sách nhóm item control chỉ tải ở `editor`. Hệ quả: vừa lưu/publish xong mà mở `release` ngay có thể thấy bản cũ tối đa ~60 giây; cần ngay thì truyền `form` (xem bên dưới) thay vì `idForm`.
 - **Từ 4.5.0** — thay được wrapper `DynamicFormBuilder` tự viết ở host:
   - `form`: form JSON host đã có (một version cụ thể, form vừa thực thi…) dùng trực tiếp, **không** gọi API chi tiết; ưu tiên hơn `idForm`. Giữ reference ổn định.
   - `dataUserFill` (preview/release): giá trị điền sẵn, key theo `name`. Giữ reference ổn định.
@@ -59,7 +60,7 @@ Props chính: `idForm` (bắt buộc nếu không truyền `form`), `environment
   - `ref`: `DynaformBuilder` là `forwardRef`, handle = `DynamicFormBuilderHandle` của lõi (`onSubmit`, `getFormJson`, undo/redo, `setViewport`…), dùng ở cả editor lẫn preview/release.
   - `isolatedState` (**4.5.1**, preview/release): state runtime riêng; bật khi nhiều form mount cùng trang (modal, task form).
 - **Từ 5.0.0 → 5.2.0** (có tag): 5.0.0 đưa các gói dùng chung với host thành `peerDependencies` (xem mục 1); 5.1.0 editor tự phục hồi khi bản nháp đang sửa đã bị người khác publish; 5.2.0 canvas đặt control lên ô lưới tường minh, preview đổi kích thước được, container không đệm, soạn thảo văn bản đúng hiển thị. 4.9.0: đọc `category`/`sub_group_code` từ item control; 4.8.1–4.8.2: sửa nhãn khối text và externalize subpath react.
-- **Từ 5.3.0** (build local, **chưa gắn tag** lúc viết; shell nạp qua `yarn build:lib:shell` → tgz):
+- **Từ 5.3.0** (nay đã nằm trong tag `v5.6.7`; trước đó chỉ có qua build local, shell nạp bằng `yarn build:lib:shell` → tgz):
   - 5.3.0 — `table`: `props.table.rowClickActionKey` (bấm dòng chạy flow của hành động); control bị ẩn bằng logic giải phóng cả ô lưới.
   - 5.4.0 — `call_api` `bodyEncoding: "multipart"`; control `file` `fileValidations.localOnly` (giữ `File` trong trình duyệt, form lưu `local-file://<id>`).
   - 5.5.0 — `table`: `cellType: "lines"` + `linesExpression` (nhiều dòng, `{ prefix, text, tone }`).
@@ -68,7 +69,9 @@ Props chính: `idForm` (bắt buộc nếu không truyền `form`), `environment
   - 5.6.3 — `file`: xem trước trong dialog (PDF/ảnh iframe, Office qua `view.officeapps.live.com`), giá trị có sẵn hiện vào danh sách.
   - 5.6.4 — `reset-button` mặc định `type="reset"` (trước đây thành submit → mở modal "Dữ liệu form đã gửi").
   - 5.6.5 — PDF nhúng bằng blob; nút xem/tải/xoá file không còn gửi form.
-  - Dùng bản chưa tag trong shell: `yarn build:lib:shell` ở `fe_dynaform` (đóng gói `vendor/dnu-dynaform-builder-<ver>.tgz` vào `mfe-shell-app`, sửa `package.json`), rồi `pnpm install` ở shell và **khởi động lại shell** — cài khi dev server đang chạy làm thư mục lib biến mất, shell báo `ENOENT … dist/lib/style.css`. Runner `mfe-dynaform` còn ở tag cũ thì **không** có các tính năng này.
+  - 5.6.6 → 5.6.7 (git chỉ có tag `v5.6.7`, không tách được từng bản; task-log của lib gom chung một lần release) — `tab`: `tabs[].hideWhen` ẩn tab theo điều kiện (xem `dynaform-components`); cache theo `mode` ở `DynaformBuilder` (mục 3); `file` `localOnly` xem trước được bằng blob URL tạm (thu hồi khi đóng dialog) — theo chú thích trong code lib, file Word/Excel/PowerPoint cần URL công khai nên không xem trước được với `local-file://`.
+  - Cần các tính năng trên thì pin `#v5.6.7` (hoặc mới hơn). Host ghim tag cũ hơn thì **không** có: `mfe-dynaform` đang ghim `v5.6.7`, `mfe-shell-app` nạp tgz 5.6.7, còn `mfe-workflow` ở `v4.8.2` (kiểm lại `package.json` trước khi khẳng định).
+  - Phần lib **chưa tag** (ví dụ agent bridge — `createSseRunAgentTurn`, `defineClientTool`, props `runAgentTurn`…: **không** có trong `v5.6.7`, mới là thay đổi chưa commit ở working tree của `fe_dynaform`): dùng qua shell bằng `yarn build:lib:shell` ở `fe_dynaform` (đóng gói `vendor/dnu-dynaform-builder-<ver>.tgz` vào `mfe-shell-app`, sửa `package.json`), rồi `pnpm install` ở shell và **khởi động lại shell** — cài khi dev server đang chạy làm thư mục lib biến mất, shell báo `ENOENT … dist/lib/style.css`. Runner `mfe-dynaform` ghim tag thì **không** có bản chưa tag.
 - **Từ 4.8.0**: `properties.style.alignSelf` (căn dọc control trong hàng lưới), hành động từng dòng của `table` chạy action flow (`actions[].flow`, `$row`), step `confirm`, `dialog.fillFromRow` / `awaitSubmit`; grid giữ đúng ô khi lưu/nạp và không xoá control khi thả; CSS "Ô nhập" của button không còn ăn thanh công cụ canvas. Form lưu bằng bản cũ vẫn chạy (cấu hình hành động hàng cũ tự chuyển thành flow khi bấm).
 - **Từ 4.6.0**: `ref.current.loadFormJson(json, { snapshot?, progress? })` thay toàn bộ form của editor từ host (build dần; editor chỉ đọc `dataFormDesign` lúc mount); canvas có hiệu ứng build dần. Mọi control nhận **CSS thuần + class Tailwind** (`properties.custom`, panel "CSS tuỳ chỉnh" ở tab Thiết kế; host tắt bằng `embedPolicy.allowCustomCss: false`). Control `table-filter` đã **gỡ** (không migrate): form cũ hiện khung cảnh báo tại chỗ đó.
 - `onError` (**4.4.0**, editor): gọi khi lưu form / lưu thành control thất bại; lib đã tự toast message chi tiết của server và `console.error` toàn bộ response. `error` = `{ action, message, status?, details[], body?, cause }` để host ghi log riêng.

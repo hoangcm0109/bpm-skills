@@ -23,7 +23,7 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 
 ## Cài đặt & cập nhật
 
-Phiên bản hiện tại: **0.9.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v5.2.0` và các bản chưa tag 5.3.0–5.6.5; riêng `dynaform-agent-tools` cần bản lib có agent bridge (export `createSseRunAgentTurn`) — kiểm tag bằng `git ls-remote --tags` trước khi ghi version.
+Phiên bản hiện tại: **0.10.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v5.6.7` (đã gộp các bản 5.3.0–5.6.6, không có tag riêng); riêng `dynaform-agent-tools` cần bản lib có agent bridge (export `createSseRunAgentTurn`) — **không có trong `v5.6.7`**, kiểm tag bằng `git ls-remote --tags` trước khi ghi version.
 
 ### Claude Code
 
