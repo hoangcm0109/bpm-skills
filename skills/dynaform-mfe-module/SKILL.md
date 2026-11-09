@@ -15,7 +15,7 @@ Chạy được cả **standalone** và **trong shell** — mọi thay đổi ph
 | Thư mục | Vai trò |
 |---|---|
 | `src/app` | App shell, routes (`routes.constants`), hosted/preview |
-| `src/pages/formManager/{list,versions,editor}` | danh sách form CORE, chi tiết + pipeline môi trường, trang editor/preview |
+| `src/pages/formManager/{list,versions,editor}` | danh sách form (mỗi lineage một dòng), chi tiết + pipeline môi trường, trang editor/preview |
 | `src/pages/{application,hostApp,itemControl,itemControlGroup}` | các domain còn lại |
 | `src/components`, `components/dialogs`, `components/ui` | UI dùng chung, `AppDialog`, `FormInput/FormSelect/FormTextarea` |
 | `src/hooks`, `src/hooks/formManager` | orchestration trang, `useListSearchParams` |

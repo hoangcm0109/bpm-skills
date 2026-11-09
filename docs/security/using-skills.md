@@ -36,7 +36,7 @@ Agent đọc nhiều thứ: tệp người dùng gửi, tài liệu, phản hồ
 
 Skill này **không** tự thực hiện các việc sau; nếu agent đề xuất, cần người dùng đồng ý rõ ràng từng lần:
 
-- lưu/ghi form lên backend, publish giữa các môi trường (DEV → CORE → PROD), đổi trạng thái form;
+- lưu/ghi form lên backend, publish giữa các môi trường (DEV → STG → PROD), đổi trạng thái form;
 - gọi API thật của form (call_api) hoặc chạy thử flow có ghi dữ liệu;
 - commit/push, tạo tag, đổi version `@dnu/dynaform-builder`;
 - cài thêm package hoặc plugin khác.

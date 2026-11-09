@@ -40,7 +40,7 @@ node skills/dynaform-build-form/scripts/dynaform.mjs validate form.json
 - `"content"` có thẻ `<script`, `onerror=`, `javascript:`
 - `"embed"`, `"custom-embed"`, `"icon"` có `<svg`
 
-Không dán JSON lạ vào môi trường **CORE/PROD** trước khi xem trên DEV/preview.
+Không dán JSON lạ vào môi trường **STG/PROD** trước khi xem trên DEV/preview.
 
 ## Quy trình đề xuất theo môi trường
 

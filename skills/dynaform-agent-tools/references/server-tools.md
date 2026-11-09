@@ -19,7 +19,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 | `limit` | integer | không | ≥ 1; ≤ 100; default `20` | Số bản ghi mỗi trang (1–100) |
 | `search` | string | không |  | Từ khoá tìm kiếm |
 | `status` | string | không |  | Trạng thái form |
-| `environment` | string | không | enum: `CORE`, `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` | Môi trường: CORE \| DEV \| STG \| PROD \| TEST \| UAT \| LAB |
+| `environment` | string | không | enum: `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` | Môi trường: DEV \| STG \| PROD \| TEST \| UAT \| LAB |
 | `application_code` | string | không |  |  |
 | `project_id` | string | không |  |  |
 
@@ -27,23 +27,23 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 
 - **REST**: `GET https://test-forms.dnu.edu.vn/query/v1/form-designs/{id}`
 - **Annotations**: readOnly=true, destructive=false, idempotent=true, openWorld=false
-- **Mô tả**: Lấy đầy đủ form design (components, object source configs, hook configs). Không truyền environment ⇒ dò CORE rồi các env. Lưu ý: mỗi lần gọi được ghi audit form.view dưới tên chủ token.
+- **Mô tả**: Lấy đầy đủ form design (components, object source configs, hook configs). Không truyền environment ⇒ dò DEV rồi các env khác. Lưu ý: mỗi lần gọi được ghi audit form.view dưới tên chủ token.
 
 | Tham số | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
 |---|---|---|---|---|
 | `id` | string | **có** | minLength 1 | id form (id core hoặc id env-local) |
-| `environment` | string | không | enum: `CORE`, `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` | Môi trường: CORE \| DEV \| STG \| PROD \| TEST \| UAT \| LAB |
+| `environment` | string | không | enum: `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` | Môi trường: DEV \| STG \| PROD \| TEST \| UAT \| LAB |
 
 ### `list_form_versions` — Các version đã phát hành
 
 - **REST**: `GET https://test-forms.dnu.edu.vn/query/v1/form-designs/{root_form_id}/versions`
 - **Annotations**: readOnly=true, destructive=false, idempotent=true, openWorld=false
-- **Mô tả**: Liệt kê các version đã phát hành của 1 form (theo root_form_id) ở các môi trường. Không truyền environment ⇒ quét CORE + tất cả env target.
+- **Mô tả**: Liệt kê các version đã phát hành của 1 form (theo root_form_id) ở các môi trường. Không truyền environment ⇒ quét DEV + tất cả env target.
 
 | Tham số | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
 |---|---|---|---|---|
 | `root_form_id` | string | **có** | format uuid | root_form_id (UUID) của lineage form |
-| `environment` | string | không | enum: `CORE`, `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` | Môi trường: CORE \| DEV \| STG \| PROD \| TEST \| UAT \| LAB |
+| `environment` | string | không | enum: `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` | Môi trường: DEV \| STG \| PROD \| TEST \| UAT \| LAB |
 
 ### `list_item_controls` — Item control theo nhóm
 
@@ -76,7 +76,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 - **REST**: `POST https://test-forms.dnu.edu.vn/command/v1/form-designs/save`
 - **Annotations**: readOnly=false, destructive=true, idempotent=false, openWorld=false
 - **Bật bằng**: `MCP_ENABLE_WRITE=true` (server dynaform-service nội bộ; MCP multi-tenant đăng ký sẵn)
-- **Mô tả**: Upsert form design ở CORE/DEV. Không truyền id ⇒ TẠO MỚI (trạng thái nháp). Có id ⇒ CẬP NHẬT, khi lưu bản nháp phải kèm expected_revision (lấy từ get_form_design) để tránh ghi đè. form_components là cây component/item control theo schema của dynaform-builder; server validate lại toàn bộ và trả lỗi 400 kèm chi tiết. Có ghi audit form.save.
+- **Mô tả**: Upsert form design ở DEV. Không truyền id ⇒ TẠO MỚI (trạng thái nháp). Có id ⇒ CẬP NHẬT, khi lưu bản nháp phải kèm expected_revision (lấy từ get_form_design) để tránh ghi đè. form_components là cây component/item control theo schema của dynaform-builder; server validate lại toàn bộ và trả lỗi 400 kèm chi tiết. Có ghi audit form.save.
 
 | Tham số | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
 |---|---|---|---|---|
@@ -90,7 +90,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 | `description` | string | không |  |  |
 | `layout` | string | không |  |  |
 | `status` | string | không |  | Chỉ có hiệu lực khi cập nhật (server kiểm tra chuyển trạng thái) |
-| `environment` | string | không | enum: `CORE`, `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` |  |
+| `environment` | string | không | enum: `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` |  |
 | `expected_revision` | integer | không | ≥ 0 | Bắt buộc khi lưu đè bản nháp |
 | `apply_date` | string \| null | không |  | ISO time tự kích hoạt bản DRAFT |
 | `bpm_process_id` | string | không |  |  |
@@ -112,7 +112,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 - **REST**: `POST https://test-forms.dnu.edu.vn/command/v1/form-designs/{id}/clone`
 - **Annotations**: readOnly=false, destructive=false, idempotent=false, openWorld=false
 - **Bật bằng**: `MCP_ENABLE_WRITE=true` (server dynaform-service nội bộ; MCP multi-tenant đăng ký sẵn)
-- **Mô tả**: Clone form thành FORM MỚI ĐỘC LẬP (lineage mới, dạng DRAFT ở CORE) từ version ở môi trường cao nhất form nguồn đã đạt. Không sửa form nguồn. Có ghi audit form.clone.
+- **Mô tả**: Clone form thành FORM MỚI ĐỘC LẬP (lineage mới, dạng DRAFT ở DEV) từ version ở môi trường cao nhất form nguồn đã đạt. Không sửa form nguồn. Có ghi audit form.clone.
 
 | Tham số | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
 |---|---|---|---|---|

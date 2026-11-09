@@ -40,7 +40,7 @@ import { DynaformBuilderProvider } from "@dnu/dynaform-builder";
 Tự gọi API (form-design, item-controls, variables, save…) rồi render engine.
 
 ```tsx
-<DynaformBuilder idForm={id} environment="CORE" mode="editor" onSaved={…} onClose={…} embedPolicy={EMBED_POLICY} />
+<DynaformBuilder idForm={id} environment="DEV" mode="editor" onSaved={…} onClose={…} embedPolicy={EMBED_POLICY} />
 ```
 
 | `mode` | Hiển thị |
@@ -49,7 +49,7 @@ Tự gọi API (form-design, item-controls, variables, save…) rồi render eng
 | `preview` | overlay có header + nút đóng |
 | `release` | runtime thuần cho người dùng cuối, theo kích thước parent |
 
-Props chính: `idForm` (bắt buộc nếu không truyền `form`), `environment` (`DEV|CORE|PROD`… — có thì GET kèm `?environment=`), `onSaved`, `onSaveDraft`, `onSaveAsControl`,
+Props chính: `idForm` (bắt buộc nếu không truyền `form`), `environment` (`DEV|STG|PROD`… — có thì GET kèm `?environment=`), `onSaved`, `onSaveDraft`, `onSaveAsControl`,
 `onError`, `onClose`, `onSubmitForm`, `onNext`/`onPrev`, `onCreateVariable`, `dataVariableExisting`, `embedPolicy`, `onMessage`, `debugTrace`, `showCloseButton`, `className`.
 - Remount khi `idForm` hoặc `environment` đổi.
 - **Từ 4.5.0** — thay được wrapper `DynamicFormBuilder` tự viết ở host:
