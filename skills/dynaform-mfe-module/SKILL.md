@@ -68,3 +68,4 @@ Nhóm màn hình `scholarship/*` (Rule, Cấu hình học bổng, Chiến dịch
 ## Liên quan
 
 Dựng nội dung form: `dynaform-build-form`. Nhúng/props lib: `dynaform-embed-lib`.
+AI agent trong editor của mfe-dynaform (`REACT_APP_AGENT_GATEWAY_URL`, `src/services/agent`, `useDynaformAgent`, `window.DynaformAgentBridge`): `dynaform-agent-tools`.

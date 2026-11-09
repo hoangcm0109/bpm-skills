@@ -136,6 +136,10 @@ JSON từ `dynaform-build-form` → `data.dataFormDesign` (hoặc dán qua Open 
 
 Thư mục nguồn của lib (từ 4.4.1): `src/lib/builder-core/` (`DynamicFormBuilder`, modes, SDK events, transform, embed) và `src/lib/builder-host/` (`DynaformBuilder`: REST + react-query + save). Hai thư mục này **không** trùng nhau: host render core, không ngược lại. Export public và tên package không đổi.
 
+## 7b. AI agent sửa form trong editor
+
+Props `DynaformBuilder` (chỉ mode editor, cần lib có agent bridge): `runAgentTurn` (thường tạo bằng `createSseRunAgentTurn({ url, getHeaders })`), `generateForm`, `agentClientTools` (tạo bằng `defineClientTool`), `onAgentConfirm`, `agentContext`. Editor chỉ đọc chúng **một lần lúc mount** ⇒ khai báo module-level/`useMemo`. Chat UI ngoài dùng `ref.getAgentTools()` / `runAgentTool()` / `beginAgentRun()` / `endAgentRun()`. Chi tiết, giao thức SSE và danh sách tool: skill `dynaform-agent-tools`.
+
 ## 8. Ví dụ đầy đủ
 
 `references/examples.md` — 13 ví dụ TSX bám đúng props thật của lib: cài đặt + CSS, Provider, màn editor, release có nút riêng + `ref.onSubmit()`, nhiều form trên một trang (`isolatedState`), `DynamicFormBuilder` thuần, `config.http` (axios), `controls` / `rawControl` / `defineControl`, `loadFormJson`, `embedPolicy`, lib build local, `onError`.

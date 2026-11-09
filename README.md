@@ -19,10 +19,11 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 | [`dynaform-data-source`](skills/dynaform-data-source/SKILL.md) | Option tĩnh/API/phụ thuộc, giá trị điền sẵn |
 | [`dynaform-embed-lib`](skills/dynaform-embed-lib/SKILL.md) | Cài đặt & nhúng lib vào app/MFE |
 | [`dynaform-mfe-module`](skills/dynaform-mfe-module/SKILL.md) | Quy ước trong repo mfe-dynaform |
+| [`dynaform-agent-tools`](skills/dynaform-agent-tools/SKILL.md) | Tool cho AI agent: 9 server tool (MCP dynaform-service), client tool trong editor, giao thức SSE gateway ⇄ editor, nối host / chat UI ngoài |
 
 ## Cài đặt & cập nhật
 
-Phiên bản hiện tại: **0.7.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v5.2.0` và các bản chưa tag 5.3.0–5.6.5.
+Phiên bản hiện tại: **0.8.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v5.2.0` và các bản chưa tag 5.3.0–5.6.5; riêng `dynaform-agent-tools` cần bản lib có agent bridge (export `createSseRunAgentTurn`) — kiểm tag bằng `git ls-remote --tags` trước khi ghi version.
 
 ### Claude Code
 
@@ -113,6 +114,7 @@ Mỗi skill có `references/examples.md` (giải thích) và, với skill dựng
 | `dynaform-data-source` | `example-data-source` | `references/examples.md` |
 | `dynaform-embed-lib` | — (13 ví dụ TSX) | `references/examples.md` |
 | `dynaform-mfe-module` | — (domain mới từ endpoint tới route) | `references/examples.md` |
+| `dynaform-agent-tools` | — (stream SSE, gateway, host TSX, chat UI ngoài) | `references/examples.md` |
 
 ```bash
 # build toàn bộ spec ví dụ (mỗi dòng phải báo OK)

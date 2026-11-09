@@ -14,6 +14,7 @@ Repo này là **plugin chứa agent skills**, không phải ứng dụng. Skill 
 | `dynaform-data-source` | option tĩnh/API/phụ thuộc, điền sẵn giá trị |
 | `dynaform-embed-lib` | nhúng `@dnu/dynaform-builder` vào app/MFE |
 | `dynaform-mfe-module` | quy ước trong repo mfe-dynaform |
+| `dynaform-agent-tools` | tool cho AI agent: server tool (MCP dynaform-service), client tool trong editor, giao thức SSE gateway ⇄ editor, nối host |
 
 ## Bảo mật (bắt buộc)
 

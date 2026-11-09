@@ -3,6 +3,17 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.8.0 — 2026-11-09 (skill mới `dynaform-agent-tools`: tool cho AI agent)
+
+- **Skill mới `dynaform-agent-tools`** — tích hợp AI agent/hệ thống AI khác với dynaform. `SKILL.md` + 4 file tham chiếu:
+  - `references/server-tools.md`: 9 server tool của `dynaform-service` (đọc: `list_form_designs`, `get_form_design`, `list_form_versions`, `list_item_controls`, `list_form_submissions`; ghi: `save_form_design`, `clone_form_design`, `create_form_draft`, `publish_form_draft`) — tham số, ràng buộc, REST tương ứng, annotations; **sinh từ `dynaform-service/docs/dynaform-mcp-tools.json`**. Luồng draft → save → publish, `expected_revision`, `409 VERSION_CONFLICT`, auth của MCP multi-tenant.
+  - `references/client-tools.md`: client tool chạy trong editor (đọc, ghi, `set_event_flow`, `load_form_json`, `validate_form`, `confirm_action`), tool của host, quy tắc và mẫu thao tác.
+  - `references/bridge-protocol.md`: giao thức SSE v1 giữa agent gateway và editor (request, event `text` / `tool_use` / `server_tool` / `stop` / `error`, quy tắc cho gateway, cách host nối).
+  - `references/examples.md`: transcript SSE, khung gateway, host TSX, chat UI ngoài qua ref handle, luồng sửa form có lưu.
+- Quy tắc vàng: client tool sửa form **đang mở**, server tool đọc/ghi dữ liệu **đã lưu**; lưu/phát hành đi qua `draftFlow` của editor, agent không đẩy JSON của form đang mở lên server.
+- Khớp lib `fe_dynaform` (agent bridge: `createSseRunAgentTurn`, `defineClientTool`, props `runAgentTurn` / `agentClientTools` / `onAgentConfirm` / `agentContext`, ref `getAgentTools` / `runAgentTool` / `beginAgentRun` / `endAgentRun`) và mfe-dynaform (`REACT_APP_AGENT_GATEWAY_URL`, `window.DynaformAgentBridge`). Lib chưa có tag cho phần này tại thời điểm viết — kiểm `git ls-remote --tags`.
+- `dynaform-embed-lib` và `dynaform-mfe-module` có thêm mục trỏ sang skill mới. `AGENTS.md`, `README.md` cập nhật bảng skill.
+
 ## 0.7.0 — 2026-11-03 (khớp `@dnu/dynaform-builder` v5.2.0 + bản chưa tag 5.3.0 → 5.6.5)
 
 Đồng bộ với các thay đổi lib làm khi dựng module học bổng bằng JSON thuần (Rule → Cấu hình học bổng → Chiến dịch).
