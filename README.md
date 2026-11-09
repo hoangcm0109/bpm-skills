@@ -11,7 +11,7 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 
 | Skill | Cụm chức năng |
 |---|---|
-| [`dynaform-build-form`](skills/dynaform-build-form/SKILL.md) | Điểm vào: yêu cầu → spec → form JSON → kiểm tra → nạp. Có script `dynaform.mjs` |
+| [`dynaform-build-form`](skills/dynaform-build-form/SKILL.md) | Điểm vào: yêu cầu → viết thẳng form JSON → tự kiểm theo checklist → nạp. Chỉ tài liệu, không script |
 | [`dynaform-components`](skills/dynaform-components/SKILL.md) | Danh mục component & chọn type |
 | [`dynaform-validation`](skills/dynaform-validation/SKILL.md) | Validation, matchField, thông báo lỗi |
 | [`dynaform-logic-events`](skills/dynaform-logic-events/SKILL.md) | Event theo từng control, rule điều kiện, action engine đầy đủ, công thức flow (submit, chọn → điền, dialog, bảng…) |
@@ -23,7 +23,7 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 
 ## Cài đặt & cập nhật
 
-Phiên bản hiện tại: **0.8.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v5.2.0` và các bản chưa tag 5.3.0–5.6.5; riêng `dynaform-agent-tools` cần bản lib có agent bridge (export `createSseRunAgentTurn`) — kiểm tag bằng `git ls-remote --tags` trước khi ghi version.
+Phiên bản hiện tại: **0.9.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v5.2.0` và các bản chưa tag 5.3.0–5.6.5; riêng `dynaform-agent-tools` cần bản lib có agent bridge (export `createSseRunAgentTurn`) — kiểm tag bằng `git ls-remote --tags` trước khi ghi version.
 
 ### Claude Code
 
@@ -83,30 +83,17 @@ Chép (hoặc symlink) thư mục `skills/<tên>` vào `.claude/skills/` hoặc 
 
 ### Người bảo trì: phát hành bản mới
 
-1. Sửa skill, chạy lại lệnh kiểm tra trong [`AGENTS.md`](AGENTS.md).
+1. Sửa skill theo quy tắc trong [`AGENTS.md`](AGENTS.md) và đi hết [checklist review](docs/security/review-checklist.md) (đặc biệt: không có mã thực thi).
 2. Bump `version` đồng bộ ở `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`; ghi vào `CHANGELOG.md`.
 3. Commit + push `main`. Người dùng chạy hai lệnh cập nhật ở trên.
 
-## Script
+### Ví dụ của từng skill
 
-```bash
-# spec gọn -> form JSON (có kiểm tra)
-node skills/dynaform-build-form/scripts/dynaform.mjs build skills/dynaform-build-form/assets/example-spec.json --out form.json
-# ví dụ chỉ bố cục: container + columns + tab
-node skills/dynaform-build-form/scripts/dynaform.mjs build skills/dynaform-build-form/assets/example-layout.spec.json --out layout.json
-# kiểm tra spec hoặc form JSON bất kỳ
-node skills/dynaform-build-form/scripts/dynaform.mjs validate form.json
-```
+Mỗi skill có `references/examples.md` (giải thích) và các ví dụ dài ở `references/example-*.md`. **Không có file nào chạy được**: `example-contact-json.md` là form JSON hoàn chỉnh; các ví dụ khác viết bằng *khoá gọn* (ký hiệu tài liệu) và quy đổi theo `skills/dynaform-build-form/references/form-json.md` §10.
 
-Yêu cầu Node ≥ 18, không cần cài package.
-
-### Ví dụ đầy đủ của từng skill
-
-Mỗi skill có `references/examples.md` (giải thích) và, với skill dựng form, các spec chạy được ở `assets/*.spec.json`:
-
-| Skill | Spec chạy được | Giải thích |
+| Skill | Ví dụ | Giải thích |
 |---|---|---|
-| `dynaform-build-form` | `example-spec`, `example-layout`, `example-contact`, `example-wizard` | `references/examples.md` |
+| `dynaform-build-form` | `example-contact-json` (JSON đầy đủ), `example-spec`, `example-layout`, `example-wizard` | `references/examples.md` |
 | `dynaform-components` | `example-input-catalog`, `example-layout-controls` | `references/examples.md` |
 | `dynaform-validation` | `example-validation` | `references/examples.md` |
 | `dynaform-logic-events` | `example-rules`, `example-flows`, `example-table-row-actions` | `references/examples.md` |
@@ -116,14 +103,9 @@ Mỗi skill có `references/examples.md` (giải thích) và, với skill dựng
 | `dynaform-mfe-module` | — (domain mới từ endpoint tới route) | `references/examples.md` |
 | `dynaform-agent-tools` | — (stream SSE, gateway, host TSX, chat UI ngoài) | `references/examples.md` |
 
-```bash
-# build toàn bộ spec ví dụ (mỗi dòng phải báo OK)
-for f in skills/*/assets/example-*.json; do node skills/dynaform-build-form/scripts/dynaform.mjs build "$f" --out /tmp/form.json || echo "FAIL $f"; done
-```
-
 ## Bảo mật
 
-Skill điều khiển hành vi của agent và form JSON có thể chứa script/URL — đọc [`SECURITY.md`](SECURITY.md) trước khi dùng:
+Skill điều khiển hành vi của agent (bộ này chỉ gồm tài liệu markdown, không có script) và form JSON có thể chứa script/URL — đọc [`SECURITY.md`](SECURITY.md) trước khi dùng:
 [dùng skill an toàn](docs/security/using-skills.md) · [an toàn form JSON](docs/security/form-json-safety.md) · [checklist review](docs/security/review-checklist.md).
 
 ## Cấu trúc
@@ -132,7 +114,7 @@ Skill điều khiển hành vi của agent và form JSON có thể chứa script
 .claude-plugin/    plugin.json + marketplace.json (Claude Code)
 .codex-plugin/     plugin.json (Codex)
 .agents/plugins/   marketplace.json (Codex)
-skills/            mỗi thư mục = một skill (SKILL.md, references/, scripts/, assets/)
+skills/            mỗi thư mục = một skill (SKILL.md + references/, chỉ markdown)
 AGENTS.md          quy tắc khi sửa repo này
 SECURITY.md        chính sách bảo mật; docs/security/ chứa hướng dẫn chi tiết
 ```
@@ -141,4 +123,4 @@ SECURITY.md        chính sách bảo mật; docs/security/ chứa hướng dẫ
 
 Skill được viết từ code thật: `fe_dynaform` (`src/models/FormComponent.ts`, `src/lib/builder-core` + `src/lib/builder-host`, `src/lib/ai`, `docs/`)
 và `mfe-dynaform` (`.skills/`, `src/pages/formManager`). Khi lib đổi (đặc biệt shape JSON, action engine, registry component),
-cập nhật `scripts/dynaform.mjs` và các skill tương ứng.
+cập nhật `skills/dynaform-build-form/references/form-json.md`, `checklist.md` và các skill tương ứng.

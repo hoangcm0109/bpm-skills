@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — Danh mục control nhập liệu
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](../../dynaform-build-form/references/form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Danh mục control nhập liệu",
   "description": "Mỗi loại control nhập liệu/hiển thị một lần, đúng cấu hình tối thiểu — dùng để copy từng dòng sang form thật",
@@ -47,3 +53,4 @@
     { "type": "submit-button", "name": "btn_submit", "label": "Submit button", "colSpan": 4 }
   ]
 }
+```

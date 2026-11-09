@@ -6,7 +6,7 @@ description: Bố cục form dynaform — lưới 12 cột (colSpan, colStart), 
 # Bố cục form
 
 Skill này là tài liệu bố cục cho Agent dựng form. Đọc cùng `../dynaform-components/SKILL.md` (cấu hình riêng từng control layout: container, columns, grid, tab, steps, dialog…).
-Mọi khoá dưới đây là khoá của **spec** (`*.spec.json`) — script `dynaform.mjs` đổi sang JSON của lib.
+Các khoá dưới đây (`colSpan`, `colStart`, `alignSelf`, `overrides`, `columns`, `grid`…) là **khoá gọn** để dễ đọc; khi viết JSON đặt đúng vị trí theo `../dynaform-build-form/references/form-json.md` §7 (`editable_props.styles`, `editable_props.overrides`) và §5 (`properties`) — bảng quy đổi §10.
 
 ## 1. Mô hình: mọi vùng chứa là một lưới 12 cột
 
@@ -15,7 +15,7 @@ Mọi khoá dưới đây là khoá của **spec** (`*.spec.json`) — script `d
 - Thứ tự mảng `components` = thứ tự hiển thị. Lib xếp như lưới CSS: cộng dồn `colSpan` theo thứ tự; cộng thêm control mà tổng **> 12** thì control đó xuống hàng mới. Không có khái niệm "hàng" khai báo sẵn.
 - `colStart` (`"auto"` hoặc 1–12): đặt cột bắt đầu. Cần `colStart + colSpan − 1 ≤ 12`. Dùng để căn phải (nút) hoặc chừa khoảng trống; còn lại để `auto`.
 - `alignSelf` (`"start"` mặc định | `"center"` | `"end"` | `"stretch"`): căn **dọc** của control trong hàng của nó (lib ≥ 4.8.0; trước đó mọi ô cố định `start`). Control trong cùng hàng cao khác nhau (ô nhập có nhãn + nút không nhãn) mặc định dính mép trên; `end` đưa nút xuống ngang đáy ô nhập, `center` căn giữa, `stretch` kéo cao bằng hàng. Đổi theo viewport như `colSpan`: `overrides: { sm: { alignSelf: "start" } }`. Giá trị `start` không ghi ra JSON.
-- Nhóm không đầy hàng (vd 6 + 4 = 10) không lỗi nhưng chừa trống bên phải — script cảnh báo.
+- Nhóm không đầy hàng (vd 6 + 4 = 10) không lỗi nhưng chừa trống bên phải — tự rà khi kiểm.
 - Overlay (`dialog`/`drawer`/`bottom-sheet`) không chiếm chỗ trong lưới; đặt trước nút mở.
 
 ```jsonc
@@ -65,13 +65,13 @@ Quy tắc chọn nhanh:
   - `sm` (mobile) — áp khi bề rộng khung chứa form **< 768px** (`@max-3xl`); thắng `md` khi cả hai cùng áp.
   - Đo theo khung chứa form (container query), không phải cửa sổ trình duyệt — form nhúng trong panel hẹp cũng tính là "mobile".
   - Không có `lg`: `colSpan` gốc chính là desktop.
-- Cú pháp spec (khoá viewport → khoá style; `colSpan`/`colStart` nhận số hoặc chuỗi):
+- Cú pháp khoá gọn (khoá viewport → khoá style):
   ```jsonc
   { "type": "input", "name": "city", "colSpan": 4,
     "overrides": { "md": { "colSpan": 6 }, "sm": { "colSpan": 12 } } }
   ```
-  (Script đổi sang `editable_props.overrides.<vp>.properties.style.colSpan` — dạng lib đọc. Dạng cũ `{ "sm": { "styles": { … } } }` vẫn được nhận. **Không** tự viết `overrides.sm.styles` thẳng vào JSON: lib bỏ qua nên bố cục không đổi.)
-- **Script tự xuống hàng trên mobile**: control nào có `colSpan < 12` mà chưa khai báo `overrides.sm.colSpan` được thêm `sm.colSpan = 12` (và `sm.colStart = "auto"` nếu có `colStart`). Muốn tắt (giữ nguyên cột trên mobile) đặt `"mobile": "keep"` ở gốc spec, hoặc tự khai `overrides.sm` cho control đó.
+  (Trong JSON viết `editable_props.overrides.<vp>.properties.style.colSpan` với giá trị **chuỗi** — dạng lib đọc: `"overrides": { "md": { "properties": { "style": { "colSpan": "6" } } }, "sm": { "properties": { "style": { "colSpan": "12" } } } }`. **Không** viết `overrides.sm.styles`: lib bỏ qua nên bố cục không đổi.)
+- **Tự xuống hàng trên mobile**: control nào có `colSpan < 12` mà chưa khai báo `overrides.sm.colSpan` thì **thêm** `sm.colSpan = "12"` (và `sm.colStart = "auto"` nếu có `colStart`). Muốn giữ nguyên cột trên mobile thì tự khai `overrides.sm` cho control đó.
 - Chỉ nên giữ cột trên mobile cho cặp rất ngắn (vd ngày + giờ, số lượng + đơn vị): `"overrides": { "sm": { "colSpan": 6 } }`.
 - `columns` và `grid` có `stackOnMobile` (`"yes"` mặc định) — tự về 1 cột khi khung < 768px, không cần override.
 
@@ -135,7 +135,7 @@ Nguyên tắc:
 { "type": "reset-button",  "name": "btn_reset",  "label": "Làm lại", "colSpan": 2, "colStart": 9 },
 { "type": "submit-button", "name": "btn_submit", "label": "Gửi",     "colSpan": 2 }
 ```
-(`colStart: 9` + 2 + 2 → các cột 9–12. Script tự đưa về cột `auto` + `colSpan 12` trên mobile.) Hoặc đơn giản hơn: mỗi nút `colSpan` 12 nếu form hẹp.
+(`colStart: 9` + 2 + 2 → các cột 9–12. Thêm `overrides.sm` đưa về cột `auto` + `colSpan 12` trên mobile.) Hoặc đơn giản hơn: mỗi nút `colSpan` 12 nếu form hẹp.
 
 **Cụm nút sát nhau (lib ≥ 5.6.0)** — mỗi nút nằm trong một ô lưới 12 cột riêng, nên nhiều nút `colSpan` nhỏ cạnh nhau **cách xa** nhau khi khung rộng (khoảng cách = phần dư của ô). Muốn các nút sát nhau, gom cụm vào một `container` không viền và đổi lưới bên trong thành flex bằng CSS của chính container; nút bên trong `colSpan: 12`, rộng vừa nhãn:
 ```jsonc
@@ -184,9 +184,9 @@ Nguyên tắc:
 `settings.theme`: `styles.type` (`normal`|`float`), `borderRadius`, `fontSize`, và 7 màu (`background foreground primary primaryForeground secondary secondaryForeground border`).
 Bỏ qua = theme mặc định. UI form phải đọc được ở cả light/dark — dùng màu theme, tránh hardcode trong `props`/`custom`.
 
-## 8. Checklist trước khi build
+## 8. Checklist trước khi giao
 
-1. Mỗi hàng cộng đủ 12 (script cảnh báo hàng thiếu); nhóm cùng nghĩa nằm cùng hàng.
+1. Mỗi hàng cộng đủ 12 (hàng thiếu thì chỉnh lại); nhóm cùng nghĩa nằm cùng hàng.
 2. Control rộng (`textarea`, `table`, `wysiwyg-editor`, …) để 12.
 3. `colStart + colSpan − 1 ≤ 12`.
 4. `columns.spans` tổng 12; `grid`: số con ≤ số ô (hàng × cột − ô bị gộp), mỗi ô 1 con.
@@ -195,5 +195,5 @@ Bỏ qua = theme mặc định. UI form phải đọc được ở cả light/da
 7. Overlay đứng trước nút mở nó.
 8. Nút đứng cạnh ô nhập có nhãn: `alignSelf: "end"` (không dùng khoảng trắng / `text` rỗng để đẩy nút xuống).
 
-Ví dụ chạy được: `skills/dynaform-build-form/assets/example-layout.spec.json` và `assets/example-layout-recipes.spec.json` (11 công thức bố cục: 2-3-4 cột, 9+3, ô nhập + nút `alignSelf`, hàng bộ lọc, responsive `overrides`, `columns` 8+4, `grid` gộp ô, nút căn phải) — giải thích trong `references/examples.md`.
+Ví dụ (khoá gọn): `../dynaform-build-form/references/example-layout.md` và `references/example-layout-recipes.md` (11 công thức bố cục: 2-3-4 cột, 9+3, ô nhập + nút `alignSelf`, hàng bộ lọc, responsive `overrides`, `columns` 8+4, `grid` gộp ô, nút căn phải) — giải thích trong `references/examples.md`.
 Tài liệu lib: `docs/CONTAINER_DRAG_DROP.md`, `docs/CANVAS_NAVIGATION.md`, `public/templates/sample/*.json` (mẫu form thật).

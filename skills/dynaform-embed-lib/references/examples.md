@@ -278,7 +278,7 @@ const controls: ControlOverrides = {
 
 Control xuất hiện trong palette (nhóm "Tuỳ biến"), chạy ở editor/preview/release. Hai builder trên một trang phải dùng chung **cùng một** kết quả `defineControl(...)` (khai báo ở module-level). Sự kiện riêng (`events`), `propsSchema`, kiểu giá trị object: `docs/DYNAMIC_FORM_BUILDER_INTEGRATION.md` › "New control types".
 
-Tiền tố `x-` là bắt buộc. Script `dynaform.mjs` **không biết** type `x-…`: validate sẽ báo, cần thêm vào registry nếu dựng bằng script.
+Tiền tố `x-` là bắt buộc. Type `x-…` không có trong bảng registry của `dynaform-build-form` (`form-json.md` §3): chỉ dùng khi host đã đăng ký control đó và người dùng yêu cầu rõ; các trường định danh lấy từ host.
 
 ## 10. Host đồng bộ form vào editor đang mở — `loadFormJson` (≥ 4.6.0)
 

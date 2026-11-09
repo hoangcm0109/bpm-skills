@@ -5,7 +5,9 @@ description: Quy tắc validation của form dynaform — required, minLength/ma
 
 # Validation trong dynaform
 
-Validation là mảng `validations` trên từng component (spec) ↔ `item_control.validation_schema` (JSON). Lib dùng Zod v4 để biên dịch rule thành schema chạy ở preview/release.
+> Các ví dụ trong skill này dùng **khoá gọn** (ký hiệu tài liệu). Khi viết form JSON, đặt đúng vị trí theo [`form-json.md`](../dynaform-build-form/references/form-json.md) §10; tự kiểm theo [`checklist.md`](../dynaform-build-form/references/checklist.md).
+
+Validation là mảng `validations` trên từng control (khoá gọn trong tài liệu) = `item_control.validation_schema` (JSON). Lib dùng Zod v4 để biên dịch rule thành schema chạy ở preview/release.
 
 ## Rule hợp lệ (`type`)
 
@@ -22,7 +24,7 @@ Validation là mảng `validations` trên từng component (spec) ↔ `item_cont
 
 | Rule | `value` | Ghi chú |
 |---|---|---|
-| `required` | `"yes"` | Thường đặt qua `required: true` (+ `requiredMessage`) — script tự thêm; **đừng khai báo trùng** |
+| `required` | `"yes"` | Thường đặt qua `required: true` (+ `requiredMessage`) — JSON cần **cả** `properties.required: true` lẫn một phần tử `required` trong `validation_schema`; **đừng khai báo trùng** |
 | `minLength` / `maxLength` | số | cho text |
 | `min` / `max` | số | cho `number` |
 | `email`, `url` | — | |
@@ -40,9 +42,9 @@ Validation là mảng `validations` trên từng component (spec) ↔ `item_cont
 
 ## Ví dụ chạy được
 
-`assets/example-validation.spec.json` — form "Đăng ký tài khoản sinh viên" dùng đủ rule theo từng kiểu control (regex, độ dài, `matchField`, khoảng số, `url`, bắt buộc theo điều kiện). Giải thích + bảng "rule nào đi với control nào": `references/examples.md`.
+`references/example-validation.md` — form "Đăng ký tài khoản sinh viên" dùng đủ rule theo từng kiểu control (regex, độ dài, `matchField`, khoảng số, `url`, bắt buộc theo điều kiện). Giải thích + bảng "rule nào đi với control nào": `references/examples.md`.
 
 ## Kiểm tra
 
-`node skills/dynaform-build-form/scripts/dynaform.mjs validate <file>` báo `validation type không hợp lệ` và `matchField trỏ tới field không tồn tại`.
+Không có công cụ kiểm tự động: tự rà `validation_schema` theo mục D của `../dynaform-build-form/references/checklist.md` (type hợp lệ, `matchField` trỏ tới `name` có thật, không trùng `required`).
 Tài liệu gốc: `docs/ZOD_VALIDATION_GUIDE.md`, `docs/FORM_VALIDATION_GUIDE.md` trong fe_dynaform.

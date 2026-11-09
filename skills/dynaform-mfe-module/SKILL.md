@@ -51,7 +51,6 @@ Nhóm màn hình `scholarship/*` (Rule, Cấu hình học bổng, Chiến dịch
 
 - `pages/scholarship/ScholarshipRunnerPage.tsx` mở `DynaformBuilder mode="release"` theo `screen` (map ở `constants/scholarship.ts`: path + `mode`, id form theo môi trường ở `constants/scholarshipForms.generated.json`); route params + query vào form qua `dataUserFill = { ...query, mode, id }` (flow không có `$route`).
 - Điều hướng giữa màn hình: step `emit_event` với sự kiện `mfe:shell:navigate` (`payload.path`, `id?`, `query?`) — shell và Runner cùng nghe và gọi `navigate` SPA, không reload.
-- Form sinh từ spec: `scripts/scholarship-forms/specs/*.spec.mjs` → `node scripts/scholarship-forms/push.mjs [--dry-run] [--only <màn>]` → build (`dynaform.mjs`) → `POST /api/v1/form-designs/save` (`expected_revision` lấy từ `draft_revision`). Placeholder `{{@KEY}}` trong spec lấy từ `env.json`. Các bước chạy trước/sau build, sửa một chỗ là đổi mọi form: `button-style.mjs` (icon/kiểu/màu/độ rộng nút theo nhãn + gom cụm nút sát nhau), `breadcrumb.mjs` (chèn embed breadcrumb bấm được trước `page_title`, nhãn cấp cuối đổi theo `mode`), `tailwind.mjs` (biên dịch Tailwind cho embed).
 - Sau khi đổi lib (`yarn build:lib:shell` ở `fe_dynaform`) → `pnpm install` ở shell → **restart shell** mới thấy; Runner `:9268` dùng tag cũ nên không có tính năng mới.
 
 ## Quy trình sửa

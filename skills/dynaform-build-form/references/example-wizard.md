@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — Wizard 3 bước — steps + validateOnNext, rule hiện/ẩn, dialog thành công, gửi bằng flow
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Đăng ký tham dự hội thảo",
   "description": "Ví dụ wizard 3 bước: steps + validateOnNext, rule hiện/ẩn, matchField, dialog thành công, nút gửi chạy flow",
@@ -62,3 +68,4 @@
       ] } }] }
   ]
 }
+```

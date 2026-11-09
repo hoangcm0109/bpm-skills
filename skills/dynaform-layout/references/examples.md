@@ -1,15 +1,9 @@
 # Ví dụ đầy đủ — bố cục form
 
-Spec chạy được: [`assets/example-layout-recipes.spec.json`](../assets/example-layout-recipes.spec.json) — **11 công thức**, mỗi công thức mở đầu bằng một `text` đánh số để dễ nhận trên canvas.
-Ví dụ bố cục sẵn có khác: `../../dynaform-build-form/assets/example-layout.spec.json` (container, `columns`, `tab`, `grid`, nút căn phải).
+Ví dụ khoá gọn: [`example-layout-recipes.md`](example-layout-recipes.md) (quy đổi sang JSON theo `../../dynaform-build-form/references/form-json.md` §10) — **11 công thức**, mỗi công thức mở đầu bằng một `text` đánh số để dễ nhận trên canvas.
+Ví dụ bố cục khác: `../../dynaform-build-form/references/example-layout.md` (container, `columns`, `tab`, `grid`, nút căn phải).
 
-```bash
-S=skills/dynaform-build-form/scripts/dynaform.mjs
-node $S build skills/dynaform-layout/assets/example-layout-recipes.spec.json --out /tmp/layout.json
-node $S validate /tmp/layout.json     # OK … hợp lệ (không còn cảnh báo hàng thiếu 12 cột)
-```
-
-## Bảng công thức → khoá spec
+## Bảng công thức → khoá gọn
 
 | # | Công thức | Khoá cần dùng | Cộng cột |
 |---|---|---|---|
@@ -42,7 +36,7 @@ node $S validate /tmp/layout.json     # OK … hợp lệ (không còn cảnh b�
 { "type": "number", "name": "r7_c", "label": "Chiết khấu", "colSpan": 4, "dataType": "number", "overrides": { "md": { "colSpan": 12 }, "sm": { "colSpan": 12 } } }
 ```
 
-Spec gốc có `"mobile": "stack"` (mặc định): control `colSpan < 12` mà chưa có `overrides.sm.colSpan` được tự thêm `sm.colSpan = 12`. Công thức #6 khai `sm: 6` nên được **giữ** 2 cột trên mobile. Tắt tự động: `"mobile": "keep"`.
+Mặc định (xếp chồng trên mobile): control `colSpan < 12` mà chưa có `overrides.sm.colSpan` thì **thêm** `sm.colSpan = "12"`. Công thức #6 khai `sm: 6` nên **giữ** 2 cột trên mobile.
 
 **Hai cột rộng khác nhau — `columns`**:
 
@@ -76,12 +70,12 @@ Spec gốc có `"mobile": "stack"` (mặc định): control `colSpan < 12` mà c
 
 | Thông báo / triệu chứng | Sửa |
 |---|---|
-| `WARN hàng ở gốc form: a(4) + b(4) + c(3) = 11/12` | chỉnh `colSpan` cho đủ 12, hoặc căn phải bằng `colStart` |
-| `ERROR grid "x": 3 con nhưng chỉ có 2 ô (…)` | tăng `rows`/`cols` hoặc bỏ `spans`; mỗi ô đúng 1 control (nhiều control → bọc `container`) |
+| Hàng ở gốc form `a(4) + b(4) + c(3) = 11/12` | chỉnh `colSpan` cho đủ 12, hoặc căn phải bằng `colStart` |
+| `grid` "x": 3 con nhưng chỉ có 2 ô | tăng `rows`/`cols` hoặc bỏ `spans`; mỗi ô đúng 1 control (nhiều control → bọc `container`) |
 | `colSpan: 6` mà mobile vẫn 2 cột | lib tính desktop trước — để `mobile: "stack"` mặc định hoặc khai `overrides.sm.colSpan: 12` |
 | nút lệch lên/xuống so với ô nhập | `alignSelf: "end"` trên nút |
-| `overrides.sm.styles` không có tác dụng | khai kiểu gọn `overrides: { sm: { colSpan: 12 } }` để script đổi sang dạng lib đọc |
+| `overrides.sm.styles` không có tác dụng | viết đúng dạng lib đọc: `overrides.sm.properties.style.colSpan = "12"` (khoá gọn `overrides: { sm: { colSpan: 12 } }`) |
 
 ## Settings & theme
 
-`size` (`xs|sm|normal|lg|xl`), `endpoint`, `method`, `formKey` đặt ở gốc spec; `theme: { styles: {…}, colors: {…} }` tuỳ chọn (bỏ qua = theme mặc định). Dùng màu theme, tránh hardcode màu trong `props`/`custom` để đọc được cả light/dark.
+`size` (`xs|sm|normal|lg|xl`), `endpoint`, `method`, `formKey` nằm ở `settings.setting`; `settings.theme`: { styles: {…}, colors: {…} }` tuỳ chọn (bỏ qua = theme mặc định). Dùng màu theme, tránh hardcode màu trong `props`/`custom` để đọc được cả light/dark.

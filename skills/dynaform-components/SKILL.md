@@ -6,8 +6,10 @@ description: >-
 
 # Component dynaform
 
-Registry gốc: `src/config/component-groups.ts` (fe_dynaform). Script sinh form chỉ nhận type trong bảng dưới; type lạ bị từ chối.
-Control tự định nghĩa của host (`defineControl`, tiền tố `x-`) cũng hợp lệ trong builder nhưng script **không** biết — validate sẽ báo, cần thêm vào registry nếu dùng.
+> Các ví dụ trong skill này dùng **khoá gọn** (ký hiệu tài liệu). Khi viết form JSON, đặt đúng vị trí theo [`form-json.md`](../dynaform-build-form/references/form-json.md) §10; tự kiểm theo [`checklist.md`](../dynaform-build-form/references/checklist.md).
+
+Registry gốc: `src/config/component-groups.ts` (fe_dynaform). Chỉ dùng `type` có trong bảng dưới (cùng bảng registry ở `../dynaform-build-form/references/form-json.md` §3); type lạ thì loader không dựng được control.
+Control tự định nghĩa của host (`defineControl`, tiền tố `x-`) cũng hợp lệ trong builder nhưng **không** có trong bảng registry của skill — chỉ dùng khi host đã đăng ký control đó và người dùng yêu cầu rõ; các trường định danh (`group_code`, `renderer_key`…) phải lấy từ host.
 
 ## Chọn type theo dữ liệu
 
@@ -40,9 +42,9 @@ Control tự định nghĩa của host (`defineControl`, tiền tố `x-`) cũng
 
 ## Control layout (có con) — chọn đúng loại, cấu hình đúng khoá
 
-Control layout chứa control khác. Con khai báo trong spec bằng `parent: "<name cha>"` (+ `tabId` tuỳ loại cha); **cha phải đứng trước con** trong mảng. Bên trong mỗi vùng chứa là một lưới 12 cột riêng — số cột từng con chiếm xem `../dynaform-layout/SKILL.md`.
+Control layout chứa control khác. Con nằm trong `children_schema` của cha (+ `parent_tab_id` tuỳ loại cha — ở các ví dụ khoá gọn viết `parent: "<name cha>"` / `tabId`); **cha phải đứng trước con**. Bên trong mỗi vùng chứa là một lưới 12 cột riêng — số cột từng con chiếm xem `../dynaform-layout/SKILL.md`.
 
-| Type | Dùng để | Con xác định vị trí bằng | Khoá spec riêng |
+| Type | Dùng để | Con xác định vị trí bằng | Khoá cấu hình riêng (trong `properties`) |
 |---|---|---|---|
 | `container` | nhóm field thành 1 khối (có khung/không) | thứ tự mảng + `colSpan` | `container: { type, border, borderType }` |
 | `columns` (2/3/4 cột) | chia vùng thành cột **rộng khác nhau** | `tabId: "col-0".."col-N"` | `columns: { count, spans, gap, stackOnMobile }` |
@@ -63,10 +65,10 @@ Chọn nhanh: field đứng cạnh nhau trong một nhóm → chỉ cần `colSp
 - Hợp để đặt rule ẩn/hiện cả nhóm bằng một handler (`field_state` trên `container`).
 
 ### `columns` — `2 columns`, `3 columns`, `4 columns`
-- Cùng một type `columns`; `columns.count` = 2–4 (script chọn `renderer_key` DfsColumns2/3/4 theo `count`).
+- Cùng một type `columns`; `columns.count` = 2–4 (`renderer_key` = DfsColumns2/3/4 theo `count`).
 - `columns.spans` = độ rộng mỗi cột trên lưới **12**, tổng phải **12**: `[6,6]`, `[4,4,4]`, `[3,3,3,3]`, `[8,4]`, `[3,9]`, `[3,6,3]`. Thiếu `spans` thì chia đều.
 - `columns.gap` (mặc định `"1rem"`), `columns.stackOnMobile: "yes"|"no"` (mặc định `yes`: dưới 768px các cột xếp chồng).
-- Con của cột nào khai `tabId` đúng cột đó (`col-0` là cột đầu). **Bắt buộc** — thiếu `tabId` script báo lỗi.
+- Con của cột nào khai `tabId` đúng cột đó (`col-0` là cột đầu). **Bắt buộc** — thiếu `parent_tab_id` thì con rơi vào ngăn `default`, không hiện đúng cột.
 - Trong mỗi cột, con lại dùng `colSpan` trên lưới 12 cột của chính cột đó (mặc định 12 = đầy cột).
 - Khi nào dùng `columns` thay `colSpan`: cột rộng khác nhau; cột chứa **nhiều control dọc** (vd cột trái ảnh + chú thích); muốn tự xếp chồng cả cột trên mobile.
 
@@ -77,8 +79,8 @@ Chọn nhanh: field đứng cạnh nhau trong một nhóm → chỉ cần `colSp
 ```
 
 ### `grid`
-- `grid.cols` (script chấp nhận 1–6), `grid.rows` (mặc định tự tính = ⌈số con / cols⌉), `grid.columnWidths` (mảng CSS, vd `["1fr","2fr","200px"]`, mặc định `1fr` đều), `grid.gap` (mặc định `"1rem"`), `grid.stackOnMobile` (`yes` mặc định).
-- **Con lấp ô theo thứ tự** (slot = hàng × cols + cột), **không có `tabId`**, mỗi ô chứa đúng **1** control; muốn nhiều control trong một ô thì bọc bằng `container`. Script dựng theo thứ tự nên không chừa ô trống ở giữa.
+- `grid.cols` (1–6), `grid.rows` (mặc định tự tính = ⌈số con / cols⌉), `grid.columnWidths` (mảng CSS, vd `["1fr","2fr","200px"]`, mặc định `1fr` đều), `grid.gap` (mặc định `"1rem"`), `grid.stackOnMobile` (`yes` mặc định).
+- **Con lấp ô theo thứ tự** (slot = hàng × cols + cột), **không có `tabId`**, mỗi ô chứa đúng **1** control; muốn nhiều control trong một ô thì bọc bằng `container`. Điền con theo thứ tự nên không chừa ô trống ở giữa.
 - Gộp ô: `grid.spans: { "<slot>": { "r": 1, "c": 2 } }` (ô `slot` trải `r` hàng × `c` cột; các ô bị phủ bị bỏ khỏi số ô khả dụng). Số con không được vượt số ô khả dụng.
 - Dùng cho dashboard thẻ số liệu, bảng form dày. Form nhập liệu thường dùng `colSpan` / `columns` hợp hơn.
 
@@ -97,7 +99,7 @@ Chọn nhanh: field đứng cạnh nhau trong một nhóm → chỉ cần `colSp
 - Overlay **không chiếm chỗ** trong lưới; đứng trước nút mở trong mảng. Mở/đóng bằng action `dialog` (`openModal`/`closeModal`/`toggleModal` hoặc step `dialog`), sự kiện `open`/`close`.
 - `dialog.variant`: `confirmation` | `delete` | `form` | `info` | `success` | `warning` | `custom`. **Chỉ `form` / `custom` có con**; các variant còn lại hiển thị `title` + `description`.
 - Khoá hay dùng: `title`, `description`, `size` (`xs|sm|md|lg|xl|2xl|3xl|4xl|full`), `showHeader`, `showCloseButton`, `closeOnEsc`, `closeOnOverlayClick`, `openByDefault`, `footer: { show, buttons: [{ id, label, action: "close"|"submit"|"confirm"|"logic"|"event", variant, color }] }`, `trigger: { type: "button"|"logic", buttonLabel, … }` (`logic` = không có nút riêng, mở bằng flow).
-- Cấu hình nằm ở `properties.dialog` (dialog), `properties.drawer` (drawer, thêm `side`: `left|right|top|bottom`), `properties.bottomSheet` (bottom-sheet: `minHeight`, `maxHeight`, `dragHandle`). Trong spec luôn viết dưới khoá `dialog`; script chuyển đúng khoá.
+- Cấu hình nằm ở `properties.dialog` (dialog), `properties.drawer` (drawer, thêm `side`: `left|right|top|bottom`), `properties.bottomSheet` (bottom-sheet: `minHeight`, `maxHeight`, `dragHandle`). Trong ví dụ khoá gọn luôn viết dưới khoá `dialog`; khi viết JSON, đặt đúng khoá theo type (`form-json.md` §5).
 - Field bên trong dialog được đăng ký dưới tiền tố của dialog nhưng flow vẫn gọi chúng bằng `name`. Tên có thể trùng tên field gốc (flow tìm từ trong dialog ra ngoài) — tuy nhiên **nên đặt tên duy nhất toàn form**.
 - `load` của control trong dialog chạy lại mỗi lần dialog mở (con được mount lại).
 
@@ -110,7 +112,7 @@ Chọn nhanh: field đứng cạnh nhau trong một nhóm → chỉ cần `colSp
 - Trong dòng, flow đọc dữ liệu dòng bằng `$row.data.<field>`; điều kiện chỉ theo dòng dùng `change` trong dòng, không dùng `condition` (xem `dynaform-logic-events`).
 
 ### `sub-form`
-- Nhúng một form khác thành instance riêng (màn hình nhiều form, layout runtime). Script chỉ dựng khung; cấu hình alias/mapping làm trong builder. Không có con.
+- Nhúng một form khác thành instance riêng (màn hình nhiều form, layout runtime). Chỉ dựng khung; cấu hình alias/mapping làm trong builder. Không có con.
 
 ### Lỗi thường gặp với control layout
 | Lỗi | Cách đúng |
@@ -122,7 +124,7 @@ Chọn nhanh: field đứng cạnh nhau trong một nhóm → chỉ cần `colSp
 | Đặt `tabId` cho con của `grid`/`container` | chỉ `tab`/`steps`/`columns` mới có `tabId` |
 | Muốn tiêu đề cho `container` bằng `container.title` | dùng `text` làm tiêu đề |
 | Dialog `confirmation`/`info` có con | nội dung ở `dialog.title/description`; chỉ `form`/`custom` có con |
-| Nghĩ `colSpan: 6` tự xuống hàng trên mobile | lib tính desktop trước; script tự thêm `overrides.sm` (xem `dynaform-layout`) |
+| Nghĩ `colSpan: 6` tự xuống hàng trên mobile | lib tính desktop trước; tự thêm `overrides.sm` (xem `dynaform-layout`) |
 
 Chi tiết bố cục (số cột từng control, responsive, công thức): skill `dynaform-layout`.
 
@@ -168,7 +170,7 @@ Ngoài ra, nhiều nhu cầu chỉ là **diện mạo**: dùng `custom` (class T
 - **Kiểu / màu**: `props.variant` (`"solid"` | `"outline"`…) và `props.color` (`primary`, `secondary`, `accent`, `destructive`, `muted`, `success`, `error`, `warning`). Màu theo theme của host — **không có xanh dương** trong design system, và theme thường có `primary` đen, `secondary` xám nhạt (nút `outline` + `secondary` gần như vô hình trên nền trắng → dùng `outline` + `primary`).
 - **Màu riêng** (vd xanh dương): `props.custom.control.css` — CSS thuần nhắm **chính nút**, `&` là nút, có `:hover`: `"&{background-color:#2563eb;border-color:#2563eb;color:#fff}&:hover{background-color:#1d4ed8}"`. **Đừng** dùng `attributes.style`: lib áp nó cả lên ô lưới chứa nút nên nguyên ô bị tô màu.
 - **Độ rộng (lib ≥ 5.6.0)**: mặc định nút **đầy ô lưới** (`w-full`). `styles.buttonWidth: "auto"` → nút chỉ rộng vừa nhãn (tối thiểu `min-w-28`); kèm `styles.buttonAlign: "start"` | `"center"` | `"end"` để căn nút trong ô (cần lib ≥ 5.6.1 để `end`/`center` căn đúng). Bố cục nhiều nút cạnh nhau: xem công thức "cụm nút" ở `dynaform-layout`.
-- **`reset-button` không có `attributes.type`** (spec/builder không ghi): lib < 5.6.4 render `<button>` không type nên trình duyệt coi là **submit** → bấm "Xoá bộ lọc" vừa chạy flow vừa gửi form (hiện modal "Dữ liệu form đã gửi"). Lib ≥ 5.6.4 mặc định `reset`. Với lib cũ, đặt `attributes: { "type": "reset" }` (hoặc dùng `button` + step `reset_form`).
+- **`reset-button` không có `attributes.type`** (JSON/builder không ghi): lib < 5.6.4 render `<button>` không type nên trình duyệt coi là **submit** → bấm "Xoá bộ lọc" vừa chạy flow vừa gửi form (hiện modal "Dữ liệu form đã gửi"). Lib ≥ 5.6.4 mặc định `reset`. Với lib cũ, đặt `attributes: { "type": "reset" }` (hoặc dùng `button` + step `reset_form`).
 - Nút chạy flow `click` (`events: [{ event: "click", flow }]`) bỏ qua đường submit/validate mặc định của lib — validate, gọi API, thông báo đều là step trong flow.
 
 ## Tệp đính kèm (`file`)
@@ -194,22 +196,22 @@ Ngoài ra, nhiều nhu cầu chỉ là **diện mạo**: dùng `custom` (class T
 3. Phần "thiếu" có phải chỉ là giao diện hiển thị dữ liệu *chỉ đọc*? → thử `descriptions` / `timeline` / `table` / `stat-cards` trước.
 
 Nếu vẫn phải dùng:
-- Spec ghi `reason` (đã thử control nào, thiếu gì) — script báo lỗi nếu thiếu.
-- **React 19 + Tailwind** (`mode: "sandbox"`, `framework: "react"`, `tailwind: true`) — mặc định của script. Template (HTML + `{{ }}`) / JS thuần / CSS thuần chỉ cho khối tĩnh rất đơn giản; trong builder, hộp "Mã nhúng" cũng đặt React + Tailwind làm lựa chọn khuyến nghị.
+- Nêu **lý do** trong báo cáo (đã thử control nào, thiếu gì) — thiếu lý do là chưa đạt checklist.
+- **React 19 + Tailwind** (`mode: "sandbox"`, `framework: "react"`, `tailwind: true`) — cấu hình chuẩn. Template (HTML + `{{ }}`) / JS thuần / CSS thuần chỉ cho khối tĩnh rất đơn giản; trong builder, hộp "Mã nhúng" cũng đặt React + Tailwind làm lựa chọn khuyến nghị.
 - Viết đủ tên class Tailwind, màu theo token theme (`bg-card border-border text-foreground`…), `dark:` chạy được.
 - Giao tiếp qua `inputs` (field → embed), `outputs` (embed → field qua `dfb.publish`), `events` (`dfb.emit` → handler `embed:<tên>` chạy action flow). Không dùng field `hidden` làm cầu nối.
-- Cú pháp, ví dụ chạy được, bước "mở builder → Lưu" để sinh Tailwind: `../dynaform-build-form/references/custom-embed.md`; tài liệu lib: `docs/CUSTOM_EMBED.md` §19–21.
+- Cú pháp, ví dụ, bước "mở builder → Lưu" để sinh Tailwind: `../dynaform-build-form/references/custom-embed.md`; tài liệu lib: `docs/CUSTOM_EMBED.md` §19–21.
 
 ## Quy tắc cho mọi component
 
 - `name` snake_case duy nhất; nên có tiền tố nhóm khi form lớn (`addr_province`).
-- Component thu dữ liệu phải có `name`; `text`/`image`/`divider` không cần ràng buộc nhưng vẫn cần `name` duy nhất trong spec.
+- Component thu dữ liệu phải có `name`; `text`/`image`/`divider` không cần ràng buộc nhưng vẫn cần `name` duy nhất trong form.
 - Cấu hình riêng của một type nằm ở `props` (passthrough vào `editable_props.properties`). Chỉ truyền khoá bạn **đã xác nhận** từ docs/builder; khoá lạ vẫn được lưu nhưng có thể không có tác dụng.
-- Gặp control cấu hình phức tạp (table, matrix, file, record-*, custom-embed): dựng khung bằng script, sau đó mở builder để cấu hình chi tiết và Save. Riêng `custom-embed` còn cần Lưu trong hộp "Mã nhúng" để sinh Tailwind.
+- Gặp control cấu hình phức tạp (table, matrix, file, record-*, custom-embed): dựng khung bằng JSON, sau đó mở builder để cấu hình chi tiết và Save. Riêng `custom-embed` còn cần Lưu trong hộp "Mã nhúng" để sinh Tailwind.
 
 ## Style tuỳ chỉnh — CSS thuần / class Tailwind (lib ≥ 4.6.0)
 
-Mọi control (nhập liệu, content, layout, overlay) nhận `custom` trong spec → `properties.custom`:
+Mọi control (nhập liệu, content, layout, overlay) nhận `custom` → `properties.custom`:
 
 ```jsonc
 { "type": "input", "name": "email", "custom": {
@@ -222,13 +224,13 @@ Mọi control (nhập liệu, content, layout, overlay) nhận `custom` trong sp
 
 - Phần **`control`** = input / textarea / select / checkbox / switch (Button thì là chính nút); **`label`** = nhãn của field. Container / content / layout chỉ có khung ngoài; Dialog / Drawer / Bottom sheet áp lên panel khi mở.
 - Class viết Tailwind thường (`p-4`, `hover:`, `dark:`, `w-[37px]`, `@max-3xl:`); phải **viết đủ tên class** (không ghép `p-${n}`). CSS thuần: khai báo trực tiếp hoặc rule lồng (`&:hover {…}`, `& input {…}`); `@import`, `expression()`, `url()` ngoài `https:` bị lọc.
-- **Đừng tự điền `tailwindCss` / `twHash`**: builder tự sinh khi form được nạp vào editor (`loadFormJson` / Open JSON / mở editor). Form chưa qua editor chỉ hiện CSS thuần cho tới khi được lưu từ builder — nên sau khi dựng bằng script, mở form trong builder một lần và Save.
+- **Đừng tự điền `tailwindCss` / `twHash`**: builder tự sinh khi form được nạp vào editor (`loadFormJson` / Open JSON / mở editor). Form chưa qua editor chỉ hiện CSS thuần cho tới khi được lưu từ builder — nên sau khi viết JSON tay, mở form trong builder một lần và Save.
 - Host tắt được bằng `embedPolicy.allowCustomCss: false`. Chi tiết: `docs/CUSTOM_STYLE.md` trong fe_dynaform.
 
 ## Ví dụ chạy được
 
-- `assets/example-input-catalog.spec.json` — mỗi control nhập liệu/hiển thị một lần (copy từng dòng sang form thật).
-- `assets/example-layout-controls.spec.json` — container card + `custom`, `list`, `nested-list`, `form-loop`, `dialog` (confirmation/form), `drawer`, `bottom-sheet`.
+- `references/example-input-catalog.md` — mỗi control nhập liệu/hiển thị một lần (khoá gọn; quy đổi sang JSON theo `form-json.md` §10).
+- `references/example-layout-controls.md` — container card + `custom`, `list`, `nested-list`, `form-loop`, `dialog` (confirmation/form), `drawer`, `bottom-sheet`.
 - `references/examples.md` — giải thích từng ví dụ, cách đặt con theo loại cha, lỗi hay gặp.
 
 ## Tài liệu sâu trong fe_dynaform (đọc khi cần)

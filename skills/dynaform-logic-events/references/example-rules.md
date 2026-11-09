@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — Rule điều kiện (hiện/ẩn/bắt buộc theo giá trị)
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](../../dynaform-build-form/references/form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Đơn xin nghỉ học",
   "description": "Ví dụ rule điều kiện: hiện/ẩn (ẩn lúc mở bằng load + field_state, không dùng hidden tĩnh), bắt buộc/tuỳ chọn, bật/tắt, AND/OR, isEmpty, so sánh số, setValue",
@@ -71,3 +77,4 @@
       ] } }] }
   ]
 }
+```

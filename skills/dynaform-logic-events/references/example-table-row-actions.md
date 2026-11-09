@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — Hành động từng dòng của table (flow riêng, `$row`)
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](../../dynaform-build-form/references/form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Quản lý người dùng",
   "description": "Ví dụ hành động từng dòng của table chạy action flow: xoá (confirm → API → tải lại bảng), sửa (dialog điền sẵn từ dòng, chờ xác nhận → API), xem (navigate). Cột dữ liệu của bảng cấu hình thêm trong builder",
@@ -54,3 +60,4 @@
       ] } } } }
   ]
 }
+```

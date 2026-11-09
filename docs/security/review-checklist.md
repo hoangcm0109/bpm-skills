@@ -1,6 +1,6 @@
 # Checklist review khi sửa bpm-skills
 
-Áp dụng cho mọi PR chạm `skills/`, `.claude-plugin/`, `.codex-plugin/`, `.agents/`.
+Áp dụng cho mọi PR chạm `skills/`, `docs/`, `.claude-plugin/`, `.codex-plugin/`, `.agents/`.
 
 ## A. Nội dung skill (`SKILL.md`, `references/`)
 
@@ -12,27 +12,12 @@
 - [ ] Mọi khẳng định về lib bám nguồn thật; khẳng định chưa kiểm chứng được ghi rõ là chưa kiểm chứng.
 - [ ] Bảng "bẫy hay gặp"/quy tắc không khuyến khích dùng `customScript` làm mặc định.
 
-## B. Script (`scripts/dynaform.mjs`)
+## B. Không có mã thực thi
 
-- [ ] Chỉ import module chuẩn cần thiết (`node:fs`, `node:crypto`, `node:vm`); không thêm dependency ngoài.
-- [ ] Không có `child_process`, `eval`, `new Function`, `fetch`/`http(s)`, `net`, đọc `process.env`.
-- [ ] `node:vm` chỉ có `new Script(...)` (biên dịch kiểm cú pháp `embed.code`); không có `runInContext`/`runInNewContext`/`runInThisContext`/`compileFunction`.
-- [ ] Chỉ đọc file truyền vào; chỉ ghi `--out`; không tạo thư mục/ghi nơi khác.
-- [ ] Không thực thi hay nội suy `code`/`url`/HTML từ spec; chỉ chép nguyên văn sang đầu ra.
-- [ ] Lỗi in ra không kèm nội dung nhạy cảm của spec ngoài tên field.
-- [ ] Đã chạy lại:
-  ```bash
-  node skills/dynaform-build-form/scripts/dynaform.mjs build skills/dynaform-build-form/assets/example-spec.json --out /tmp/form.json
-  node skills/dynaform-build-form/scripts/dynaform.mjs validate /tmp/form.json
-  ```
-- [ ] Ca lỗi vẫn exit 1 (trùng name, ref treo, type lạ, select thiếu options).
-
-## B2. Script cầu nối (`scripts/stream-server.mjs`)
-
-- [ ] Chỉ import `node:fs`, `node:http` và `./dynaform.mjs`; không `child_process`, `eval`, `new Function`, `fetch`, `net` ra ngoài, không đọc `process.env`.
-- [ ] Chỉ `listen` trên `127.0.0.1`; kiểm `Host` và `Origin`; chỉ phục vụ `GET`; không endpoint ghi.
-- [ ] Chỉ đọc file spec truyền vào; không ghi file.
-- [ ] Đã thử: Host lạ → 403, Origin ngoài localhost → 403, file spec đang ghi dở không làm server sập.
+- [ ] Không có file thực thi hoặc script trong `skills/` và gốc repo: `.mjs`, `.cjs`, `.js`, `.ts`, `.sh`, `.bash`, `.ps1`, `.bat`, `.cmd`, `.py`, `.rb`, `.exe`… Kiểm bằng cách liệt kê file trong `skills/` (chỉ được có `SKILL.md` và file `.md`).
+- [ ] Không có chỉ dẫn bắt agent chạy lệnh shell, `node`, `npx`, `curl`, `git` nhân danh skill. Ví dụ code (TSX/JSON) trong tài liệu chỉ để đọc, không phải lệnh chạy.
+- [ ] Không thêm dependency, `package.json`, workflow CI chạy mã trong repo mà chưa review bảo mật riêng.
+- [ ] Nếu thật sự cần mã thực thi: tách thành thay đổi riêng, nêu lý do, cập nhật `SECURITY.md` + `using-skills.md` và review từng dòng (không mạng, không `child_process`/`eval`, không đọc biến môi trường).
 
 ## C. Manifest plugin
 
@@ -42,13 +27,14 @@
 - [ ] `repository` trỏ đúng repo GitHub chính thức; `homepage` là URL đã xác nhận.
 - [ ] Đã chạy `claude plugin validate .` và `claude plugin validate .claude-plugin/plugin.json`.
 
-## D. Tài liệu ví dụ & assets
+## D. Tài liệu ví dụ
 
-- [ ] `assets/*.json` không chứa `run_script`/`customScript` trừ khi là ví dụ minh hoạ cảnh báo, có ghi chú rõ.
+- [ ] Ví dụ form JSON/khoá gọn trong `references/` không chứa `run_script`/`customScript` trừ khi là ví dụ minh hoạ cảnh báo, có ghi chú rõ.
+- [ ] Ví dụ JSON hợp lệ cú pháp, `id` là UUID giả, không có token/URL nội bộ.
 - [ ] Không có file nhị phân hoặc file lớn không giải thích được.
 
 ## E. Release
 
 - [ ] Tăng version đồng bộ ở 3 manifest, ghi thay đổi liên quan bảo mật trong mô tả PR.
 - [ ] Gắn tag; người dùng cài theo tag (xem `using-skills.md`).
-- [ ] Nếu đổi hành vi script hoặc quyền cần cho skill: cập nhật `SECURITY.md` và `using-skills.md`.
+- [ ] Nếu đổi quyền cần cho skill hoặc thêm bất kỳ mã thực thi nào: cập nhật `SECURITY.md` và `using-skills.md`.

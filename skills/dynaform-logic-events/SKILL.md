@@ -5,12 +5,12 @@ description: Logic và sự kiện của form dynaform — mọi event (click/ch
 
 # Logic & sự kiện
 
-Tài liệu cho Agent dựng form. Mọi khoá bên dưới là khoá **spec** (`*.spec.json`, xem `../dynaform-build-form/references/spec-format.md`) — `dynaform.mjs` đổi sang JSON của lib và **kiểm tra** event/step/tham chiếu (lỗi → exit 1, cảnh báo → in `WARN`).
+Tài liệu cho Agent dựng form. Các khoá `events`, `rules`, `flow` bên dưới là **khoá gọn** để dễ đọc; khi viết JSON, mỗi handler nằm ở `properties.eventHandlers[]` đúng như `../dynaform-build-form/references/form-json.md` §8 (bảng quy đổi §10). Không có công cụ kiểm tự động — tự kiểm event/step/tham chiếu theo mục F của `../dynaform-build-form/references/checklist.md`.
 
 ## 1. Mô hình
 
 - Hành vi nằm ở `properties.eventHandlers[]` của control: `{ id, event, enabled, actions: [{ type: "flow", flow }] }`. **Mỗi handler chạy đúng một flow** (action engine). Không còn hệ "visual rule" riêng: rule điều kiện chính là handler `event: "condition"`.
-- Trong spec bạn viết một trong ba dạng, script đưa hết về flow:
+- Bạn có thể nghĩ theo một trong ba dạng (khoá gọn), nhưng JSON cuối cùng **luôn là flow** trong handler:
   1. `rules[]` — hiện/ẩn/bắt buộc theo điều kiện (§4).
   2. `events[].actions[]` — chuỗi action phẳng (§5).
   3. `events[].flow` — flow tự viết đầy đủ (§6–§7). **Dùng khi có nhiều bước, rẽ nhánh, API, hoặc cần dữ liệu từ bước trước.**
@@ -41,7 +41,7 @@ Tài liệu cho Agent dựng form. Mọi khoá bên dưới là khoá **spec** (
 | `control:<tên>` | control do host định nghĩa phát ra | control host (`x-…`) |
 
 Quy tắc:
-- Event không nằm trong cột "Control có" của type đó sẽ **không chạy** — script cảnh báo.
+- Event không nằm trong cột "Control có" của type đó sẽ **không chạy** — tự rà khi kiểm.
 - `$event.payload` chỉ có với `embed:*`, `control:*`, `menu:*` (và click từ hàng bảng/loop có `$row`). Event DOM (`click`, `change`…) **không mang giá trị**: đọc giá trị mới bằng `$form.current.values.<name>`.
 - `condition` được đánh giá trên **giá trị gốc của form**, không theo dòng loop/list; điều kiện theo dòng đặt `change` trong dòng.
 - Nút (`button`/`submit-button`) có flow `click` đang chạy tự **khoá + hiện spinner** và bỏ qua click tiếp.
@@ -126,7 +126,7 @@ Từ hai thao tác có phụ thuộc nhau (dùng kết quả bước trước, r
 | `$forms.<alias>.values.<name>`, `$layout.vars.<n>`, `$queries.<id>.data` | chỉ khi form chạy trong layout nhiều form |
 
 Template `{{…}}` dùng được ở `template.template`, `show_message.message`, `navigate.url`.
-Script chỉ tham chiếu tới `name` đã có trong spec và `$steps.<id>` có trong cùng flow — sai tên → lỗi.
+Chỉ tham chiếu tới `name` đã có trong form và `$steps.<id>` có trong cùng flow — sai tên là lỗi (tự rà khi kiểm).
 
 ### 6.2 Điều kiện (`branch.condition`)
 
@@ -137,7 +137,7 @@ Script chỉ tham chiếu tới `name` đã có trong spec và `$steps.<id>` có
 ```
 
 `operator`: `eq neq gt gte lt lte contains not_contains empty not_empty` (`empty`/`not_empty` không cần `right`). `all: []` = đúng; `any: []` = sai. Số so với chuỗi: lấy giá trị bằng `ref`, so `literal` đúng kiểu.
-(Trong `rules[]` của spec dùng tên dễ đọc `equals/greaterThan/…` — xem §4.)
+(Trong `rules[]` khoá gọn dùng tên dễ đọc `equals/greaterThan/…`; khi viết JSON đổi sang tên flow theo bảng ở §4.)
 
 ### 6.3 Các step
 
@@ -169,7 +169,7 @@ Script chỉ tham chiếu tới `name` đã có trong spec và `$steps.<id>` có
 | `confirm` | `message` (chuỗi hoặc ValueSource, có `{{$row.data.name}}`), `title?`, `confirmLabel?` (mặc định "Tiếp tục"), `cancelLabel?` (mặc định "Hủy"), `destructive?` (nút đỏ) | hỏi người dùng đồng ý trước khi chạy tiếp (thay confirm modal). Bấm Hủy / Esc → **flow dừng lặng lẽ** (xem "Huỷ" bên dưới) |
 | `show_message` | `level`: `success\|error\|warning\|info`, `message` (chuỗi hoặc ValueSource, có `{{…}}`) | toast |
 | `navigate` | `url` (có `{{…}}`), `newTab?`, `delayMs?`, `pathMapping?`, `queryMapping?`, `download?: { authConfig?, fileName? }` | `download` tải file **tại tab hiện tại** kèm header Authorization. `delayMs` để người dùng kịp đọc toast. Chỉ `https://` hoặc đường dẫn nội bộ |
-| `push_table` | `tableId`, `mode`: `rows\|request`, `rows`/`total` (mode rows), body (mode request), `keepPage?` | đẩy dữ liệu vào `table` / `record-gallery`; `request` = bảng tự gọi lại API của nó (về trang 1; `keepPage: true` giữ trang). **Trong spec viết `tableId` = name của table**, script đổi sang id lúc build |
+| `push_table` | `tableId`, `mode`: `rows\|request`, `rows`/`total` (mode rows), body (mode request), `keepPage?` | đẩy dữ liệu vào `table` / `record-gallery`; `request` = bảng tự gọi lại API của nó (về trang 1; `keepPage: true` giữ trang). **Trong ví dụ khoá gọn viết `tableId` = name của table; khi viết JSON phải là `item_control.id` của table** |
 | `embed_command` | `target` (name custom-embed), `command`, `payload?` | gửi lệnh vào embed đang hiển thị (`dfb.onCommand`) |
 | `emit_event` | `eventName`, `payload?: { khoá: ValueSource }` | phát `CustomEvent` ra `window` cho app host lắng nghe |
 
@@ -195,7 +195,7 @@ Script chỉ tham chiếu tới `name` đã có trong spec và `$steps.<id>` có
 
 `run_script` (`code`, async JS có `form`, `fields`, `ctx.steps/row/event`; `return` → output) — cuối cùng mới dùng.
 
-**Chỉ trong layout nhiều form** (script cảnh báo ở form đơn): `open_form`, `close_form`, `refetch` (chạy lại query của layout), và trường `form` (alias) trên các step.
+**Chỉ trong layout nhiều form** (ở form đơn sẽ lỗi): `open_form`, `close_form`, `refetch` (chạy lại query của layout), và trường `form` (alias) trên các step.
 **Chưa có tác dụng**: `switch_tab`, `collapse`.
 
 ## 7. Công thức nhanh (copy rồi đổi tên)
@@ -378,7 +378,7 @@ Không đặt `Content-Type` trong `headers` (sẽ làm mất boundary). Server 
 ### 7.16 Hành động từng dòng của table (`actions[].flow`)
 
 Mỗi hành động trong cột hành động của `table` có **flow riêng**, chạy khi bấm với `$row` = dòng được bấm: `$row.data.<cột>`, `$row.key`, `$row.index`.
-Khai trong spec ở `props.table.actionColumn.actions[]` (cấu hình cột / dữ liệu bảng làm trong builder; script chỉ kiểm flow):
+Khai ở `properties.table.actionColumn.actions[]` (khoá gọn: `props.table.actionColumn.actions[]`; cấu hình cột / dữ liệu bảng làm trong builder):
 
 ```jsonc
 { "type": "table", "name": "users_table",
@@ -406,11 +406,11 @@ Khai trong spec ở `props.table.actionColumn.actions[]` (cấu hình cột / d�
   ] } } } }
 ```
 
-- Có `flow` thì flow **nắm toàn bộ cú click**: `confirm` / `dialogTarget` / `dataSourceId` / `redirectUrl` cũ và hành vi sửa/xoá cục bộ của `type` bị bỏ qua (script cảnh báo khi còn trường cũ). Muốn hỏi xác nhận → step `confirm`.
+- Có `flow` thì flow **nắm toàn bộ cú click**: `confirm` / `dialogTarget` / `dataSourceId` / `redirectUrl` cũ và hành vi sửa/xoá cục bộ của `type` bị bỏ qua (nên bỏ các trường cũ khi đã có `flow`). Muốn hỏi xác nhận → step `confirm`.
 - `type` (`edit`/`delete`/`view`/`custom`) chỉ quyết định nhãn/biểu tượng mặc định; không có `flow` thì `edit`/`delete` vẫn sửa/xoá dòng cục bộ (bảng tĩnh).
-- `push_table.tableId` viết bằng **name của table** (script đổi sang id lúc build). `keepPage: true` tải lại tại trang hiện tại.
+- `push_table.tableId` trong ví dụ khoá gọn viết bằng **name của table**; khi viết JSON phải là **`item_control.id` của table** (không phải name). `keepPage: true` tải lại tại trang hiện tại.
 - Dialog mở từ hàng bảng đứng **trước** table trong mảng; nút xác nhận của dialog dùng footer action `confirm` (không kiểm tra form) hoặc `submit` (kiểm tra các trường trong dialog).
-- Cấu hình cũ (confirm, mở dialog, gọi Data Source, redirect) ở form lưu từ trước **vẫn chạy** (lib tự chuyển thành flow khi bấm; builder hiển thị "chuyển từ cấu hình cũ"). Sự kiện script `table-row-action` giai đoạn `response` không còn bắn cho hành động chạy bằng flow.
+- Cấu hình cũ (confirm, mở dialog, gọi Data Source, redirect) ở form lưu từ trước **vẫn chạy** (lib tự chuyển thành flow khi bấm; builder hiển thị "chuyển từ cấu hình cũ"). Sự kiện `table-row-action` giai đoạn `response` không còn bắn cho hành động chạy bằng flow.
 
 ## 8. Giới hạn & lưu ý
 
@@ -422,17 +422,17 @@ Khai trong spec ở `props.table.actionColumn.actions[]` (cấu hình cột / d�
 - `required` thay đổi động: dùng `field_state` `require`/`optional` (đừng đặt `required: true` cứng cho control cần bật/tắt — `../dynaform-validation/SKILL.md`).
 - Gỡ lỗi: builder có **Sơ đồ + chạy thử + trace từng step** (`docs/ACTION_ENGINE.md`); mỗi lần gọi API test trong editor nhập giá trị mẫu cho các field flow đọc.
 
-## 9. Ví dụ chạy được
+## 9. Ví dụ
 
-Spec đầy đủ (build + validate bằng `dynaform.mjs`), giải thích trong `references/examples.md`:
+Ví dụ đầy đủ (khoá gọn), giải thích trong `references/examples.md`:
 
-- `assets/example-rules.spec.json` — rule điều kiện: hiện/ẩn, bắt buộc, bật/tắt, `AND`/`OR`, `isEmpty`, so sánh số, `setValue`; ẩn lúc mở bằng `load` + `field_state`.
-- `assets/example-flows.spec.json` — flow: tìm kiếm → làm mới bảng, chọn → điền từ API, nạp song song khi mở, `branch`, `confirm` + `for_each`, xác nhận xoá trong dialog, tải file, `emit_event`.
-- `assets/example-table-row-actions.spec.json` — hành động từng dòng của `table` (xem / sửa bằng dialog chờ xác nhận / xoá có xác nhận).
+- `references/example-rules.md` — rule điều kiện: hiện/ẩn, bắt buộc, bật/tắt, `AND`/`OR`, `isEmpty`, so sánh số, `setValue`; ẩn lúc mở bằng `load` + `field_state`.
+- `references/example-flows.md` — flow: tìm kiếm → làm mới bảng, chọn → điền từ API, nạp song song khi mở, `branch`, `confirm` + `for_each`, xác nhận xoá trong dialog, tải file, `emit_event`.
+- `references/example-table-row-actions.md` — hành động từng dòng của `table` (xem / sửa bằng dialog chờ xác nhận / xoá có xác nhận).
 
 ## 10. Quy tắc chung
 
-1. Mọi `target` / `field` là **`name`**, phải tồn tại trong spec; script từ chối tham chiếu treo.
+1. Mọi `target` / `field` là **`name`**, phải tồn tại trong form; không để tham chiếu treo.
 2. Dialog đứng **trước** nút mở nó; `dialog` variant confirmation/info đặt nội dung ở `dialog.title/description`.
 3. `customScript`/`run_script` là JS thô chạy ở trình duyệt người dùng cuối, bị host kiểm soát theo logic-execution policy — **không dùng mặc định** (`../dynaform-build-form/` › Bảo mật; `docs/security/form-json-safety.md`).
 4. Không nhúng secret/token vào JSON form; API ngoài cần CORS + auth do host cấp.

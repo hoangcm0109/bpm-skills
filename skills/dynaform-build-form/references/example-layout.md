@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — Chỉ bố cục — container 6/6 + 12, columns 3 cột, tab, grid, nút căn phải
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Đăng ký sinh viên",
   "description": "Ví dụ bố cục: container, 2 cột, 3 cột (columns) và tab",
@@ -30,3 +36,4 @@
     { "type": "submit-button", "name": "btn_submit", "label": "Gửi hồ sơ", "colSpan": 2 }
   ]
 }
+```

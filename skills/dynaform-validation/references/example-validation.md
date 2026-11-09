@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — Validation — mọi rule theo từng kiểu control
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](../../dynaform-build-form/references/form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Đăng ký tài khoản sinh viên",
   "description": "Ví dụ validation đủ loại rule theo từng kiểu control: regex, độ dài, so khớp field, khoảng số, URL, rule bắt buộc theo điều kiện",
@@ -90,3 +96,4 @@
       ] } }] }
   ]
 }
+```

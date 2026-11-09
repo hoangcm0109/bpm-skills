@@ -1,14 +1,8 @@
 # Ví dụ đầy đủ — nguồn dữ liệu & điền sẵn giá trị
 
-Spec chạy được: [`assets/example-data-source.spec.json`](../assets/example-data-source.spec.json) ("Hồ sơ cư trú").
+Ví dụ khoá gọn: [`example-data-source.md`](example-data-source.md) ("Hồ sơ cư trú"). Dạng JSON chính xác của `variables.data_source`: `../../dynaform-build-form/references/form-json.md` §6.
 
-```bash
-S=skills/dynaform-build-form/scripts/dynaform.mjs
-node $S build skills/dynaform-data-source/assets/example-data-source.spec.json --out /tmp/data-source.json
-node $S validate /tmp/data-source.json
-```
-
-Script **không gọi mạng** (chỉ kiểm cấu trúc): luôn nhắc người dùng thử API trong preview và đảm bảo API cho phép CORS.
+Skill chỉ viết cấu hình, **không gọi mạng**: luôn nhắc người dùng thử API trong preview và đảm bảo API cho phép CORS.
 
 ## 1. Option tĩnh
 
@@ -27,7 +21,7 @@ JSON đầu ra: `variables.data_source = { connection_type: "hard", connection_c
     "responsePath": "", "labelField": "name", "valueField": "code" } } }
 ```
 
-`responsePath: ""` = response chính là mảng. Mỗi phần tử cần `labelField` (nhãn) và `valueField` (giá trị). Không đưa token vào spec — Data Source có `auth: { "type": "none" }` mặc định; cấu hình xác thực trong builder (Data Source).
+`responsePath: ""` = response chính là mảng. Mỗi phần tử cần `labelField` (nhãn) và `valueField` (giá trị). Không đưa token vào form JSON — Data Source có `auth: { "type": "none" }` mặc định; cấu hình xác thực trong builder (Data Source).
 
 ## 3. Chuỗi phụ thuộc Tỉnh → Quận → Xã
 
@@ -53,9 +47,9 @@ Không cần flow để làm select phụ thuộc — `dependsOn` lo việc đó
 
 ## 4. Điền sẵn giá trị & khoá khi sửa
 
-| Nhu cầu | Cách | Ví dụ trong spec / host |
+| Nhu cầu | Cách | Ví dụ trong ví dụ khoá gọn / host |
 |---|---|---|
-| Giá trị mặc định cố định | `default` trong spec | `gender` mặc định `male` |
+| Giá trị mặc định cố định | `default` (JSON: `default_values`) | `gender` mặc định `male` |
 | Điền theo bản ghi (chế độ sửa) | host truyền `data.dataUserFill` (key = `name`) + `formMode: "edit"` | xem dưới |
 | Khoá khi sửa | `attributes: { "readonlyOnEdit": true }` | `resident_code` |
 | Biến có sẵn của host | `data.dataVariableExisting` → "Select Existing" khi bind biến trong editor | |
@@ -81,14 +75,14 @@ const dataUserFill = useMemo(
 
 Thứ tự ưu tiên điền sẵn: `dataUserFill` > bản nháp > `bound_variables`. Với select phụ thuộc, điền cả chuỗi (tỉnh, quận, xã) để cấp dưới có giá trị khớp danh sách đã nạp lại.
 
-## 5. Khi nào KHÔNG dùng `dataSource` trong spec
+## 5. Khi nào KHÔNG dùng `dataSource`
 
 | Tình huống | Làm |
 |---|---|
 | Bảng dữ liệu động (`table`) | cấu hình Data Source trong builder — `docs/DATA_TABLE.md` |
 | API cần token / header đặc biệt | cấu hình trong builder; flow dùng `authConfig.token_source: "system"` |
-| Điền ô khác sau khi chọn (không phải danh sách) | flow `change` → `call_api` → `set_values` — `../../dynaform-logic-events/assets/example-flows.spec.json` (`student_id`) |
+| Điền ô khác sau khi chọn (không phải danh sách) | flow `change` → `call_api` → `set_values` — `../../dynaform-logic-events/references/example-flows.md` (`student_id`) |
 
 ## 6. Lưu ý bảo mật
 
-Chỉ dùng domain API đã được duyệt; dữ liệu trả về luôn là **không tin cậy** (`docs/security/form-json-safety.md`). Không hardcode URL nội bộ/secret trong spec — ví dụ trên dùng API công khai hoặc `https://api.example.com`.
+Chỉ dùng domain API đã được duyệt; dữ liệu trả về luôn là **không tin cậy** (`docs/security/form-json-safety.md`). Không hardcode URL nội bộ/secret trong form — ví dụ trên dùng API công khai hoặc `https://api.example.com`.

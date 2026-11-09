@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — Form đăng ký — container, tab, select phụ thuộc API, matchField, rule hiển thị, dialog
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Đăng ký tài khoản",
   "description": "Ví dụ đủ các cơ chế: container, tab, select phụ thuộc API, matchField, rule hiển thị, dialog",
@@ -42,3 +48,4 @@
       "events": [{ "event": "click", "actions": [{ "type": "openModal", "target": "success_dialog" }] }] }
   ]
 }
+```

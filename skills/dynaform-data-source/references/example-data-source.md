@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — Data source — option tĩnh/API, Tỉnh → Quận → Xã
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](../../dynaform-build-form/references/form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Hồ sơ cư trú",
   "description": "Ví dụ nguồn dữ liệu: option tĩnh, select từ API công khai, chuỗi phụ thuộc Tỉnh → Quận → Xã (dependsOn + pathParams), giá trị mặc định, ô chỉ-đọc khi sửa",
@@ -30,3 +36,4 @@
       ] } }] }
   ]
 }
+```

@@ -1,16 +1,10 @@
 # Ví dụ đầy đủ — validation
 
-Spec chạy được: [`assets/example-validation.spec.json`](../assets/example-validation.spec.json) ("Đăng ký tài khoản sinh viên", 2 nhóm, ~20 field).
-
-```bash
-S=skills/dynaform-build-form/scripts/dynaform.mjs
-node $S build skills/dynaform-validation/assets/example-validation.spec.json --out /tmp/validation.json
-node $S validate /tmp/validation.json
-```
+Ví dụ (khoá gọn, quy đổi sang JSON theo `../../dynaform-build-form/references/form-json.md` §10): [`example-validation.md`](example-validation.md) ("Đăng ký tài khoản sinh viên", 2 nhóm, ~20 field).
 
 ## 1. Rule nào đi với control nào
 
-Lib chỉ đưa ra các rule dưới đây trong panel Validation của từng kiểu control (script vẫn chấp nhận mọi `type` hợp lệ). Ví dụ trong spec bám đúng bảng này.
+Lib chỉ đưa ra các rule dưới đây trong panel Validation của từng kiểu control (mọi `type` hợp lệ vẫn được lib biên dịch, nhưng không hiện trong panel). Ví dụ bám đúng bảng này.
 
 | Control | Rule hợp lý | Trong ví dụ |
 |---|---|---|
@@ -74,12 +68,12 @@ Rule `show↔hide` và `require↔optional` tự có nhánh ngược nên khi đ
 | "Lỗi" | "Mật khẩu nhập lại không khớp" |
 | (để trống với regex) | luôn có `errorMessage` cho `regex` và `matchField` |
 
-## 5. Khi script báo lỗi
+## 5. Lỗi hay gặp khi tự rà
 
-| Thông báo | Sửa |
+| Dấu hiệu | Sửa |
 |---|---|
-| `ERROR components[0] (n): validation type "gte" không hợp lệ` | dùng đúng tên trong danh sách ở SKILL.md (`greaterEqual`, không phải `gte`) |
-| `ERROR components[3] (pw2): matchField trỏ tới "nope" không tồn tại` | `value` = `name` của field gốc, field gốc có trong spec |
-| khai `required: true` **và** `{ "type": "required" }` | script giữ đúng một rule `required` (bỏ bản trùng trong `validations`) — vẫn nên chỉ dùng `required: true` + `requiredMessage` |
+| `validations[].type` là `"gte"` (không hợp lệ) | dùng đúng tên trong danh sách ở SKILL.md (`greaterEqual`, không phải `gte`) |
+| `matchField.value` trỏ tới "nope" (không tồn tại) | `value` = `name` của field gốc, field gốc có trong form |
+| khai `required: true` **và** `{ "type": "required" }` | chỉ giữ **một** phần tử `required` trong `validation_schema` (bỏ bản trùng) — vẫn nên chỉ khai `required: true` + `requiredMessage` rồi quy đổi một lần |
 
 Validate ở **app host** dùng react-hook-form + Zod là việc khác (xem `../../dynaform-mfe-module/references/examples.md` §7–§8).

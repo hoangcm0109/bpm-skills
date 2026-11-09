@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — 11 công thức bố cục + responsive
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](../../dynaform-build-form/references/form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Công thức bố cục form",
   "description": "Mỗi nhóm là một công thức bố cục của dynaform-layout: 2 cột, 3 cột, 9+3, ô nhập + nút (alignSelf), hàng bộ lọc, giữ cột trên mobile, columns 8+4, grid gộp ô, nút căn phải",
@@ -61,3 +67,4 @@
     { "type": "submit-button", "name": "r11_submit", "label": "Gửi", "colSpan": 2 }
   ]
 }
+```

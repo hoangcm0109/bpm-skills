@@ -1,23 +1,16 @@
 # Ví dụ đầy đủ — logic & sự kiện
 
-Ba spec chạy được trong `assets/`. Mỗi handler được script đổi thành một flow (`properties.eventHandlers[]`) và **kiểm** event/step/tham chiếu.
+Ba ví dụ viết bằng **khoá gọn** (ký hiệu tài liệu). Mỗi handler quy đổi thành một flow trong `properties.eventHandlers[]` theo `../../dynaform-build-form/references/form-json.md` §8 / §10; tự kiểm event/step/tham chiếu theo mục F của `../../dynaform-build-form/references/checklist.md`.
 
-```bash
-S=skills/dynaform-build-form/scripts/dynaform.mjs
-for f in example-rules example-flows example-table-row-actions; do
-  node $S build skills/dynaform-logic-events/assets/$f.spec.json --out /tmp/$f.json && node $S validate /tmp/$f.json
-done
-```
-
-| Spec | Chủ đề | Điểm đáng học |
+| Ví dụ | Chủ đề | Điểm đáng học |
 |---|---|---|
-| `example-rules.spec.json` | "Đơn xin nghỉ học" — rule điều kiện | hiện/ẩn, bắt buộc, bật/tắt, `AND`/`OR`, `isEmpty`, so sánh số, `setValue`, ẩn lúc mở |
-| `example-flows.spec.json` | "Trung tâm xử lý hồ sơ" — action flow | `push_table`, chọn → điền từ API, `parallel`, `branch`, `confirm` + `for_each`, xác nhận xoá, tải file, `emit_event` |
-| `example-table-row-actions.spec.json` | "Quản lý người dùng" | hành động từng dòng của `table` chạy flow riêng (`$row`) |
+| [`example-rules.md`](example-rules.md) | "Đơn xin nghỉ học" — rule điều kiện | hiện/ẩn, bắt buộc, bật/tắt, `AND`/`OR`, `isEmpty`, so sánh số, `setValue`, ẩn lúc mở |
+| [`example-flows.md`](example-flows.md) | "Trung tâm xử lý hồ sơ" — action flow | `push_table`, chọn → điền từ API, `parallel`, `branch`, `confirm` + `for_each`, xác nhận xoá, tải file, `emit_event` |
+| [`example-table-row-actions.md`](example-table-row-actions.md) | "Quản lý người dùng" | hành động từng dòng của `table` chạy flow riêng (`$row`) |
 
-Script có một cảnh báo cố định: `awaitSubmit: dialog phải có nút xác nhận / gửi …` — chỉ là nhắc (spec đã có footer action `submit`).
+Lưu ý cố định: step `dialog` có `awaitSubmit` thì dialog phải có nút xác nhận / gửi (footer action `confirm`/`submit`) — các ví dụ đều đã có footer action `submit`.
 
-## 1. Rule điều kiện — `example-rules.spec.json`
+## 1. Rule điều kiện — `example-rules.md`
 
 | Yêu cầu | Rule | Ghi chú |
 |---|---|---|
@@ -40,7 +33,7 @@ Script có một cảnh báo cố định: `awaitSubmit: dialog phải có nút 
     "then": [{ "type": "show", "target": "medical_proof" }, { "type": "require", "target": "medical_proof" }] }] }
 ```
 
-## 2. Action flow — `example-flows.spec.json`
+## 2. Action flow — `example-flows.md`
 
 ### 2.1 Tìm kiếm → làm mới bảng (body theo ô lọc)
 
@@ -52,7 +45,7 @@ Script có một cảnh báo cố định: `awaitSubmit: dialog phải có nút 
       { "source": { "type": "ref", "path": "$form.current.values.status" },  "target": "status" } ] } }] }
 ```
 
-`tableId` viết bằng **`name` của table** (script đổi sang id lúc build). Bảng `GET` thì khoá body đi thành query, giá trị rỗng bị bỏ.
+`tableId` trong ví dụ khoá gọn viết bằng **`name` của table**; khi viết JSON phải là **`item_control.id` của table**. Bảng `GET` thì khoá body đi thành query, giá trị rỗng bị bỏ.
 
 ### 2.2 Chọn → điền ô khác từ API (dùng kết quả bước trước)
 
@@ -111,7 +104,7 @@ Dialog `delete_dialog` (variant `custom`) đứng trước nút mở; nút "Xoá
 
 `download` tải file tại tab hiện tại kèm header Authorization; `emit_event` phát `CustomEvent` ra `window` để app host lắng nghe (`window.addEventListener("dynaform:request-processed", …)`).
 
-## 3. Hành động từng dòng của table — `example-table-row-actions.spec.json`
+## 3. Hành động từng dòng của table — `example-table-row-actions.md`
 
 Cấu hình ở `props.table.actionColumn.actions[]`, mỗi hành động có `flow` riêng với `$row.data.<cột>`, `$row.key`, `$row.index`:
 
@@ -125,13 +118,13 @@ Cấu hình ở `props.table.actionColumn.actions[]`, mỗi hành động có `f
 - Có `flow` thì flow **nắm toàn bộ** cú click: các trường cũ `confirm` / `dialogTarget` / `dataSourceId` / `redirectUrl` bị bỏ qua.
 - Dữ liệu và cột của bảng (Data Source, cột hiển thị) cấu hình thêm trong builder.
 
-## 4. Lỗi hay gặp (script báo)
+## 4. Lỗi hay gặp khi tự rà
 
-| Thông báo thật của script | Sửa |
+| Dấu hiệu | Sửa |
 |---|---|
-| `WARN … event "change" không được lib cung cấp cho type button (có: click, dblclick, …) — handler sẽ không chạy` | xem bảng event theo control ở SKILL.md §3 |
-| `ERROR … $steps.nope.output.x trỏ tới step "nope" không có trong flow` | sửa id; `$steps` chỉ tham chiếu step có trong cùng flow |
-| `ERROR … mappings[1].to "missing_field" không tồn tại` | `to` / `target` / `field` là `name` có thật trong spec |
-| `ERROR … then phải là MỘT step (dùng sequence để gộp nhiều bước)` | `then`/`else` không phải mảng — bọc bằng `sequence` |
-| `ERROR … step id "s1" bị trùng trong cùng handler` | đặt id khác nhau |
+| event `change` gắn vào `button` (type chỉ có `click`, `dblclick`, `hover`, `load`, `condition`) — handler sẽ không chạy | xem bảng event theo control ở SKILL.md §3 |
+| `$steps.nope.output.x` trỏ tới step "nope" không có trong flow | sửa id; `$steps` chỉ tham chiếu step có trong cùng flow |
+| `mappings[1].to` là "missing_field" (không tồn tại) | `to` / `target` / `field` là `name` có thật trong form |
+| `then` / `else` là mảng thay vì MỘT step | `then`/`else` không phải mảng — bọc bằng `sequence` |
+| step `id` "s1" trùng trong cùng handler | đặt id khác nhau |
 | (không có thông báo) nút có flow `click` không validate/gửi | flow phải tự `validate_form` + `call_api` |

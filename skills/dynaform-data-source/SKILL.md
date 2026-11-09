@@ -5,6 +5,8 @@ description: Nguồn dữ liệu cho field dynaform — option tĩnh, select l�
 
 # Data source & biến
 
+> Các ví dụ trong skill này dùng **khoá gọn** (ký hiệu tài liệu). Khi viết form JSON, đặt đúng vị trí theo [`form-json.md`](../dynaform-build-form/references/form-json.md) §10; tự kiểm theo [`checklist.md`](../dynaform-build-form/references/checklist.md).
+
 ## Option tĩnh
 
 ```jsonc
@@ -29,7 +31,7 @@ description: Nguồn dữ liệu cho field dynaform — option tĩnh, select l�
 | `headers`, `queryParams`, `body` | tuỳ chọn |
 | `responsePath` | đường dẫn tới mảng trong response (`""` = response là mảng; `"districts"`, `"data.items"`) |
 | `labelField` / `valueField` | khoá trong từng phần tử dùng làm nhãn / giá trị |
-| `auth` | mặc định `{ "type": "none" }` — cấu hình token trong builder (Data Source), **không** đưa secret vào spec |
+| `auth` | mặc định `{ "type": "none" }` — cấu hình token trong builder (Data Source), **không** đưa secret vào form JSON |
 
 ## Option phụ thuộc field khác
 
@@ -50,7 +52,7 @@ description: Nguồn dữ liệu cho field dynaform — option tĩnh, select l�
 
 | Nhu cầu | Cách |
 |---|---|
-| Giá trị mặc định cố định | `default` trong spec |
+| Giá trị mặc định cố định | `default` (JSON: `default_values`) |
 | Điền theo bản ghi (chế độ sửa) | `data.dataUserFill` (key = `name`) hoặc `userFill` của release; `formMode: "edit"` |
 | Biến có sẵn của host | `data.dataVariableExisting` → hiện ở "Select Existing" khi bind biến trong editor |
 | Option/giá trị host cấp sẵn | `bound_variables` trong form JSON, key theo `key_path` |
@@ -58,7 +60,7 @@ description: Nguồn dữ liệu cho field dynaform — option tĩnh, select l�
 
 ## Ví dụ chạy được
 
-`assets/example-data-source.spec.json` — "Hồ sơ cư trú": option tĩnh, select API công khai, chuỗi Tỉnh → Quận → Xã (`dependsOn` + `pathParams`), `default`, `readonlyOnEdit`. Giải thích + đoạn host điền sẵn bằng `dataUserFill`: `references/examples.md`.
+`references/example-data-source.md` (khoá gọn; JSON chính xác ở `../dynaform-build-form/references/form-json.md` §6) — "Hồ sơ cư trú": option tĩnh, select API công khai, chuỗi Tỉnh → Quận → Xã (`dependsOn` + `pathParams`), `default`, `readonlyOnEdit`. Giải thích + đoạn host điền sẵn bằng `dataUserFill`: `references/examples.md`.
 
 ## Lưu ý
 
@@ -66,4 +68,4 @@ description: Nguồn dữ liệu cho field dynaform — option tĩnh, select l�
 2. Gọi API đi qua `config.http` (mặc định fetch trực tiếp → cần CORS) hoặc proxy của host; Data Source `token_source: "system"` đọc cookie `access_token` của host.
 3. Không hardcode URL nội bộ/secret; chỉ ghi URL công khai hoặc để người dùng điền trong builder.
 4. `table` với data source (dynamic) cấu hình trong builder — xem `docs/DATA_TABLE.md`.
-5. Kết quả `validate` chỉ kiểm cấu trúc, **không** gọi mạng — nhắc người dùng test API trong preview.
+5. Skill chỉ viết cấu hình, **không** gọi mạng — nhắc người dùng test API trong preview.

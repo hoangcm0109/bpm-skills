@@ -3,6 +3,15 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.9.0 — 2026-11-09 (bỏ toàn bộ script: skill chỉ còn tài liệu markdown)
+
+- **Xoá `skills/dynaform-build-form/scripts/`** (`dynaform.mjs`, `stream-server.mjs`) và 12 file `assets/*.spec.json`: repo không còn file thực thi nào, giảm bề mặt tấn công khi cài skill (xem `SECURITY.md`). Bỏ luôn chế độ "build dần" (`stream-preview.md`).
+- **`dynaform-build-form` viết lại**: agent **viết thẳng form JSON** thay vì spec → script. Tài liệu mới: `references/form-json.md` (khung, mẫu control, bảng registry type → 5 trường định danh, cây cha–con, `properties`, data source, bố cục, validation/sự kiện/logic, `custom-embed`, bảng quy đổi khoá gọn → JSON), `references/checklist.md` (tự kiểm thay cho `validate` của script), `references/example-contact-json.md` (form JSON hoàn chỉnh). Định dạng JSON rút gọn đã **kiểm chứng**: nạp qua `transformFormComponents` của lib cho model giống hệt bản đầy đủ trên cả 12 form mẫu cũ. `spec-format.md` và `output-format.md` được gộp vào `form-json.md`.
+- **Ví dụ** chuyển thành markdown: 11 spec cũ thành `references/example-*.md` (khoá gọn, quy đổi theo `form-json.md` §10); form liên hệ có bản JSON đầy đủ. Các skill con (`components`, `validation`, `logic-events`, `layout`, `data-source`, `embed-lib`, `mfe-module`) bỏ mọi tham chiếu script/`assets`/`validate`; ghi chú `push_table.tableId` phải là `item_control.id` khi viết JSON.
+- **Bảo mật**: `SECURITY.md`, `docs/security/using-skills.md`, `form-json-safety.md`, `review-checklist.md` viết lại — cam kết "không có mã thực thi", không còn allowlist lệnh `node`; checklist review thêm mục kiểm không có file thực thi. `AGENTS.md`, `README.md` cập nhật.
+- Bỏ bullet pipeline `scripts/scholarship-forms` trong `dynaform-mfe-module` (thư mục đó trong mfe-dynaform chỉ còn `.out/`).
+- **Hệ quả cần biết**: không còn bước kiểm tự động; chất lượng JSON phụ thuộc agent làm đúng checklist, người dùng nên mở form trong builder/preview trước khi dùng.
+
 ## 0.8.0 — 2026-11-09 (skill mới `dynaform-agent-tools`: tool cho AI agent)
 
 - **Skill mới `dynaform-agent-tools`** — tích hợp AI agent/hệ thống AI khác với dynaform. `SKILL.md` + 4 file tham chiếu:

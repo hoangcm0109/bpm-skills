@@ -1,3 +1,9 @@
+# Ví dụ (khoá gọn) — Flow — API, dialog, bảng
+
+Ví dụ viết bằng **khoá gọn** (`name`, `label`, `colSpan`, `validations`, `events`, `rules`, `parent`, `props`…) cho dễ đọc. Đây là ký hiệu trong tài liệu, **không** phải JSON để nạp: khi dựng form, viết `FormDesignJson` đầy đủ theo [`form-json.md`](../../dynaform-build-form/references/form-json.md) — bảng quy đổi ở §10, mẫu một control ở §2, ví dụ hoàn chỉnh ở `example-contact-json.md`.
+Mọi URL là `https://api.example.com` (giả), dữ liệu giả, không token.
+
+```jsonc
 {
   "name": "Trung tâm xử lý hồ sơ",
   "description": "Ví dụ action flow: tìm kiếm → làm mới bảng, chọn → điền từ API, nạp song song khi mở, rẽ nhánh, xử lý hàng loạt (confirm + for_each), xác nhận xoá trong dialog, tải file, phát sự kiện cho host",
@@ -100,3 +106,4 @@
         "payload": { "student_id": { "type": "ref", "path": "$form.current.values.student_id" } } } }] }
   ]
 }
+```

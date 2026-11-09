@@ -1,12 +1,14 @@
 # custom-embed — React (TSX) + Tailwind
 
 `custom-embed` là **lối thoát cuối cùng**: chỉ dùng khi không control có sẵn nào đáp ứng (bảng "nhu cầu → control" ở `dynaform-components`).
-Spec bắt buộc có `reason` (control có sẵn nào đã cân nhắc, vì sao không đủ) — thiếu thì script báo lỗi.
+Phải nêu **lý do** (control có sẵn nào đã cân nhắc, vì sao không đủ) trong báo cáo cuối — thiếu lý do là chưa đạt checklist (§G).
 
-Khi đã phải dùng: **React 19 + Tailwind** (`mode: "sandbox"`, `framework: "react"`, `tailwind: true` — đây là mặc định của script).
+Khi đã phải dùng: **React 19 + Tailwind** (`mode: "sandbox"`, `framework: "react"`, `tailwind: true` — đây là cấu hình chuẩn).
 Template (HTML + `{{ }}`) và JS thuần chỉ cho khối tĩnh rất đơn giản; CSS thuần là phần thêm, tránh dùng.
 
-## Spec
+## Cấu hình (khoá gọn)
+
+Viết bằng khoá gọn cho dễ đọc; khi dựng JSON, `embed` quy đổi thành `editable_props.properties.embed` đầy đủ như `form-json.md` §9 (`inputs[].field` → `from: { field }`; `code` ghi vào cả `source` và `js`; `reason` không ghi vào JSON).
 
 ```jsonc
 {
@@ -27,8 +29,8 @@ Khoá khác của `embed`: `height` (`{ mode: "auto" }` | `{ mode: "fixed", valu
 
 ## Viết `embed.code`
 
-Script **không biên dịch TSX**, nên `code` phải chạy được như JavaScript: dùng thẻ `html` của `DfbReact` (JSX viết bằng tagged template) — đó là TSX hợp lệ, builder biên dịch lại không đổi gì.
-Script ghi `code` vào cả `source` (TSX) lẫn `js` (bản chạy).
+Không có bước biên dịch TSX khi viết JSON tay, nên `code` phải chạy được như JavaScript: dùng thẻ `html` của `DfbReact` (JSX viết bằng tagged template) — đó là TSX hợp lệ, builder biên dịch lại không đổi gì.
+Ghi `code` vào cả `source` (TSX) lẫn `js` (bản chạy).
 
 ```js
 const { React, html, render, useDfbData } = DfbReact;   // React 19 có sẵn trong frame; KHÔNG import / export
@@ -60,9 +62,9 @@ Quy tắc:
 - Không `import`/`export`, không JSX thô (`<div>` ngoài template), không `eval`, không mạng (CSP `connect-src 'none'`). Cần gọi API: khai báo Data Source rồi cấp quyền `permissions: [{ kind: "http", dataSourceId }]` trong builder.
 - Giới hạn kích thước code + CSS; frame mang thêm ~180 KB runtime React.
 
-## Việc phải làm sau khi script sinh JSON
+## Việc phải làm sau khi viết JSON
 
-Script **không** sinh được `tailwindCss` (cần trình biên dịch Tailwind của builder). Form dựng bằng script, embed sẽ **chưa có style** cho tới khi:
+JSON viết tay **không** có `tailwindCss` (cần trình biên dịch Tailwind của builder). Embed sẽ **chưa có style** cho tới khi:
 
 1. Nạp JSON vào builder (Open JSON / `loadFormJson` / `DynaformBuilder form=…` ở editor).
 2. Chọn control → **Sửa TSX / HTML (Tailwind)** → **Lưu** — builder biên dịch TSX và sinh `tailwindCss` (cần mạng để tải Monaco).
