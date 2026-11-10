@@ -5,6 +5,27 @@
 
 Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi: `/command/v1`.
 
+## Chế độ gọn `view=agent` (tiết kiệm token)
+
+Response mặc định của các tool đọc rất dài (đo thật 2026-11-10: `list_item_controls` **102.010 ký tự**, `get_form_design` form 12 control khoảng **19K**, `list_form_designs` 20 form khoảng 35–45K). Backend `dynaform-service` (commit `0eb3ada`) thêm tham số **`view`** cho 5 endpoint đọc: `full` (mặc định, không đổi — UI dùng) hoặc `agent` (bản gọn). Giá trị khác ⇒ `400`.
+
+| Tool | `view=agent` trả về | Cắt bỏ so với `full` |
+|---|---|---|
+| `list_item_controls` | nhóm `{code, display_name, data[]}`; mỗi control chỉ `type`, `display_name`, `category`, `sub_group_code` | `editable_props`, `locked_props`, `icon` (SVG), `default_values`, `logic_rules`, `validation_schema`, audit; nhóm rỗng. Đo thật: 102.010 → **4.432** ký tự |
+| `list_form_designs` | `id`, `root_form_id`, `name`, `code`, `description`, `application_code`, `project_id`, `project_name`, `current_status`, `current_environment`, `current_version`, `version_counts`, `flow_publish`, `updated_date` | `settings`, `language`, `variable_schema`, `object_source_spec`, `layout_runtime`, `path_relationship`, audit, `information`, cột trùng (`status`, `environment`…) |
+| `get_form_design` | **outline**: metadata (`id`, `name`, `status`, `environment`, `version`, `draft_revision`, `base_version`, `flow_publish`…) + `component_count` + cây `form_components` gồm `id`, `type`, `ref`, `label`, `required`, `col_span` (khi ≠ 12), `validations[]` (chỉ tên rule), `has_data_source`, `events` (số handler), `children[]`; `object_source_configs`/`hook_configs`/`integrations` chỉ là số đếm khi > 0 | `editable_props`, `variables`, rule/flow chi tiết, `settings`, `environments`… — **không round-trip được qua `save_form_design`** |
+| `list_form_versions` | `version`, `status`, `is_current`, `id`, `form_id`, `activated_at`; thêm `limit` (mặc định **10** bản mới nhất mỗi môi trường, tối đa 100) | `design_id` (= `id`), `archived_at` null |
+| `list_form_submissions` | `id`, `instance_id`, `form_id`, `callback_status`, `submitted_by_user_id`, `submitted_at`; `include_data=true` mới kèm `submission_data` | IP, `device_fingerprint`, `callback_response`, `ai_enrichment`, `validation_result`, `tenant_code` |
+
+Quy tắc dùng:
+
+- **Tra cứu / chọn form / xem cấu trúc** ⇒ `view=agent`. **Sửa form có sẵn qua `save_form_design`** (hoặc cần props, validation, flow chi tiết) ⇒ `get_form_design` với `view=full` (hoặc bỏ `view`), vì chỉ bản đầy đủ mới gửi lại được.
+- Form đang mở trong editor thì **không** gọi `get_form_design`: dùng client tool `get_form_state` / `get_component` (đọc cả phần chưa lưu, nhỏ hơn nhiều).
+- Cần chi tiết **một** control: dùng `get_component` ở editor, không kéo `view=full` của cả form.
+- `list_item_controls` ít khi cần: client tool `list_component_types` đã trả danh sách type (của lib, khớp với editor đang chạy).
+
+> **Trạng thái kết nối (cập nhật 2026-11-10):** tham số `view` (và `limit`, `include_data`) có ở REST sau khi `dynaform-service` commit `0eb3ada` được deploy. Qua **MCP** chỉ gọi được khi connector `dynaform-service` khai báo thêm các tham số này trong schema tool — schema hiện tại **chưa** có (xem bảng tham số bên dưới). Kiểm bằng `tools/list`; nếu tool chưa có `view` thì tool vẫn trả bản `full` như cũ. Connector cũng đang in JSON thụt lề 2 khoảng trắng (`JSON.stringify(rows, null, 2)`), làm tăng thêm ~35–40% ký tự.
+
 
 ## Nhóm đọc (query, GET)
 
@@ -23,6 +44,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 | `environment` | string | không | enum: `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` | Môi trường: DEV \| STG \| PROD \| TEST \| UAT \| LAB |
 | `application_code` | string | không |  |  |
 | `project_id` | string | không |  |  |
+| `view` | string | không | enum: `full`, `agent`; default `full` | REST đã có; MCP chỉ khi connector khai báo — xem mục "Chế độ gọn" |
 
 ### `get_form_design` — Chi tiết form design
 
@@ -34,6 +56,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 |---|---|---|---|---|
 | `id` | string | **có** | minLength 1 | id form (id core hoặc id env-local) |
 | `environment` | string | không | enum: `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` | Môi trường: DEV \| STG \| PROD \| TEST \| UAT \| LAB |
+| `view` | string | không | enum: `full`, `agent`; default `full` | `agent` = outline (không round-trip được); sửa/lưu form ⇒ `full` |
 
 ### `list_form_versions` — Các version đã phát hành
 
@@ -45,6 +68,8 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 |---|---|---|---|---|
 | `root_form_id` | string | **có** | format uuid | root_form_id (UUID) của lineage form |
 | `environment` | string | không | enum: `DEV`, `STG`, `PROD`, `TEST`, `UAT`, `LAB` | Môi trường: DEV \| STG \| PROD \| TEST \| UAT \| LAB |
+| `view` | string | không | enum: `full`, `agent`; default `full` | `agent` = bỏ `design_id`/key null, giới hạn số version mỗi môi trường |
+| `limit` | integer | không | ≥ 1; ≤ 100; default `10` | **Chỉ khi `view=agent`**: số version mới nhất mỗi môi trường |
 
 ### `list_item_controls` — Item control theo nhóm
 
@@ -55,6 +80,7 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 | Tham số | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
 |---|---|---|---|---|
 | `org_code` | string | không |  | Mã tổ chức |
+| `view` | string | không | enum: `full`, `agent`; default `full` | `agent` = chỉ `type`/`display_name`/`category`/`sub_group_code` (giảm ~96%) |
 
 ### `list_form_submissions` — Danh sách bài nộp form
 
@@ -68,6 +94,8 @@ Domain công khai: `https://test-forms.dnu.edu.vn` — đọc: `/query/v1`, ghi:
 | `instance_id` | string | không |  |  |
 | `page` | integer | không | ≥ 1; default `1` | Trang, bắt đầu từ 1 |
 | `limit` | integer | không | ≥ 1; ≤ 100; default `20` | Số bản ghi mỗi trang (1–100) |
+| `view` | string | không | enum: `full`, `agent`; default `full` | `agent` = bản tóm tắt, bỏ IP/fingerprint/callback/validation |
+| `include_data` | boolean | không | chỉ có tác dụng khi `view=agent` | `true` ⇒ kèm `submission_data` |
 
 
 ## Nhóm ghi (command, POST)

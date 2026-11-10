@@ -3,6 +3,12 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.10.1 — 2026-11-10 (tối ưu token cho tool đọc của agent)
+
+- **`dynaform-agent-tools`** `references/server-tools.md`: thêm mục **"Chế độ gọn `view=agent`"** và tham số `view` (+ `limit`, `include_data`) vào bảng của 5 tool đọc. Bám `dynaform-service` commit `0eb3ada` (thêm `?view=agent`; mặc định `full`, UI không đổi). Số đo thật trên DEV: `list_item_controls` 102.010 → 4.432 ký tự (mapper thật chạy trên response thật); `get_form_design` ~19K, `list_form_designs` 20 form ~35–45K là **ước tính**, chưa đo lại sau tối ưu.
+- **`dynaform-agent-tools`** `SKILL.md`: quy tắc dùng `view=agent` (tra cứu) so với `full` (sửa qua `save_form_design`, vì outline không round-trip), ưu tiên `get_form_state`/`get_component` cho form đang mở, không gọi `list_item_controls` bản `full`.
+- **Điều kiện**: `view` chỉ dùng được qua MCP khi connector `dynaform-service` khai báo tham số này (chưa có ở schema hiện tại) và `dynaform-service` đã deploy `0eb3ada`; nếu chưa, tool vẫn trả bản `full`. Connector còn in JSON thụt lề (`null, 2`), cần sửa riêng.
+
 ## 0.10.0 — 2026-11-09 (khớp `@dnu/dynaform-builder` v5.6.7)
 
 Đối chiếu tag `v5.6.7` (annotated tag → commit `4c47fe2d`, `package.json` ghi `5.6.7`) với skill đang đồng bộ tới 5.6.5. Repo lib chỉ có tag `v5.2.0` rồi `v5.6.7`; các bản 5.3.0–5.6.6 không có tag riêng.

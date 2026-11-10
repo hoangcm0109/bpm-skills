@@ -1,6 +1,6 @@
 ---
 name: dynaform-agent-tools
-description: Tool cho AI agent làm việc với dynaform — 9 server tool (MCP dynaform-service - list_form_designs, get_form_design, list_form_versions, list_item_controls, list_form_submissions, create_form_draft, save_form_design, clone_form_design, publish_form_draft), client tool chạy trong editor (get_form_state, add_component, update_component, set_event_flow, load_form_json, validate_form, confirm_action…), giao thức SSE giữa agent gateway và editor, cách nối runAgentTurn / agentClientTools / window.DynaformAgentBridge ở host. Dùng khi tích hợp một hệ thống AI/agent khác với dynaform, viết gateway hoặc agent gọi tool, thêm client tool cho host, hoặc debug agent sửa form.
+description: Tool cho AI agent làm việc với dynaform — 9 server tool (MCP dynaform-service - list_form_designs, get_form_design, list_form_versions, list_item_controls, list_form_submissions, create_form_draft, save_form_design, clone_form_design, publish_form_draft; tool đọc có view=agent để giảm token), client tool chạy trong editor (get_form_state, add_component, update_component, set_event_flow, load_form_json, validate_form, confirm_action…), giao thức SSE giữa agent gateway và editor, cách nối runAgentTurn / agentClientTools / window.DynaformAgentBridge ở host. Dùng khi tích hợp một hệ thống AI/agent khác với dynaform, viết gateway hoặc agent gọi tool, thêm client tool cho host, hoặc debug agent sửa form.
 ---
 
 # Tool cho AI agent trong dynaform
@@ -24,12 +24,14 @@ Ghi (`/command/v1`): `save_form_design`, `clone_form_design`, `create_form_draft
 
 - Truy cập qua MCP connector `dynaform-service` (tên tool y hệt; `tools/list` của connector là nguồn đúng). Source MCP cũ trong repo `dynaform-service` đã bị xoá (commit `927f207`), nên không còn endpoint `/api/v1/mcp` để dựa vào. Đường REST tương ứng: xem `references/server-tools.md`.
 - Auth: thiết kế gốc là `Authorization: Bearer <token người dùng>` chuyển tiếp nguyên trạng. Với MCP multi-tenant, token nằm trong `config.auth` của connection `dynaform-service`; token hết hạn ⇒ tool trả `401` — cấp lại token ở connection, không sửa tool.
+- **Tiết kiệm token — `view=agent`**: 5 tool đọc có chế độ gọn (`list_item_controls` giảm ~96%, `list_form_designs`/`list_form_submissions` bỏ cột nặng, `get_form_design` trả outline, `list_form_versions` giới hạn `limit`). Tra cứu/xem cấu trúc ⇒ dùng `view=agent`; **sửa form qua `save_form_design` ⇒ `get_form_design` bản `full`** (outline không round-trip được). Form đang mở thì dùng client tool `get_form_state`/`get_component`, đừng gọi `get_form_design`. Số đo, bảng key và trạng thái connector: `references/server-tools.md` mục "Chế độ gọn".
 - **Luồng sửa form**: `create_form_draft(id=<version hiện tại>)` → `save_form_design(id=<id draft>, expected_revision=<revision đã đọc>, …)` → `publish_form_draft(id=<id draft>, base_version=<version đã thấy>)`.
 - `save_form_design` không có `id` ⇒ **tạo mới**; có `id` ⇒ cập nhật và **phải** kèm `expected_revision` (lấy từ `get_form_design`) để không ghi đè người khác.
 - `form_components` gửi lên `save_form_design` **không** phải JSON dán vào builder: mỗi control gốc cần vỏ ngoài `{ kind, data_lang, sort_order, variable_name, item_control }`, thiếu `data_lang` ⇒ `400 form_components.N.data_lang should not be empty`. Định dạng đầy đủ: `../dynaform-build-form/references/form-json.md` §13.
 - `publish_form_draft` gặp `409 VERSION_CONFLICT` ⇒ DEV đã có version mới hơn. **Chỉ** gửi lại với `force=true` khi người dùng đã xác nhận rõ.
 - `get_form_design` được ghi audit `form.view` dưới tên chủ token — đừng gọi vòng lặp không cần thiết.
-- Kết quả bị cắt ở 60 000 ký tự: thu hẹp bằng `page`/`limit`/`search`/`environment`.
+- Kết quả bị cắt ở 60 000 ký tự: thu hẹp bằng `view=agent`, `page`/`limit`/`search`/`environment`. Không gọi `list_item_controls` bản `full` (~100K ký tự, tự nó đã vượt giới hạn).
+- `view` chỉ dùng được qua MCP khi connector khai báo tham số này (kiểm `tools/list`); chưa có thì tool vẫn trả bản `full`.
 - **Không có tool xoá form.** Vòng đời CRUD: Create = `save_form_design` (không `id`), Read = `get_form_design`/`list_*`, Update = luồng sửa ở trên, Delete = không hỗ trợ.
 - Môi trường dùng enum `DEV|STG|PROD|TEST|UAT|LAB`. `CORE` là môi trường đã bỏ (đã gộp vào `DEV`); source backend hiện tại từ chối `CORE`. Mô tả tool trên connector có thể vẫn liệt kê `CORE` — không truyền, dùng `DEV` hoặc bỏ trống.
 
@@ -45,7 +47,7 @@ Quy tắc cho agent:
 
 ## 3. Phân công — quy tắc vàng
 
-- **Client tool sửa form đang mở; server tool đọc/ghi dữ liệu đã lưu.** Không dùng `save_form_design` để đẩy JSON của form đang mở: bản trên server và bản trong editor sẽ lệch nhau.
+- **Client tool sửa form đang mở; server tool đọc/ghi dữ liệu đã lưu.** Đọc dữ liệu đã lưu thì ưu tiên `view=agent`. Không dùng `save_form_design` để đẩy JSON của form đang mở: bản trên server và bản trong editor sẽ lệch nhau.
 - **Lưu đi qua editor** (`draftFlow`: `expected_revision`, xử lý xung đột, xác nhận phát hành). Agent sửa form rồi đề nghị người dùng lưu.
 - Server tool ghi (`clone_form_design`, `create_form_draft`) dùng cho việc **không** liên quan form đang mở; sau đó gọi `refresh_form_lists` (host) và, nếu muốn người dùng sửa bản mới, `open_form_editor`.
 
