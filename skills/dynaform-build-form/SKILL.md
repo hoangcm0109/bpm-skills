@@ -82,6 +82,7 @@ Chỉ cần gọi skill này (`/bpm-skills:dynaform-build-form <yêu cầu>`) ho
 
 - Option tĩnh: `variables.data_source` loại `hard` với `connection_config.value: [{ label, value }]` (value là chuỗi).
 - Option từ API: `variables.data_source` loại `api` (`request_config`, `response_mapping`, `connection_config.base_url`).
+- Địa chỉ API nội bộ / đổi theo môi trường (DEV/STG/PROD): `connection_config.base_url` (hoặc `url` của `call_api`) viết `@{NAME}` — biến do người dùng tạo, giá trị theo từng môi trường nằm ở Variable Service, **không** trong JSON; lib ≥ 5.8.3. Chi tiết: `../dynaform-data-source/SKILL.md`.
 - Phụ thuộc field khác: `depends_on: ["<name cha>"]` và `path_params: { "<param>": "{$<name cha>}" }`; cấp cha đứng trước.
 - Điền sẵn: `default_values` (cố định); ở host dùng `data.dataUserFill`. Không đưa token/secret vào form.
 - Mẫu JSON chính xác: `references/form-json.md` §6.
@@ -139,6 +140,7 @@ Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc fi
 | Field `hidden` làm cờ/tín hiệu giữa các event | `set_values` / `$steps.<id>.output` / `$event.payload` trong một flow |
 | Sao chép cả khối từ ví dụ rồi quên đổi `id` | UUID v4 mới cho mọi control; kiểm lại không trùng |
 | Gửi `{ "item_control": … }` trần vào `save_form_design` → `400 form_components.N.data_lang should not be empty` | bọc vỏ ngoài `kind` + `data_lang` + `sort_order` + `variable_name` (`form-json.md` §13) |
+| Ghi cứng địa chỉ nội bộ của một môi trường (`http://<host nội bộ>:<cổng>`) vào `base_url` / `url` | `@{NAME}` — biến môi trường người dùng đã tạo; không có thì hỏi tên biến (`dynaform-data-source`) |
 
 ## Tham chiếu
 

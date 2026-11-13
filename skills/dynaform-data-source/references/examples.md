@@ -75,6 +75,25 @@ const dataUserFill = useMemo(
 
 Thứ tự ưu tiên điền sẵn: `dataUserFill` > bản nháp > `bound_variables`. Với select phụ thuộc, điền cả chuỗi (tỉnh, quận, xã) để cấp dưới có giá trị khớp danh sách đã nạp lại.
 
+## 4b. Địa chỉ API đổi theo môi trường (`@{NAME}`)
+
+Cùng một form dùng ở DEV, STG, PROD nhưng API ở địa chỉ khác nhau → viết biến môi trường thay vì địa chỉ cứng (`USER_API` do người dùng tạo trước, mỗi môi trường một giá trị — xem `SKILL.md`):
+
+```jsonc
+{ "type": "select", "name": "student", "label": "Sinh viên", "colSpan": 6,
+  "dataSource": { "api": { "baseUrl": "@{USER_API}", "endpoint": "/students", "method": "GET",
+    "responsePath": "data.items", "labelField": "name", "valueField": "id" } } },
+{ "type": "button", "name": "btn_load", "label": "Tải chi tiết", "colSpan": 3,
+  "events": [{ "event": "click", "flow": { "id": "load", "type": "sequence", "steps": [
+    { "id": "detail", "type": "call_api", "url": "@{USER_API}/students/{id}", "method": "GET",
+      "pathMapping": [{ "source": { "type": "ref", "path": "$form.current.values.student" }, "target": "id", "required": true }] }
+  ] } }] }
+```
+
+- `baseUrl` / `url` chỉ chứa **tên** biến; DEV, STG, PROD mỗi nơi lấy địa chỉ riêng của mình mà JSON không đổi.
+- `{id}` sau `@{USER_API}` vẫn là tham số đường dẫn, điền bằng `pathMapping`.
+- Người dùng cần tạo biến `USER_API` và điền đủ DEV/STG/PROD trước khi publish sang môi trường kế tiếp; agent **không** tạo biến và **không** ghi giá trị vào JSON.
+
 ## 5. Khi nào KHÔNG dùng `dataSource`
 
 | Tình huống | Làm |

@@ -42,7 +42,8 @@ Chạy được cả **standalone** và **trong shell** — mọi thay đổi ph
 - **Không có dialog tạo form** trong module (đã gỡ `CreateFormDialog`): trang danh sách chỉ có nút "Đi tới workspace để tạo form", mở `{REACT_APP_BPM_URL}/workflow/workspaces` ở tab mới (`resolveBpmUrl()` trong `lib/runtimeConfig.ts`, `BPM_WORKSPACES_PATH` trong `constants/formManager.ts`). Chưa cấu hình `REACT_APP_BPM_URL` thì nút ẩn. Form mới được tạo bên trong một workspace của BPM, không tạo từ mfe-dynaform.
 - Chỉ mở editor cho version **`draft`**; mở với `id` + môi trường của version đang chọn.
 - Môi trường & publish: `ENDPOINTS.formDesign.{publish,changeStatus,edit,crossEnv}`; pipeline lấy từ `flow_publish` của form.
-- Tag lib mới nhất: `v5.6.7` (gộp 5.3.0 → 5.6.7; không có tag riêng cho từng bản giữa `v5.2.0` và `v5.6.7`). `package.json` của mfe-dynaform đang ghim `#v5.6.7`; các host khác có thể còn tag cũ (đã thấy `v4.7.0`, `v4.8.2`, `v5.2.0`) — kiểm tra `package.json` của chính host trước khi nói về version.
+- Tag lib: `v5.6.7` gộp 5.3.0 → 5.6.7 (không có tag riêng giữa `v5.2.0` và `v5.6.7`); biến môi trường có từ `v5.8.0`, đủ chức năng từ `v5.8.3` (xem `dynaform-embed-lib`). Version mfe-dynaform đang ghim nằm trong `package.json` (`#v5.8.x` sau khi thêm biến môi trường); các host khác có thể còn tag cũ (đã thấy `v4.7.0`, `v4.8.2`, `v5.2.0`) — kiểm tra `package.json` của chính host trước khi nói về version.
+- **Biến môi trường** (`@{NAME}` trong địa chỉ API của form): trang **Biến môi trường** (`pages/envVariable`, route `env-variables`, menu "Biến môi trường"; service `services/envVariable`, endpoint `ENDPOINTS.envVariables` → `GET/POST /env-variables`, `PUT /env-variables/:id`) — liệt kê, tạo, sửa giá trị DEV/STG/PROD của biến `constant`; sửa PROD chỉ khi `useShellAuth().hasRole("admin")`. `FormEditorPage` và `FormPreviewDrawer` truyền `envValues` (hook `useEnvValues`, lấy tối đa 200 biến theo môi trường đang xem) cho `DynaformBuilder`; lib ≥ 5.8.3 tự lấy nếu không truyền. Chưa có chức năng xoá biến. Cách viết trong form: `dynaform-data-source`.
 - Sửa version lib: đổi tag trong `package.json` rồi cài lại; thử thay đổi lib chưa release bằng `pnpm start:linked` (xem `dynaform-embed-lib`).
 
 ## Màn hình dựng bằng JSON thuần (module học bổng)
@@ -51,7 +52,7 @@ Nhóm màn hình `scholarship/*` (Rule, Cấu hình học bổng, Chiến dịch
 
 - `pages/scholarship/ScholarshipRunnerPage.tsx` mở `DynaformBuilder mode="release"` theo `screen` (map ở `constants/scholarship.ts`: path + `mode`, id form theo môi trường ở `constants/scholarshipForms.generated.json`); route params + query vào form qua `dataUserFill = { ...query, mode, id }` (flow không có `$route`).
 - Điều hướng giữa màn hình: step `emit_event` với sự kiện `mfe:shell:navigate` (`payload.path`, `id?`, `query?`) — shell và Runner cùng nghe và gọi `navigate` SPA, không reload.
-- Sau khi đổi lib (`yarn build:lib:shell` ở `fe_dynaform`) → `pnpm install` ở shell → **restart shell** mới thấy. Runner `:9268` dùng lib theo tag trong `package.json` của mfe-dynaform (hiện `v5.6.7`): thay đổi lib chưa tag/chưa release thì Runner không có, chỉ shell nạp qua tgz mới có.
+- Sau khi đổi lib (`yarn build:lib:shell` ở `fe_dynaform`) → `pnpm install` ở shell → **restart shell** mới thấy. Runner `:9268` dùng lib theo tag trong `package.json` của mfe-dynaform: thay đổi lib chưa tag/chưa release thì Runner không có, chỉ shell nạp qua tgz mới có.
 
 ## Quy trình sửa
 

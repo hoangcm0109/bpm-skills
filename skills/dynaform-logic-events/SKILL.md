@@ -179,7 +179,7 @@ Chỉ tham chiếu tới `name` đã có trong form và `$steps.<id>` có trong 
 
 | trường | ý nghĩa |
 |---|---|
-| `url` hoặc `apiRef` | endpoint trực tiếp, hoặc id Data Source đã cấu hình trong builder |
+| `url` hoặc `apiRef` | endpoint trực tiếp, hoặc id Data Source đã cấu hình trong builder. Địa chỉ nội bộ / khác nhau theo môi trường: `url: "@{NAME}/đường-dẫn"` (biến môi trường, lib ≥ 5.8.3; `{id}` phía sau vẫn là path param) — xem `dynaform-data-source`. `continueOnError: true` **nuốt lỗi** thiếu giá trị biến (không request, không toast) |
 | `method` | `GET` (mặc định) \| `POST` \| `PUT` \| `PATCH` \| `DELETE` |
 | `headers` | object tĩnh (không để token) |
 | `authConfig` | `{ type: "none"\|"bearer"\|"basic"\|"api_key", token_source: "system"\|"manual", token? }` — **dùng `token_source: "system"`**; không ghi token vào form |

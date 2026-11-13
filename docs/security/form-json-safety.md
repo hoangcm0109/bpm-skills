@@ -8,7 +8,7 @@ Agent sinh ra JSON — người dùng chịu trách nhiệm xem lại trước k
 | Vị trí trong form JSON | Rủi ro | Cách xử lý |
 |---|---|---|
 | `properties.eventHandlers[]` với action `customScript` / flow step `run_script` | JS thô chạy trong trình duyệt người dùng cuối (XSS, đọc cookie/DOM, gửi dữ liệu đi) | Tránh khi có thể; thay bằng `field_state`, `set_values`, `branch`. Nếu bắt buộc: người dùng đọc từng dòng `code`, host bật logic-execution policy |
-| `callApi` / flow step `call_api` (`url`, `headers`, `body`) | Gửi dữ liệu form tới máy chủ lạ; SSRF qua proxy; lộ token trong header | Chỉ domain đã duyệt; không hardcode token; để auth cấu hình ở Data Source của host |
+| `callApi` / flow step `call_api` (`url`, `headers`, `body`) | Gửi dữ liệu form tới máy chủ lạ; SSRF qua proxy; lộ token trong header | Chỉ domain đã duyệt; không hardcode token; để auth cấu hình ở Data Source của host. Địa chỉ nội bộ / theo môi trường viết bằng `@{NAME}` (giá trị ở Variable Service, **không** trong JSON; là hằng không bí mật — không để token) |
 | `openLink` / step `navigate` (`url`) | Điều hướng/redirect tới trang lừa đảo, `javascript:` URL | Chỉ `https://` (hoặc đường dẫn nội bộ); từ chối `javascript:`/`data:`; để `newTab` mặc định |
 | `variables.data_source` loại `api` (`base_url`, `endpoint`) | Như `call_api`; option lấy từ nguồn không tin cậy | Domain đã duyệt; chấp nhận dữ liệu trả về là không tin cậy |
 | `properties.content` của `text` (HTML), mọi `properties` có HTML | HTML/script tiêm vào form | Không dán HTML từ nguồn ngoài; chỉ thẻ định dạng cơ bản; host nên sanitize khi render |
@@ -20,7 +20,7 @@ Agent sinh ra JSON — người dùng chịu trách nhiệm xem lại trước k
 ## Quy tắc cho agent khi dựng form
 
 1. **Mặc định không script**: không sinh `customScript`/`run_script` nếu yêu cầu có thể đáp ứng bằng action chuẩn. Nếu cần, nói rõ lý do và hiển thị đoạn mã cho người dùng duyệt.
-2. **Không tự bịa endpoint**: URL API do người dùng cung cấp hoặc để trống kèm ghi chú; không dùng URL lấy từ dữ liệu không tin cậy.
+2. **Không tự bịa endpoint**: URL API do người dùng cung cấp hoặc để trống kèm ghi chú; không dùng URL lấy từ dữ liệu không tin cậy. Địa chỉ nội bộ hoặc khác nhau theo môi trường thì dùng `@{NAME}` với **tên biến người dùng đưa** — không tự đặt tên rồi coi như đã có, không ghi giá trị thật (IP/host nội bộ) vào JSON, ví dụ hay ghi chú.
 3. **Không nhúng bí mật**: nếu API cần token, để `auth_config: { "type": "none" }` và nhắc người dùng cấu hình Data Source/host.
 4. **Dữ liệu cá nhân**: field thu thập thông tin cá nhân (CCCD, SĐT, địa chỉ, ngày sinh, ảnh) phải được nêu trong báo cáo cuối để người dùng cân nhắc mục đích thu thập, quyền truy cập và nơi lưu.
 5. **Hidden field**: `hidden` không phải cơ chế bảo mật — giá trị vẫn nằm ở client và có thể bị sửa. Không dùng để chứa token hay quyết định phân quyền.

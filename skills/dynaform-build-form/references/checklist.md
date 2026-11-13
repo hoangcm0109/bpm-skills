@@ -25,6 +25,7 @@ Không có công cụ kiểm tự động — đi hết danh sách này **trên 
 - [ ] `select` / `radio-group` / `checkbox-group` / `tree-select` có `variables.data_source`: tĩnh với **≥ 2** mục (`label` và `value` đều là chuỗi) hoặc `connection_type: "api"`.
 - [ ] Select phụ thuộc: `depends_on` trỏ tới `name` có thật; cấp cha đứng trước cấp con.
 - [ ] Không có token/mật khẩu/`Authorization` trong `data_source`, `call_api`, `authConfig`; URL chỉ `https://` hoặc đường dẫn nội bộ.
+- [ ] Địa chỉ API nội bộ / khác nhau theo môi trường viết bằng `@{NAME}` (biến đã có, tên IN_HOA_GẠCH_DƯỚI), không ghi cứng `http://…` của một môi trường; chỉ để địa chỉ cứng cho API công khai. Tên biến lấy từ người dùng — không tự đặt rồi coi như đã tồn tại; nhắc người dùng điền đủ giá trị DEV/STG/PROD (`dynaform-data-source` › Địa chỉ API theo môi trường).
 
 ## D. Validation
 

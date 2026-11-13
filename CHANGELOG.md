@@ -3,6 +3,19 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.11.0 — 2026-11-13 (biến môi trường `@{NAME}` cho địa chỉ API)
+
+Bám lib `@dnu/dynaform-builder` `v5.8.0` → `v5.8.3`, `mfe-dynaform` (trang Biến môi trường) và `dynaform-service` (`/env-variables`, `env_values` ở render, chặn publish khi biến thiếu giá trị).
+
+- **`dynaform-data-source`**: mục mới **"Địa chỉ API theo môi trường — `@{NAME}`"**: cú pháp (`@{NAME}` / `${NAME}`, ghép đường dẫn, cú pháp cũ vẫn chạy), luật tên, biến là `constant` ở Variable Service với `value_per_env { dev, stg, prod }` (chỉ ba môi trường), cách tạo (trang Biến môi trường, nút "Tạo biến" trong Data Source), các khoá JSON được thay biến, cách lib/server chọn giá trị lúc chạy, chặn publish khi thiếu giá trị, giới hạn (hằng không bí mật; chỗ chưa thay biến). Lưu ý 3 đổi từ "không hardcode URL nội bộ" thành "dùng `@{NAME}`". `references/examples.md` §4b: ví dụ select + `call_api`.
+- **`dynaform-build-form`**: `SKILL.md` (mục Data source + bẫy "ghi cứng địa chỉ một môi trường") và `references/checklist.md` mục C (địa chỉ nội bộ dùng `@{NAME}`, tên biến lấy từ người dùng, nhắc điền đủ giá trị).
+- **`dynaform-logic-events`**: dòng `url` của `call_api` nhắc `@{NAME}` và việc `continueOnError: true` nuốt lỗi thiếu giá trị biến.
+- **`dynaform-embed-lib`**: prop `envValues`; mục **"Từ 5.8.0 → 5.8.3"** (5.8.0 thay biến + `envValues` + ô chọn biến, 5.8.1 URL của `call_api`, 5.8.2 sửa `call_api` bị chặn nhầm vì `{NAME}`, 5.8.3 tự gọi `env-variables` khi mở theo `idForm`) và hệ quả khi host mở theo `idForm` (lộ giá trị cả ba môi trường cho trình duyệt, cần quyền gọi endpoint).
+- **`dynaform-mfe-module`**: mô tả trang Biến môi trường, `useEnvValues`, nơi truyền `envValues`; bỏ câu "đang ghim `v5.6.7`" (đã lỗi thời).
+- **`docs/security/form-json-safety.md`**: địa chỉ nội bộ dùng `@{NAME}`, không ghi IP/host thật vào JSON; hằng không bí mật.
+- **README**: dòng "khớp lib" nêu thêm `v5.8.3` cho biến môi trường.
+- **Chưa làm / chưa kiểm**: các thay đổi lib 5.7.x và các phần khác của 5.8.x ngoài biến môi trường chưa đối chiếu nên tag mẫu `#v5.6.7` ở `dynaform-embed-lib` giữ nguyên; agent chưa có tool tạo/đọc biến môi trường (connector MCP `dynaform-service` hiện không có); các chỗ còn gọi `fetch` thẳng (nút submit cũ, `navigate.download`, upload, bảng tải từ xa) và `queries` của layout runtime chưa thay biến — ghi trong skill là "chưa thay / chưa kiểm hết".
+
 ## 0.10.1 — 2026-11-10 (tối ưu token cho tool đọc của agent)
 
 - **`dynaform-agent-tools`** `references/server-tools.md`: thêm mục **"Chế độ gọn `view=agent`"** và tham số `view` (+ `limit`, `include_data`) vào bảng của 5 tool đọc. Bám `dynaform-service` commit `0eb3ada` (thêm `?view=agent`; mặc định `full`, UI không đổi). Số đo thật trên DEV: `list_item_controls` 102.010 → 4.432 ký tự (mapper thật chạy trên response thật); `get_form_design` ~19K, `list_form_designs` 20 form ~35–45K là **ước tính**, chưa đo lại sau tối ưu.
