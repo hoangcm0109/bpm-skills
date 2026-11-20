@@ -20,14 +20,14 @@ Chỉ cần gọi skill này (`/bpm-skills:dynaform-build-form <yêu cầu>`) ho
 1. **Làm rõ yêu cầu** (hỏi lại nếu mơ hồ): form để làm gì, field nào, bắt buộc/không, ràng buộc, field phụ thuộc nhau, nút submit làm gì, có chia nhóm/tab/bước không.
 2. **Chọn component** — theo bảng tra nhanh bên dưới. Mỗi `type` phải có trong bảng registry (`references/form-json.md` §3); dùng `input` cho text, `tel` cho số điện thoại.
    **Ưu tiên control có sẵn.** Đi theo thứ tự: (1) control cơ bản trong bảng; (2) control chuyên dụng (`table`, `timeline`, `descriptions`, `record-picker`, `record-gallery`, `stat-cards`, `sortable-list`, `matrix`, `tree-select`, `form-loop`, `sub-form`… — bảng "nhu cầu → control" ở `../dynaform-components/SKILL.md`); (3) ghép/tuỳ biến bằng `custom` (Tailwind) + `props` + action flow; (4) **chỉ khi cả ba không đáp ứng** mới dùng `custom-embed`, và phải nêu lý do trong báo cáo. Embed thì viết **React (TSX) + Tailwind** — xem `references/custom-embed.md`.
-3. **Phác cấu trúc trước khi gõ JSON**: danh sách `name` (snake_case, duy nhất toàn form), cây cha–con, mỗi hàng 12 cột chia thế nào. Quy tắc chốt:
+3. **Thiết kế, rồi phác cấu trúc trước khi gõ JSON**: đọc `../dynaform-form-design/SKILL.md` — brief, gom field thành nhóm/card, xuất outline cho người dùng duyệt (form ≤ 6 field: outline 1–2 dòng). Sau đó lập danh sách `name` (snake_case, duy nhất toàn form), cây cha–con, mỗi hàng 12 cột chia thế nào. Quy tắc chốt:
    - Mọi tham chiếu chéo (matchField, rule, event, flow, `depends_on`) dùng `name`, không dùng id.
    - Con khai báo trong `children_schema` của cha; thêm `parent_tab_id` khi cha là tab/steps/columns.
    - `select` / `radio-group` / `checkbox-group` bắt buộc có ≥ 2 lựa chọn hoặc data source API.
    - Nhãn, thông báo lỗi, placeholder viết **tiếng Việt**; `name`, `type`, mã lỗi kỹ thuật giữ tiếng Anh.
 4. **Viết form JSON** theo `references/form-json.md`: khung tài liệu §1, mẫu một control §2, 5 trường định danh theo bảng registry §3, cây cha–con §4, `properties` §5, data source §6, bố cục §7, validation/sự kiện/logic §8. Mẫu hoàn chỉnh để sao chép cấu trúc: `references/example-contact-json.md`.
    Sinh `id` là UUID v4 **mới** cho form và từng control; không dùng lại id từ ví dụ.
-5. **Tự kiểm** từng mục của `references/checklist.md` trên chính JSON vừa viết (cấu trúc, cha–con, lựa chọn, validation, bố cục, flow, cú pháp JSON). Có mục không đạt thì sửa rồi kiểm lại — không giao form còn lỗi.
+5. **Tự kiểm** từng mục của `references/checklist.md` trên chính JSON vừa viết (cấu trúc, cha–con, lựa chọn, validation, bố cục, flow, cú pháp JSON). Có mục không đạt thì sửa rồi kiểm lại — không giao form còn lỗi. Chấm thêm thẩm mỹ theo `../dynaform-form-design/references/review-rubric.md` (≥ 16/20, không có lỗi chết) và ghi điểm vào báo cáo.
 6. **Nạp form** (chọn theo ngữ cảnh):
    - Trong builder: nút *Open JSON* (`open-json-dialog`) → dán JSON → xem lại trên canvas, chỉnh tay nếu cần rồi Save (builder xuất lại bản đầy đủ — bản nên lưu).
    - Trong app host: truyền vào `data.dataFormDesign` của `DynamicFormBuilder` (mode `editor` | `preview` | `release`), hoặc `form={…}` của `DynaformBuilder` (lib ≥ 4.5.0) — xem `../dynaform-embed-lib/SKILL.md`.
@@ -96,6 +96,7 @@ Bảng trên đủ cho phần lớn yêu cầu. Khi cần sâu hơn, **đọc fi
 | Cấu hình riêng từng component, danh mục đầy đủ | `../dynaform-components/SKILL.md` |
 | Rule validation, cách đặt `matchField` | `../dynaform-validation/SKILL.md` |
 | Flow, call_api, branch/try, danh sách step | `../dynaform-logic-events/SKILL.md` |
+| Thiết kế form đẹp: nhóm/card, tiêu đề, callout, outline, chấm thẩm mỹ | `../dynaform-form-design/SKILL.md` |
 | Bố cục, viewport, theme, settings | `../dynaform-layout/SKILL.md` |
 | API options, phụ thuộc, điền sẵn | `../dynaform-data-source/SKILL.md` |
 | Nhúng lib vào app/MFE, props, release mode | `../dynaform-embed-lib/SKILL.md` |

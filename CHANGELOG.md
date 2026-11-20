@@ -3,6 +3,18 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.12.0 — 2026-11-20 (skill mới `dynaform-form-design`: gu thiết kế form)
+
+Nguồn: form thử do Agent dựng khi chưa có skill này (`01a1eced`, chấm 11/20 theo rubric mới) được dựng lại theo quy tắc (bản nháp DEV `01a1f6ec`, 19/20 chấm tĩnh) và soi trên Chrome ở trang preview của `mfe-dynaform`. Các điều ghi dưới đây về hiển thị đều là điều đã thấy trên màn hình hoặc đọc từ mã lib `fe_dynaform`.
+
+- **Skill mới `dynaform-form-design`** — quyết định form *trông thế nào* trước khi viết JSON. Quy trình: brief → gom nhóm → chọn cấu trúc theo ngưỡng (≤ 6 field một card; 7–20 card theo nhóm nghĩa; > 20 `steps`; phần độc lập `tab`) → xuất outline cho người dùng duyệt → viết JSON → tự chấm. Gồm 10 quy tắc cốt lõi, 5 khuôn mẫu (đơn đề nghị, đăng ký, khảo sát, bộ lọc, hồ sơ nhiều bước), thang chấm 20 điểm kèm lỗi chết, ví dụ form thật trước/sau với hai phương án.
+- **Ràng buộc dữ liệu của card**: `container`, `tab`, `steps`, `columns`, `grid` lồng dữ liệu khi có `variables.name` (`fe_dynaform/src/lib/nest-form-values.ts`), nên chia thêm card làm đổi `key_path`. Skill bắt hỏi người dùng trước khi tách card ở form workflow / host nạp sẵn dữ liệu, và có phương án giữ một cấp dữ liệu (một card + `divider`).
+- **Bẫy hiển thị đã kiểm trên Chrome, thành quy tắc**: container có viền **không có padding mặc định** → đặt `styles.paddingTop/Right/Bottom/Left`; `<h3>`/`<h4>` trong `text` render như chữ thường → kèm `custom.css`; callout dùng `custom.css` (`color-mix`), **không** `custom.className` Tailwind vì class chỉ có CSS sau khi builder biên dịch lúc lưu (`CUSTOM_STYLE.md` §4); `checkbox` cam kết cần `showLabel: "no"` kẻo hiện nhãn hai lần.
+- **`dynaform-build-form`**: bước 3 thêm thiết kế + outline, bước 5 chấm thẩm mỹ, bảng "Khi cần chi tiết hơn" trỏ sang skill mới; `references/checklist.md` mục **I. Thẩm mỹ**.
+- **`dynaform-layout`**: bỏ câu "Form ≤ ~8 field: phẳng 2 cột" (chính câu này khiến Agent rải control), thay bằng ngưỡng của skill mới và lưu ý layout có tên là một cấp dữ liệu.
+- **README, AGENTS.md**: thêm dòng skill mới và ví dụ.
+- **Chưa làm / chưa kiểm**: hiển thị của callout cảnh báo (`warn_budget`, "Ý kiến trả lại") chưa thấy vì cần dữ liệu host nạp; `columns`/`tab` không tên có lưu được qua `save_form_design` hay không; dòng `nested-list` vẫn giữ nhiều cột trên khung hẹp dù có `overrides.sm` (quan sát, chưa có cách ép); `slug: "divider-field"` của `divider` là suy ra theo quy ước (server nhận và đọc lại được, chưa đối chiếu registry lib). Skill chưa được thử bằng một Agent dựng form từ đầu — mới thử bằng cách dựng lại một form có sẵn.
+
 ## 0.11.0 — 2026-11-13 (biến môi trường `@{NAME}` cho địa chỉ API)
 
 Bám lib `@dnu/dynaform-builder` `v5.8.0` → `v5.8.3`, `mfe-dynaform` (trang Biến môi trường) và `dynaform-service` (`/env-variables`, `env_values` ở render, chặn publish khi biến thiếu giá trị).

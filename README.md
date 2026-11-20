@@ -12,6 +12,7 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 | Skill | Cụm chức năng |
 |---|---|
 | [`dynaform-build-form`](skills/dynaform-build-form/SKILL.md) | Điểm vào: yêu cầu → viết thẳng form JSON → tự kiểm theo checklist → nạp. Chỉ tài liệu, không script |
+| [`dynaform-form-design`](skills/dynaform-form-design/SKILL.md) | Thiết kế form đẹp trước khi viết JSON: brief, outline duyệt, card/nhóm, tiêu đề, callout, nhịp cột, thang chấm thẩm mỹ |
 | [`dynaform-components`](skills/dynaform-components/SKILL.md) | Danh mục component & chọn type |
 | [`dynaform-validation`](skills/dynaform-validation/SKILL.md) | Validation, matchField, thông báo lỗi |
 | [`dynaform-logic-events`](skills/dynaform-logic-events/SKILL.md) | Event theo từng control, rule điều kiện, action engine đầy đủ, công thức flow (submit, chọn → điền, dialog, bảng…) |
@@ -23,7 +24,7 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 
 ## Cài đặt & cập nhật
 
-Phiên bản hiện tại: **0.11.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v5.6.7` (đã gộp các bản 5.3.0–5.6.6, không có tag riêng); riêng **biến môi trường** `@{NAME}` cần tag `v5.8.3` trở lên (các thay đổi 5.7.x chưa đối chiếu); riêng `dynaform-agent-tools` cần bản lib có agent bridge (export `createSseRunAgentTurn`) — **không có trong `v5.6.7`**, kiểm tag bằng `git ls-remote --tags` trước khi ghi version.
+Phiên bản hiện tại: **0.12.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v5.6.7` (đã gộp các bản 5.3.0–5.6.6, không có tag riêng); riêng **biến môi trường** `@{NAME}` cần tag `v5.8.3` trở lên (các thay đổi 5.7.x chưa đối chiếu); riêng `dynaform-agent-tools` cần bản lib có agent bridge (export `createSseRunAgentTurn`) — **không có trong `v5.6.7`**, kiểm tag bằng `git ls-remote --tags` trước khi ghi version.
 
 ### Claude Code
 
@@ -94,6 +95,7 @@ Mỗi skill có `references/examples.md` (giải thích) và các ví dụ dài 
 | Skill | Ví dụ | Giải thích |
 |---|---|---|
 | `dynaform-build-form` | `example-contact-json` (JSON đầy đủ), `example-spec`, `example-layout`, `example-wizard` | `references/examples.md` |
+| `dynaform-form-design` | `example-before-after` (form thật trước/sau + chấm điểm), `patterns` (5 khuôn mẫu) | `references/examples.md` |
 | `dynaform-components` | `example-input-catalog`, `example-layout-controls` | `references/examples.md` |
 | `dynaform-validation` | `example-validation` | `references/examples.md` |
 | `dynaform-logic-events` | `example-rules`, `example-flows`, `example-table-row-actions` | `references/examples.md` |

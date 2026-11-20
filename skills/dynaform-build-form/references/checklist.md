@@ -65,3 +65,13 @@ Không có công cụ kiểm tự động — đi hết danh sách này **trên 
 - [ ] Có nút gửi (`submit-button` hoặc `button` có flow) nếu form cần gửi; không có hai `submit-button`.
 - [ ] Nếu sẽ lưu qua MCP `save_form_design`: mỗi phần tử gốc của `form_components` có vỏ ngoài `kind: "component"`, `data_lang` (không rỗng, = `<type>-<name>`), `sort_order`, `variable_name` (`form-json.md` §13); không truyền `id` khi tạo mới.
 - [ ] Báo cáo (SKILL.md bước 7) nêu rõ: các field, logic/flow, phần chưa làm được, mọi `custom-embed` / `hidden` / script / URL có trong form, field thu thập dữ liệu cá nhân.
+
+## I. Thẩm mỹ (chi tiết: `../../dynaform-form-design/references/review-rubric.md`)
+
+- [ ] Đã xuất outline thiết kế và người dùng duyệt (form > 6 field); tách thêm card đã được xác nhận nếu form là bước workflow / host nạp dữ liệu.
+- [ ] Có tiêu đề form (+ mô tả 1 câu); mỗi phần là một card (hoặc đoạn giữa hai `divider`) cùng kiểu, có tiêu đề; mỗi phần 4–8 field (tối đa 10).
+- [ ] Mọi hàng cộng đủ 12; `textarea` cuối card; không field 12 lẻ xen giữa các cặp 6+6.
+- [ ] Callout là `text` có `custom.css` (nền + viền), không dùng `custom.className` Tailwind trong JSON tay, không `style="color:#…"`; ẩn theo điều kiện bằng handler `load`.
+- [ ] Mỗi container có viền đã đặt `styles.paddingTop/Right/Bottom/Left`; mọi `<h3>`/`<h4>` có `custom.css` (cỡ chữ, độ đậm); `checkbox` cam kết có `showLabel: "no"`.
+- [ ] Một nút chính ở cuối, căn phải; không quá 3 nút.
+- [ ] Tự chấm ≥ 16/20, không lỗi chết; điểm đã ghi vào báo cáo.

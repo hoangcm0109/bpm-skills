@@ -91,7 +91,8 @@ Quy tắc chọn nhanh:
 
 Nguyên tắc:
 - **Ưu tiên `colSpan` trên field** hơn là `columns`/`grid`. `columns` chỉ khi cần cột có độ rộng khác nhau hoặc **nhiều control xếp dọc trong một cột** (cột trái ảnh + chú thích, cột phải form).
-- Form ≤ ~8 field: phẳng 2 cột. Form dài có nhóm nghĩa: `container` theo nhóm. Quá dài: `tab` hoặc `steps`.
+- Chọn cấu trúc theo ngưỡng ở `../dynaform-form-design/SKILL.md`: ≤ 6 field một card hoặc phẳng; 7–20 field thì mỗi nhóm nghĩa một card; > 20 field thì `steps`/`tab`. Đừng rải phẳng cả form dài chỉ vì field xếp được vào lưới.
+- Mỗi `container` / `tab` / `steps` / `columns` / `grid` **có `variables.name` là một cấp dữ liệu** (`key_path` thêm tiền tố). Chia thêm card trong form workflow hoặc form host nạp sẵn dữ liệu thì xác nhận trước.
 - Lồng tối đa 2–3 cấp (container trong tab trong form); mỗi cấp lồng làm dài `key_path` và hẹp chỗ.
 - Cha luôn đứng **trước** con trong mảng; con khai `parent` (+ `tabId` nếu cha là `tab`/`steps`/`columns`).
 

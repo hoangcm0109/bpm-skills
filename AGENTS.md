@@ -7,6 +7,7 @@ Repo này là **plugin chứa agent skills**, không phải ứng dụng. Skill 
 | Skill | Dùng khi |
 |---|---|
 | `dynaform-build-form` | dựng form JSON từ yêu cầu: viết thẳng JSON theo `references/form-json.md`, tự kiểm theo `references/checklist.md` (điểm vào chính) |
+| `dynaform-form-design` | thiết kế form đẹp trước khi viết JSON: brief + outline duyệt, chia card/nhóm, tiêu đề, callout, nhịp cột, thang chấm thẩm mỹ |
 | `dynaform-components` | chọn type component, control layout (container/columns/grid/tab/steps/overlay/list), cấu hình riêng từng loại |
 | `dynaform-validation` | ràng buộc dữ liệu, matchField, thông báo lỗi |
 | `dynaform-logic-events` | event theo control, rule hiện/ẩn, action engine đầy đủ, công thức flow |
