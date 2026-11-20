@@ -3,6 +3,11 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.12.2 — 2026-11-20 (`form-json.md`: lưu form qua MCP và khoá style của container)
+
+- **`dynaform-build-form/references/form-json.md` §13 (lưu qua MCP `save_form_design`)**: dữ liệu đọc lại khác dữ liệu gửi lên (control gốc **có con** như `container`, `columns`, `tab` trả dạng flat; control gốc không có con và mọi con trong `children_schema` trả dạng wrapper); quy trình **cập nhật form nháp** (`get_form_design` lấy `draft_revision` → `save_form_design` với `id` + `expected_revision` + toàn bộ `form_components`, giữ `id` control cũ; lệch → `409 DRAFT_CONFLICT`; `create_form_draft` trên nháp trả `existed: true`); danh sách đã kiểm khi lưu qua MCP (container/columns/tab có con, `parent_tab_id`, `tabs[].hideWhen`, `select` và `radio-group` có data source tĩnh, `dialog` confirmation, `eventHandlers` click/load/condition + branch, các step, validation); mục "chưa kiểm" cập nhật (`steps`, `grid`, `dialog` form có con, `select` từ API, `custom-embed`, xoá control bằng cách bỏ khỏi `form_components`). Đây là thay đổi chưa commit có từ trước trong repo, được đưa lên theo yêu cầu của người dùng; các mốc "đã kiểm 2026-11-09" là của lần kiểm trước, **không kiểm lại trong đợt này**.
+- **§5 và §10**: khoá style của container thêm `showShadow` (lib ≥ v5.9.0) và `paddingTop`/`paddingRight`/`paddingBottom`/`paddingLeft`, khớp với `dynaform-form-design` 0.12.1.
+
 ## 0.12.1 — 2026-11-20 (card không bóng bằng `showShadow`)
 
 Nguyên nhân gốc tìm được ở lib `fe_dynaform`: container kiểu card được vẽ bằng shadcn `Card` (`src/components/ui/card.tsx:10` có sẵn `shadow-sm`), mà `cardBorderReset` chỉ gỡ bóng khi tắt viền, nên card có viền luôn đổ bóng nhẹ. Lib đã thêm khoá style `showShadow` (có từ lib **v5.9.0**, tag đã push 2026-11-20): thiếu khoá hoặc `"yes"` thì có bóng như cũ, `"no"` giữ viền bỏ bóng.

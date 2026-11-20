@@ -153,7 +153,7 @@ Theo type — mỗi khoá nằm cùng cấp trong `properties`:
 | `dialog` | `dialog` `{ variant: "confirmation"\|"form"\|"info"\|"custom", title, description }` |
 | `drawer` | `drawer` `{ side: "right", …như dialog }` |
 | `bottom-sheet` | `bottomSheet` `{ …như dialog }` |
-| `container` | kiểu hiển thị nằm ở `styles` (§7): `containerType` (`div`\|`card`\|`fieldset`), `showBorder` (`yes`\|`no`), `borderType`. Tiêu đề container **không lưu được** — dùng control `text` |
+| `container` | kiểu hiển thị nằm ở `styles` (§7): `containerType` (`div`\|`card`\|`fieldset`), `showBorder` (`yes`\|`no`), `borderType`, `showShadow` (`yes`\|`no`, chỉ card có viền, lib ≥ v5.9.0; thiếu khoá = có bóng), `paddingTop`/`paddingRight`/`paddingBottom`/`paddingLeft` (chuỗi số px; lib không đặt padding mặc định). Tiêu đề container **không lưu được** — dùng control `text` |
 | mọi control | `custom` `{ className, css, control: {className, css}, label: {className, css} }` (CSS thuần + class Tailwind; skill `dynaform-components` › Style tuỳ chỉnh) |
 | `table`, `file`, nút… | cấu hình sâu theo skill `dynaform-components` (`table.rowClickActionKey`, cột `cellType: "lines"`, `fileValidations.localOnly`; nút: `variant`, `color`) |
 | `custom-embed` | `embed` — xem §9 |
@@ -262,7 +262,7 @@ Lối thoát **cuối cùng** (khi mọi control có sẵn không đáp ứng); 
 | `rules` (`when` / `then`) | `properties.eventHandlers[]` với `event: "condition"` + `branch` (§8) |
 | `parent`, `tabId` | vị trí trong `children_schema` của cha + `parent_tab_id` (§4) |
 | `tabs`, `steps`, `stepsOptions`, `columns`, `grid`, `list`, `loop`, `dialog`, `custom`, `embed`, `props` | `editable_props.properties.<khoá>` (`dialog` của `drawer` → `properties.drawer`, của `bottom-sheet` → `properties.bottomSheet`) |
-| `container` `{ type, border, borderType }` | `styles.containerType`, `styles.showBorder` (`"yes"`/`"no"`), `styles.borderType` |
+| `container` `{ type, border, borderType }` | `styles.containerType`, `styles.showBorder` (`"yes"`/`"no"`), `styles.borderType`; khoá style khác (`showShadow`, `paddingTop…paddingLeft`) viết thẳng trong `styles` |
 | `reason` | không ghi vào JSON — chỉ nêu trong báo cáo |
 
 ## 11. Đọc / sửa JSON có sẵn (do builder xuất)
@@ -300,6 +300,8 @@ Quy tắc khi gọi tool:
 - Đã kiểm thực tế (2026-11-09, DEV) với 5 control phẳng: `text`, `input`, `password`, `checkbox`, `submit-button` — lưu được, `get_form_design` trả đủ `validation_schema`/`editable_props`.
 - **Cây lồng**: con của `container` nằm trong `item_control.children_schema` của cha, và **mỗi con cũng phải có vỏ ngoài** `{ kind, data_lang, sort_order, variable_name, item_control }` (`sort_order` đếm lại từ 1 trong từng cha). Đã kiểm (2026-11-09, DEV): container + 2 con `input`/`password` lưu được; server tự điền `parent_id`, `source: "children_schema"`, `path_relationship: "<id cha>/<id con>"`.
 - **`eventHandlers`** đặt trong `item_control.editable_props.properties` như §8 — đã kiểm với nút `click` chạy flow `validate_form` → `show_message`, đọc lại còn nguyên cấu trúc.
-- **Dữ liệu đọc lại khác dữ liệu gửi lên**: `get_form_design` trả container ở gốc dạng **flat** (không còn `item_control` bọc), còn control lá và con trong `children_schema` trả dạng wrapper. Muốn sửa form có sẵn thì giữ nguyên `id` của từng control và khi gửi lại vẫn bọc vỏ ngoài như trên.
-- **Chưa kiểm**: `tab`/`steps`/`columns` (`parent_tab_id`), `grid`, `dialog`, `select` có `data_source`, `custom-embed`. Gặp `400`, đọc `err_mess` (nêu rõ `form_components.<chỉ số>.<trường>`) và đối chiếu `SaveFormDesignDto` trong `dynaform-service` thay vì đoán.
+- **Dữ liệu đọc lại khác dữ liệu gửi lên**: `get_form_design` trả control **gốc có con** (`container`, `columns`, `tab`) ở dạng **flat** (không còn `item_control` bọc); control gốc không có con (`input`, `select`, `dialog`, nút…) và mọi con trong `children_schema` trả dạng wrapper. Muốn sửa form có sẵn thì giữ nguyên `id` của từng control và khi gửi lại vẫn bọc vỏ ngoài như trên.
+- **Cập nhật form nháp** (đã kiểm 2026-11-09): `get_form_design` lấy `draft_revision` → `save_form_design` với `id` + `expected_revision` + **toàn bộ** `form_components` (cây mới, giữ `id` control cũ) → `draft_revision` tăng 1, control cũ giữ `id`, control mới được thêm kể cả vào container có sẵn. `expected_revision` lệch → `409 DRAFT_CONFLICT` (`revision`, `expected_revision`, `saved_by`, `saved_at`), không ghi gì. `create_form_draft` trên một form **đã là nháp** trả `existed: true` cùng `id`, không tạo bản ghi mới — không cần gọi.
+- **Đã kiểm khi lưu qua MCP** (đọc lại giữ nguyên): `container`/`columns`/`tab` có con; `parent_tab_id` (`col-0`/`col-1`, `id` trong `tabs[]`); `tabs[].hideWhen`; `select` và `radio-group` có `data_source` tĩnh (`checked` giữ nguyên); `dialog` variant `confirmation`; `eventHandlers` loại `click`, `load`, `condition` + `branch`; step `field_state`, `dialog`, `validate_form`, `show_message`; validation `required`, `regex`, `email`, `maxLength`, `matchField`.
+- **Chưa kiểm**: `steps`, `grid`, `dialog` variant `form` có con, `select` từ API (`data_source` loại `api`), `custom-embed`; và việc **xoá** một control bằng cách bỏ nó khỏi `form_components` khi cập nhật. Gặp `400`, đọc `err_mess` (nêu rõ `form_components.<chỉ số>.<trường>`) và đối chiếu `SaveFormDesignDto` trong `dynaform-service` thay vì đoán.
 - Đường khác server chấp nhận: "V2 flat" — phần tử gốc chính là item_control (có `slug`/`renderer_key` ở cấp trên, không có `item_control` bọc). Chưa kiểm; dùng vỏ ngoài ở trên.
