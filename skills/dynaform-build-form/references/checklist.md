@@ -72,6 +72,6 @@ Không có công cụ kiểm tự động — đi hết danh sách này **trên 
 - [ ] Có tiêu đề form (+ mô tả 1 câu); mỗi phần là một card (hoặc đoạn giữa hai `divider`) cùng kiểu, có tiêu đề; mỗi phần 4–8 field (tối đa 10).
 - [ ] Mọi hàng cộng đủ 12; `textarea` cuối card; không field 12 lẻ xen giữa các cặp 6+6.
 - [ ] Callout là `text` có `custom.css` (nền + viền), không dùng `custom.className` Tailwind trong JSON tay, không `style="color:#…"`; ẩn theo điều kiện bằng handler `load`.
-- [ ] Mỗi container có viền đã đặt `styles.paddingTop/Right/Bottom/Left`; mọi `<h3>`/`<h4>` có `custom.css` (cỡ chữ, độ đậm); `checkbox` cam kết có `showLabel: "no"`.
+- [ ] Mỗi container có viền đã đặt `styles.paddingTop/Right/Bottom/Left` và (lib ≥ v5.9.0) `styles.showShadow: "no"`; mọi `<h3>`/`<h4>` có `custom.css` (cỡ chữ, độ đậm); `checkbox` cam kết có `showLabel: "no"`.
 - [ ] Một nút chính ở cuối, căn phải; không quá 3 nút.
 - [ ] Tự chấm ≥ 16/20, không lỗi chết; điểm đã ghi vào báo cáo.

@@ -3,6 +3,14 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.12.1 — 2026-11-20 (card không bóng bằng `showShadow`)
+
+Nguyên nhân gốc tìm được ở lib `fe_dynaform`: container kiểu card được vẽ bằng shadcn `Card` (`src/components/ui/card.tsx:10` có sẵn `shadow-sm`), mà `cardBorderReset` chỉ gỡ bóng khi tắt viền, nên card có viền luôn đổ bóng nhẹ. Lib đã thêm khoá style `showShadow` (có từ lib **v5.9.0**, tag đã push 2026-11-20): thiếu khoá hoặc `"yes"` thì có bóng như cũ, `"no"` giữ viền bỏ bóng.
+
+- **`dynaform-form-design`**: card đặt `styles.showShadow: "no"` (`SKILL.md` quy tắc 2; `references/design-rules.md` §2 có ví dụ và lưu ý tương thích, §12 thêm hai dòng kiểm chứng; `review-rubric.md` thêm lỗi chết "card có viền không `showShadow: "no"`", chỉ tính khi lib có khoá này; `references/example-before-after.md`).
+- **`dynaform-build-form`**: `references/checklist.md` mục I thêm `showShadow: "no"` cho container có viền.
+- **Chưa làm / chưa kiểm**: lib cũ (≤ v5.8.6) bỏ qua khoá nên card vẫn có bóng (vô hại); chưa mở editor host với lib v5.9.0 đã cài để xem `showShadow: "no"` bỏ bóng thật (mfe-dynaform đã cài 5.9.0; hiện chỉ có test đơn vị 19/19 và phép đo của phiên làm lib). `skills/dynaform-build-form/references/form-json.md` §5, §10 vẫn chưa liệt kê khoá `showShadow` vì file đang có thay đổi chưa commit khác; thêm khi gộp.
+
 ## 0.12.0 — 2026-11-20 (skill mới `dynaform-form-design`: gu thiết kế form)
 
 Nguồn: form thử do Agent dựng khi chưa có skill này (`01a1eced`, chấm 11/20 theo rubric mới) được dựng lại theo quy tắc (bản nháp DEV `01a1f6ec`, 19/20 chấm tĩnh) và soi trên Chrome ở trang preview của `mfe-dynaform`. Các điều ghi dưới đây về hiển thị đều là điều đã thấy trên màn hình hoặc đọc từ mã lib `fe_dynaform`.

@@ -20,6 +20,7 @@ Mỗi vi phạm trừ 1 điểm của mục tương ứng, không xuống dướ
 
 - Hardcode màu bằng `style="color:#…"` / `attributes.style`; hoặc dùng `custom.className` Tailwind trong JSON tay thay vì `custom.css` (không có CSS nếu form chưa qua builder).
 - Container có viền nhưng không đặt `styles.padding*` (chữ và ô nhập dính sát mép card).
+- Card có viền mà không đặt `styles.showShadow: "no"` (bóng nhẹ trong trang trái nguyên tắc: bóng chỉ dành cho lớp nổi). Chỉ tính khi lib đang dùng đã có khoá này (lib ≥ v5.9.0); lib cũ thì ghi vào báo cáo thay vì trừ điểm.
 - Tiêu đề `<h3>`/`<h4>` không có `custom.css` (render như chữ thường, mất phân cấp).
 - Ô `textarea`/field mồ côi ngoài card, nằm trơ ngay dưới tiêu đề.
 - Một phần hơn 10 field, hoặc nhiều phần có tiêu đề riêng nằm chung một card mà không có phân cách thật (`divider`).

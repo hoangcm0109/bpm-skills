@@ -79,7 +79,7 @@ Thay đổi so với bản trước:
 - Mỗi phần một card, cùng kiểu; không card nào quá 6 field (trừ `goods` có nested-list).
 - Địa điểm giao hàng đi cùng "Cần trước ngày" (cùng nghĩa giao hàng), nên "Ngân sách còn lại" có cặp, hết hàng trống nửa.
 - "Ý kiến trả lại" thành callout cảnh báo ở đầu form, hiện khi có nội dung.
-- Callout có nền/viền bằng `custom.css` (`design-rules.md` §6), bỏ màu cứng. Mỗi card có padding 20 và mỗi tiêu đề có `custom.css` cỡ chữ/độ đậm.
+- Callout có nền/viền bằng `custom.css` (`design-rules.md` §6), bỏ màu cứng. Mỗi card có padding 20, không bóng (`showShadow: "no"`) và mỗi tiêu đề có `custom.css` cỡ chữ/độ đậm.
 - Phần cuối đánh lại số **4.** (bản dựng đầu quên sửa nên vẫn là "3." — lỗi do Agent, thấy ngay khi mở preview).
 - Hai ghi chú cho dev (`helpText`) bỏ khỏi form; thông tin đó thuộc báo cáo cho người dựng, không phải người điền.
 - VAT đứng trước tổng; tổng đứng cuối phần.

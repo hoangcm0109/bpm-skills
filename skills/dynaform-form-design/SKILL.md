@@ -34,7 +34,7 @@ Gu mặc định: card theo từng phần, tiêu đề có số và mô tả ng�
 ## Mười quy tắc cốt lõi (chi tiết + ví dụ ở `references/design-rules.md`)
 
 1. Form có **tiêu đề** và **một câu mô tả** ở đầu. `<h3>`/`<h4>` trong `text` render như chữ thường nên **luôn kèm `custom.css`** để có cỡ chữ và độ đậm.
-2. **Mỗi nhóm nghĩa là một card** có **padding 4 cạnh** (`styles.padding*`, lib không đặt mặc định) và tiêu đề (đánh số nếu ≥ 3 phần). Không để nhiều phần trong cùng một card chỉ ngăn bằng thẻ `<h4>`.
+2. **Mỗi nhóm nghĩa là một card** có **padding 4 cạnh** (`styles.padding*`, lib không đặt mặc định), **không bóng** (`styles.showShadow: "no"`, lib ≥ v5.9.0) và tiêu đề (đánh số nếu ≥ 3 phần). Không để nhiều phần trong cùng một card chỉ ngăn bằng thẻ `<h4>`.
 3. Mỗi **phần** có **4–8 field**; tối đa 10. Card nhiều hơn 10 field chỉ chấp nhận khi chia thành các phần bằng `divider` + tiêu đề (phương án B).
 4. **Thứ tự theo luồng nghĩ**: nhận diện → bối cảnh → nội dung chính → số liệu tổng → đính kèm → cam kết → nút.
 5. **Nhịp 6+6 làm nền**; field ngắn (ngày, số, mã) 4 hoặc 3; `textarea` 12 và dồn xuống cuối card; mọi hàng cộng đủ 12.

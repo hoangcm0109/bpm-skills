@@ -24,7 +24,7 @@ Mỗi card là một `container` với `container.type: "card"`, `border: true`.
 
 ```jsonc
 { "type": "container", "name": "requester_info", "container": { "type": "card", "border": true },
-  "styles": { "paddingTop": "20", "paddingRight": "20", "paddingBottom": "20", "paddingLeft": "20" } },
+  "styles": { "paddingTop": "20", "paddingRight": "20", "paddingBottom": "20", "paddingLeft": "20", "showShadow": "no" } },
 { "type": "text", "name": "requester_info_title", "parent": "requester_info",
   "content": "<h4>1. Thông tin chung</h4>",
   "custom": { "css": "& h4{font-size:1rem;font-weight:600;margin:0}" } },
@@ -32,6 +32,7 @@ Mỗi card là một `container` với `container.type: "card"`, `border: true`.
 ```
 
 - **Container không có padding mặc định** (lib: "the author sets it per side"). Có viền mà thiếu padding thì chữ và ô nhập dính sát mép card — đã gặp thật. Luôn đặt đủ 4 cạnh `styles.paddingTop/Right/Bottom/Left` (chuỗi số px, khuyến nghị `"20"`; đã kiểm trên Chrome 2026-11-20). Đây là khoá `properties.style.padding*`, khớp `editable_props.styles.*` (`form-json.md` §10).
+- **Card có viền mặc định đổ bóng nhẹ**: shadcn `Card` có sẵn `shadow-sm` (`src/components/ui/card.tsx`), và trước đây lib chỉ gỡ bóng khi tắt viền. Khối trong trang không dùng bóng (bóng chỉ dành cho lớp nổi như popover, dialog), nên đặt `styles.showShadow: "no"` cho card để **giữ viền, bỏ bóng**. Khoá này có từ lib **v5.9.0** (phát hành 2026-11-20). Lib cũ bỏ qua khoá nên card vẫn có bóng, vô hại; thiếu khoá cũng có bóng như cũ. Card tắt viền thì không có bóng, không cần khoá này.
 - Số thứ tự ("1.", "2.") khi form có ≥ 3 phần; ít hơn thì bỏ số.
 - Tiêu đề của chính `container` (`showTitle`) chưa lưu được vào JSON ở lib 4.7–4.8 — dùng `text` `<h4>` làm con đầu tiên (xem `../../dynaform-components/SKILL.md`).
 - **4–8 field mỗi phần, tối đa 10.** Một phần là một card, hoặc một đoạn giữa hai `divider` trong một card (phương án B). Nhiều hơn thì tách theo nghĩa; ít hơn 3 thì gộp với phần kề trừ khi khác hẳn nghĩa.
@@ -143,6 +144,8 @@ Nền và viền dùng `color-mix` trên màu gốc để vừa light vừa dark
 |---|---|
 | Card/tab/steps/columns/grid lồng dữ liệu khi có `variables.name` | Đọc mã `fe_dynaform/src/lib/nest-form-values.ts` |
 | Container có viền cần padding 4 cạnh | Đọc mã `form-container.tsx` + **thấy trên Chrome** (preview, 2026-11-20): thiếu thì sát mép, `"20"` thì ổn |
+| Card có viền đổ bóng mặc định (`shadow-sm` của shadcn Card) | Đọc mã `card.tsx:10`, `form-container.tsx`; **DOM trên Chrome** (preview): lớp `shadow-sm` có trên hai container |
+| `showShadow: "no"` giữ viền, bỏ bóng; thiếu khoá thì vẫn có bóng; lưu rồi nạp lại JSON giữ đúng | Test đơn vị 19/19 trên nhánh lib; **chưa mở editor host với lib v5.9.0 đã cài** (mfe-dynaform đã cài 5.9.0) |
 | `<h3>`/`<h4>` trong `text` render như chữ thường | **Chrome**: computed 14px / 400; thêm `custom.css` thì đậm, to rõ |
 | `custom.className` (Tailwind) không ra CSS nếu form chưa qua builder | **Chrome**: class `dfx:…` có trên DOM, computed nền trong suốt, không có rule `.dfx\:…`; khớp `CUSTOM_STYLE.md` §4 |
 | Callout thông tin bằng `text` + `custom.css` hiện nền + viền | **Chrome**: nền xanh nhạt + viền, đúng điều kiện `> 100 triệu` |
