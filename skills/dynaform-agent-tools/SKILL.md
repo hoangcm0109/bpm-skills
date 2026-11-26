@@ -54,11 +54,11 @@ Quy tắc cho agent:
 ## 4. Nối host với agent (tóm tắt)
 
 ```tsx
-<DynaformBuilder idForm={id} runAgentTurn={runAgentTurn}      // createSseRunAgentTurn({ url, getHeaders })
+<DynamicFormBuilder idForm={id} runAgentTurn={runAgentTurn}      // createSseRunAgentTurn({ url, getHeaders })
                  agentClientTools={clientTools} onAgentConfirm={confirm} />
 ```
 
-Chat UI không phải thanh chat của editor: dùng `ref.getAgentTools()` / `ref.runAgentTool()` / `beginAgentRun()` / `endAgentRun()` (mfe-dynaform công bố thành `window.DynaformAgentBridge`). Cài lib, `DynaformBuilderProvider`, `ref`: skill `dynaform-embed-lib`; wiring cụ thể trong repo mfe-dynaform: `dynaform-mfe-module`.
+Chat UI không phải thanh chat của editor: dùng `ref.getAgentTools()` / `ref.runAgentTool()` / `beginAgentRun()` / `endAgentRun()` (mfe-dynaform công bố thành `window.DynaformAgentBridge`). Cài lib, `DynamicFormBuilderProvider`, `ref`: skill `dynaform-embed-lib`; wiring cụ thể trong repo mfe-dynaform: `dynaform-mfe-module`.
 
 Cần lib `@dnu/dynaform-builder` có agent bridge (export `createSseRunAgentTurn`, `defineClientTool`; docs `AI_AGENT_BRIDGE.md` trong `fe_dynaform`). Kiểm tag trước khi ghi version — đừng bịa.
 

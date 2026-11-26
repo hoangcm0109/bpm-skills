@@ -1,7 +1,7 @@
 # Ví dụ đầy đủ — thêm một domain mới trong mfe-dynaform
 
 Ví dụ dùng domain giả **`faculty`** (Khoa) để đi hết chuỗi: endpoint → type → service → query → mutation → hook trang → schema → dialog form → page → route,
-rồi tới trang editor dùng `DynaformBuilder`. Mỗi đoạn mô phỏng đúng file thật của domain `application` (đọc mã gốc trước khi chép):
+rồi tới trang editor dùng `DynamicFormBuilder`. Mỗi đoạn mô phỏng đúng file thật của domain `application` (đọc mã gốc trước khi chép):
 `services/application/*`, `hooks/application/useApplicationPage.ts`, `pages/application/ApplicationPage.tsx`,
 `components/dialogs/CreateItemControlGroupDialog/*`, `pages/formManager/editor/FormEditorPage.tsx`, `app/App.tsx`.
 Nguồn sự thật của repo vẫn là `.skills/project-overview/SKILL.md` + `.skills/sectioned-form-layout/SKILL.md` trong mfe-dynaform — khi mâu thuẫn, **file trong repo thắng**.
@@ -472,12 +472,12 @@ import FacultyPage from "../pages/faculty/FacultyPage";
 
 Link tới route dùng `buildRouteUrl(ROUTES.faculty.index)` (tự thêm prefix `/dynaform`); route có tham số: `buildRouteUrl(ROUTES.formManager.editor.index, { id })`.
 
-## 11. Trang editor/preview/release dùng `DynaformBuilder`
+## 11. Trang editor/preview/release dùng `DynamicFormBuilder`
 
 ```tsx
 // src/pages/formManager/editor/FormEditorPage.tsx (rút gọn)
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { DynaformBuilder } from "@dnu/dynaform-builder";
+import { DynamicFormBuilder } from "@dnu/dynaform-builder";
 import { ROUTES, buildRouteUrl } from "@/app/routes.constants";
 import { FORM_ENVIRONMENT_QUERY_KEY, type FormManagerLocationState } from "@/types/formManager.type";
 import { parseFormEnvTab } from "@/utils/formManagerUtils";
@@ -503,7 +503,7 @@ export default function FormEditorPage({ forceMode }: { forceMode?: "editor" | "
   };
 
   return (
-    <DynaformBuilder
+    <DynamicFormBuilder
       idForm={id}
       environment={environment}
       mode={forceMode ?? "editor"}
@@ -514,8 +514,8 @@ export default function FormEditorPage({ forceMode }: { forceMode?: "editor" | "
 }
 ```
 
-Chỉ mở editor cho version `draft`, với `id` + môi trường của version đang chọn. Cấu hình URL lib **duy nhất** qua `DynaformBuilderProvider` trong `app/App.tsx`
-(`backendUrl` = gốc gateway, `shellUrl`, bọc bằng `useMemo`); CSS lib import ở `bootstrap.tsx` — xem `../../dynaform-embed-lib/references/examples.md` §1–§3.
+Chỉ mở editor cho version `draft`, với `id` + môi trường của version đang chọn. Cấu hình URL lib **duy nhất** qua `DynamicFormBuilderProvider` trong `app/App.tsx`
+(`backendUrl` = gốc gateway, bọc bằng `useMemo`; lib v6 không còn `shellUrl`); CSS lib import ở `bootstrap.tsx` — xem `../../dynaform-embed-lib/references/examples.md` §1–§3.
 
 ## Checklist trước khi báo xong
 

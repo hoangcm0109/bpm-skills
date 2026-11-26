@@ -1,18 +1,19 @@
 # Ví dụ đầy đủ — nhúng `@dnu/dynaform-builder`
 
-Mọi ví dụ bám đúng props/export thật của lib (đối chiếu `src/lib/index.ts`, `src/lib/builder-host/DynaformBuilder.tsx`,
-`docs/DYNAMIC_FORM_BUILDER_INTEGRATION.md` trong `fe_dynaform`; mẫu host thật: `mfe-dynaform/src/app/App.tsx`,
+Mọi ví dụ bám đúng props/export thật của lib **v6** (đối chiếu `src/lib/index.ts`, `src/lib/builder-host/DynamicFormBuilder.tsx`,
+`docs/DYNAMIC_FORM_BUILDER_INTEGRATION.md` (host), `docs/DYNAMIC_CORE_BUILDER_INTEGRATION.md` (core) trong `fe_dynaform`;
+lib < 6 dùng tên cũ — bảng đổi tên ở SKILL.md mục 1; mẫu host thật: `mfe-dynaform/src/app/App.tsx`,
 `pages/formManager/editor/FormEditorPage.tsx`). Tag lib ghi ở SKILL.md — kiểm `package.json` trước khi chép version.
 Dữ liệu trong ví dụ là giả; URL/gateway thay bằng của bạn, **không** ghi token vào mã.
 
 | # | Tình huống | Thành phần |
 |---|---|---|
 | 1 | Cài đặt + import CSS | `package.json`, entry |
-| 2 | Cấu hình URL cho cả app | `DynaformBuilderProvider` |
-| 3 | Màn thiết kế form có backend dynaform | `DynaformBuilder mode="editor"` |
-| 4 | Điền và gửi form cho người dùng cuối (host có nút riêng) | `DynaformBuilder mode="release"` + `ref` |
+| 2 | Cấu hình URL cho cả app | `DynamicFormBuilderProvider` |
+| 3 | Màn thiết kế form có backend dynaform | `DynamicFormBuilder mode="editor"` |
+| 4 | Điền và gửi form cho người dùng cuối (host có nút riêng) | `DynamicFormBuilder mode="release"` + `ref` |
 | 5 | Nhiều form trên một trang (modal, task form) | `isolatedState` |
-| 6 | Không có backend dynaform — chỉ chạy một form JSON | `DynamicFormBuilder` |
+| 6 | Không có backend dynaform — chỉ chạy một form JSON | `DynamicCoreBuilder` |
 | 7 | Tự đưa request qua axios / thêm auth | `config.http` |
 | 8 | Thay widget của control bằng component của host | `controls` + `rawControl` |
 | 9 | Control mới của host (`x-…`) | `defineControl` |
@@ -25,7 +26,7 @@ Dữ liệu trong ví dụ là giả; URL/gateway thay bằng của bạn, **kh�
 
 ```jsonc
 // package.json của host
-"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v4.8.0"
+"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v6.0.0"
 ```
 
 ```tsx
@@ -39,11 +40,11 @@ createRoot(document.getElementById("root")!).render(<App />);
 
 Vite: thêm `resolve: { dedupe: ["react", "react-dom"] }`. Webpack Module Federation: `shared: { react: { singleton: true }, "react-dom": { singleton: true } }`.
 
-## 2. Cấu hình URL — `DynaformBuilderProvider`
+## 2. Cấu hình URL — `DynamicFormBuilderProvider`
 
 ```tsx
 import { useMemo } from "react";
-import { DynaformBuilderProvider } from "@dnu/dynaform-builder";
+import { DynamicFormBuilderProvider } from "@dnu/dynaform-builder";
 
 export default function App() {
   // dist của lib build sẵn nên env của host KHÔNG có tác dụng: phải truyền URL qua Provider.
@@ -51,14 +52,14 @@ export default function App() {
   const config = useMemo(
     () => ({
       backendUrl: "https://gateway.example.com", // GỐC gateway; lib tự suy …/query/v1/… và …/command/v1/…
-      shellUrl: "https://shell.example.com",     // nơi redirect đăng nhập khi 401
+      // Không có shellUrl (bỏ ở v6): đăng nhập do host lo, lib chỉ gửi cookie access_token dạng Bearer, 401 → ApiError.
     }),
     [],
   );
   return (
-    <DynaformBuilderProvider config={config}>
+    <DynamicFormBuilderProvider config={config}>
       <Routes />
-    </DynaformBuilderProvider>
+    </DynamicFormBuilderProvider>
   );
 }
 ```
@@ -67,8 +68,8 @@ export default function App() {
 
 ```tsx
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { DynaformBuilder } from "@dnu/dynaform-builder";
-import type { DynaformBuilderError, EmbedPolicy } from "@dnu/dynaform-builder";
+import { DynamicFormBuilder } from "@dnu/dynaform-builder";
+import type { DynamicFormBuilderError, EmbedPolicy } from "@dnu/dynaform-builder";
 
 // Khai báo NGOÀI component: lib so sánh embedPolicy theo reference.
 const EMBED_POLICY: EmbedPolicy = {
@@ -87,13 +88,13 @@ export default function FormEditorPage() {
     navigate(returnTo ?? "/forms");
   };
 
-  const handleError = (error: DynaformBuilderError) => {
+  const handleError = (error: DynamicFormBuilderError) => {
     // lib đã tự toast message của server; đây chỉ để host ghi log riêng.
     console.warn(`[dynaform] ${error.action} lỗi ${error.status ?? ""}: ${error.message}`, error.details);
   };
 
   return (
-    <DynaformBuilder
+    <DynamicFormBuilder
       idForm={id}
       environment={environment}
       mode="editor"
@@ -115,13 +116,13 @@ Host có nút Gửi riêng (ví dụ nằm trong footer modal). Lib **ẩn nút 
 
 ```tsx
 import { useMemo, useRef, useState } from "react";
-import { DynaformBuilder } from "@dnu/dynaform-builder";
-import type { DynamicFormBuilderHandle } from "@dnu/dynaform-builder";
+import { DynamicFormBuilder } from "@dnu/dynaform-builder";
+import type { DynamicCoreBuilderHandle } from "@dnu/dynaform-builder";
 
 type Props = { formJson: Record<string, unknown>; student: { fullName: string; email: string } };
 
 export function ApplyForm({ formJson, student }: Props) {
-  const ref = useRef<DynamicFormBuilderHandle>(null);
+  const ref = useRef<DynamicCoreBuilderHandle>(null);
   const [busy, setBusy] = useState(false);
 
   // Giá trị điền sẵn: key theo `name` của control; giữ reference ổn định.
@@ -147,7 +148,7 @@ export function ApplyForm({ formJson, student }: Props) {
 
   return (
     <div style={{ height: 520 }}>{/* parent PHẢI có chiều cao */}
-      <DynaformBuilder ref={ref} form={formJson} dataUserFill={dataUserFill} mode="release" isolatedState />
+      <DynamicFormBuilder ref={ref} form={formJson} dataUserFill={dataUserFill} mode="release" isolatedState />
       <button type="button" disabled={busy} onClick={handleSubmit}>Gửi hồ sơ</button>
     </div>
   );
@@ -160,29 +161,29 @@ export function ApplyForm({ formJson, student }: Props) {
 ## 5. Nhiều form trên một trang
 
 ```tsx
-<DynaformBuilder form={taskForm}    mode="release" isolatedState />
-<DynaformBuilder form={commentForm} mode="release" isolatedState />
+<DynamicFormBuilder form={taskForm}    mode="release" isolatedState />
+<DynamicFormBuilder form={commentForm} mode="release" isolatedState />
 ```
 
-Thiếu `isolatedState` thì hai form dùng chung state runtime (field_state, busy…) và đè nhau. Với `DynamicFormBuilder` là `config.isolatedState`.
+Thiếu `isolatedState` thì hai form dùng chung state runtime (field_state, busy…) và đè nhau. Với `DynamicCoreBuilder` là `config.isolatedState`.
 
-## 6. Engine thuần — `DynamicFormBuilder` (không có backend dynaform)
+## 6. Engine thuần — `DynamicCoreBuilder` (không có backend dynaform)
 
 ```tsx
 import { useMemo, useRef } from "react";
-import { DynamicFormBuilder } from "@dnu/dynaform-builder";
-import type { DynamicFormBuilderHandle, FormDesignJson } from "@dnu/dynaform-builder";
+import { DynamicCoreBuilder } from "@dnu/dynaform-builder";
+import type { DynamicCoreBuilderHandle, FormDesignJson } from "@dnu/dynaform-builder";
 
 // config / data / controls / events khai báo ổn định (module-level hoặc useMemo)
 const CONFIG = { mode: "release", formMode: "create", viewport: "lg", hideSubmitButton: false } as const;
 
 export function SurveyForm({ formJson }: { formJson: FormDesignJson }) {
-  const ref = useRef<DynamicFormBuilderHandle>(null);
+  const ref = useRef<DynamicCoreBuilderHandle>(null);
   const data = useMemo(() => ({ dataFormDesign: formJson }), [formJson]);
 
   return (
     <div style={{ width: "100%", height: 480 }}>
-      <DynamicFormBuilder
+      <DynamicCoreBuilder
         ref={ref}
         config={CONFIG}
         data={data}
@@ -217,7 +218,7 @@ Data Source `token_source: "system"` đọc cookie `access_token` (không HttpOn
 ## 8. Thay widget của control — `controls`
 
 ```tsx
-import { DynamicFormBuilder, rawControl } from "@dnu/dynaform-builder";
+import { DynamicCoreBuilder, rawControl } from "@dnu/dynaform-builder";
 import type { ControlOverrides, ControlPropsByType } from "@dnu/dynaform-builder";
 
 function BrandInput({ field, id, placeholder, readOnly, disabled }: ControlPropsByType["input"]) {
@@ -241,7 +242,7 @@ const controls: ControlOverrides = {
   "record-gallery": rawControl(MyGallery), // mức 3: tự lo mọi thứ (MyGallery là component của host)
 };
 
-<DynamicFormBuilder controls={controls} config={CONFIG} data={data} />
+<DynamicCoreBuilder controls={controls} config={CONFIG} data={data} />
 ```
 
 JSON form không đổi. Component ném lỗi → lib tự rơi về control gốc. Chi tiết: `docs/CONTROL_OVERRIDES.md`.
@@ -276,15 +277,15 @@ const controls: ControlOverrides = {
 };
 ```
 
-Control xuất hiện trong palette (nhóm "Tuỳ biến"), chạy ở editor/preview/release. Hai builder trên một trang phải dùng chung **cùng một** kết quả `defineControl(...)` (khai báo ở module-level). Sự kiện riêng (`events`), `propsSchema`, kiểu giá trị object: `docs/DYNAMIC_FORM_BUILDER_INTEGRATION.md` › "New control types".
+Control xuất hiện trong palette (nhóm "Tuỳ biến"), chạy ở editor/preview/release. Hai builder trên một trang phải dùng chung **cùng một** kết quả `defineControl(...)` (khai báo ở module-level). Sự kiện riêng (`events`), `propsSchema`, kiểu giá trị object: `docs/DYNAMIC_CORE_BUILDER_INTEGRATION.md` › "New control types".
 
 Tiền tố `x-` là bắt buộc. Type `x-…` không có trong bảng registry của `dynaform-build-form` (`form-json.md` §3): chỉ dùng khi host đã đăng ký control đó và người dùng yêu cầu rõ; các trường định danh lấy từ host.
 
 ## 10. Host đồng bộ form vào editor đang mở — `loadFormJson` (≥ 4.6.0)
 
 ```tsx
-const ref = useRef<DynamicFormBuilderHandle>(null);
-<DynaformBuilder ref={ref} mode="editor" idForm={id} />
+const ref = useRef<DynamicCoreBuilderHandle>(null);
+<DynamicFormBuilder ref={ref} mode="editor" idForm={id} />
 
 // Nhận từng bản snapshot (ví dụ agent dựng dần):
 ref.current?.loadFormJson(partialJson, { snapshot: false, progress: { done: 3, total: 8 } }); // không ghi undo
@@ -307,7 +308,7 @@ const EMBED_POLICY: EmbedPolicy = {
   imageFetch: ["https://files.example.com"],           // origin để host tải hộ ảnh http cho embed
   maxEmbedsPerForm: 6,
 };
-// DynaformBuilder: prop `embedPolicy`; DynamicFormBuilder: `config.embedPolicy`.
+// DynamicFormBuilder: prop `embedPolicy`; DynamicCoreBuilder: `config.embedPolicy`.
 ```
 
 ## 12. Dev với lib build local (không cần tag)
@@ -326,7 +327,7 @@ Không sửa dependency/lockfile; chỉ dùng mode development. Đổi vị trí
 ## 13. Bắt lỗi lưu form
 
 ```tsx
-<DynaformBuilder
+<DynamicFormBuilder
   mode="editor"
   idForm={id}
   onError={(error) => {

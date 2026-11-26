@@ -69,8 +69,8 @@ const dataUserFill = useMemo(
   [record],
 );
 
-<DynaformBuilder form={formJson} dataUserFill={dataUserFill} mode="release" isolatedState />
-// DynamicFormBuilder: config={{ mode: "release", formMode: "edit" }} data={{ dataFormDesign: formJson, dataUserFill }}
+<DynamicFormBuilder form={formJson} dataUserFill={dataUserFill} mode="release" isolatedState />
+// DynamicCoreBuilder: config={{ mode: "release", formMode: "edit" }} data={{ dataFormDesign: formJson, dataUserFill }}
 ```
 
 Thứ tự ưu tiên điền sẵn: `dataUserFill` > bản nháp > `bound_variables`. Với select phụ thuộc, điền cả chuỗi (tỉnh, quận, xã) để cấp dưới có giá trị khớp danh sách đã nạp lại.

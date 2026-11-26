@@ -3,6 +3,15 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.13.0 — 2026-11-26 (khớp lib v6.0.0: tên component mới, bỏ `shellUrl`)
+
+Lib `@dnu/dynaform-builder` v6.0.0 (tag đã push 2026-11-26) là bản breaking: core `DynamicFormBuilder` → `DynamicCoreBuilder` (+ `Props`/`Mode`/`Handle`), host `DynaformBuilder` → `DynamicFormBuilder` (+ `Props`/`Error`), `DynaformBuilderProvider` → `DynamicFormBuilderProvider`; bỏ `shellUrl` và `bootstrapStandaloneAuth` (lib không chuyển trang khi 401, chỉ ném `ApiError`). `DynamicFormBuilderHandle` vẫn export, là alias của `DynamicCoreBuilderHandle`.
+
+- **Mọi skill** đổi sang tên v6 (theo đúng thứ tự: core trước, host sau, vì tên `DynamicFormBuilder` đổi nghĩa từ core sang host): `dynaform-embed-lib`, `dynaform-agent-tools`, `dynaform-build-form`, `dynaform-data-source`, `dynaform-mfe-module`, ví dụ prompt trong `.codex-plugin/plugin.json`, `AGENTS.md`. Đường dẫn docs của lib đổi theo: `docs/DYNAMIC_FORM_BUILDER_INTEGRATION.md` (host), `docs/DYNAMIC_CORE_BUILDER_INTEGRATION.md` (core).
+- **`dynaform-embed-lib`**: thêm bảng "Đổi tên ở v6.0.0" và cách nâng host; Provider chỉ còn `backendUrl` (tuỳ chọn `queryUrl`/`commandUrl`), đăng nhập là việc của host; tag mẫu `#v6.0.0`; mẹo lockfile pnpm (mã tag object → mã commit); `environment` của host ghi là tuỳ chọn và bỏ khỏi ví dụ editor; dòng phiên bản 5.9.0 và 6.0.0; hai lỗi thường gặp mới (tên cũ / `shellUrl` lỗi typecheck, `--frozen-lockfile` lỗi); trạng thái các host: mfe-dynaform, mfe-workflow ghim `#v6.0.0`, mfe-shell-app nạp tgz 6.0.0.
+- **`dynaform-mfe-module`**: Provider không còn `shellUrl`; ghi tag `#v6.0.0` của mfe-dynaform.
+- README: dòng "khớp lib" chuyển sang `v6.0.0`.
+
 ## 0.12.2 — 2026-11-20 (`form-json.md`: lưu form qua MCP và khoá style của container)
 
 - **`dynaform-build-form/references/form-json.md` §13 (lưu qua MCP `save_form_design`)**: dữ liệu đọc lại khác dữ liệu gửi lên (control gốc **có con** như `container`, `columns`, `tab` trả dạng flat; control gốc không có con và mọi con trong `children_schema` trả dạng wrapper); quy trình **cập nhật form nháp** (`get_form_design` lấy `draft_revision` → `save_form_design` với `id` + `expected_revision` + toàn bộ `form_components`, giữ `id` control cũ; lệch → `409 DRAFT_CONFLICT`; `create_form_draft` trên nháp trả `existed: true`); danh sách đã kiểm khi lưu qua MCP (container/columns/tab có con, `parent_tab_id`, `tabs[].hideWhen`, `select` và `radio-group` có data source tĩnh, `dialog` confirmation, `eventHandlers` click/load/condition + branch, các step, validation); mục "chưa kiểm" cập nhật (`steps`, `grid`, `dialog` form có con, `select` từ API, `custom-embed`, xoá control bằng cách bỏ khỏi `form_components`). Đây là thay đổi chưa commit có từ trước trong repo, được đưa lên theo yêu cầu của người dùng; các mốc "đã kiểm 2026-11-09" là của lần kiểm trước, **không kiểm lại trong đợt này**.

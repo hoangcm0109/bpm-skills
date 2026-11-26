@@ -1,6 +1,6 @@
 # Ví dụ — agent & dynaform
 
-Mọi URL/dữ liệu là giả (`https://gateway.example.com`), không token. Code bám đúng API của lib (`createSseRunAgentTurn`, `defineClientTool`, props `DynaformBuilder`, ref handle) và của mfe-dynaform.
+Mọi URL/dữ liệu là giả (`https://gateway.example.com`), không token. Code bám đúng API của lib (`createSseRunAgentTurn`, `defineClientTool`, props `DynamicFormBuilder`, ref handle) và của mfe-dynaform.
 
 ## 1. Một lượt hội thoại trên dây
 
@@ -115,11 +115,11 @@ function end(res: Response, send: (e: object) => void, reason: "tool_use" | "end
 
 Lưu ý về lịch sử: editor chỉ ghi lại những gì nó **nhận được** (`text` và `tool_use` của client tool) rồi gửi lại ở lượt sau. Hệ quả: (1) `tool_use` của server tool nằm cùng message với `tool_use` của client tool bị bỏ khi phát cho editor — LLM sẽ gọi lại ở lượt sau, nên message `assistant` editor lưu vẫn nhất quán; (2) kết quả của server tool chỉ sống trong `convo` cục bộ của một lần gọi `agentTurn`, lượt sau gateway chỉ thấy phần `text` đã phát. Cần giữ nguyên kết quả server tool qua các lượt thì gateway tự lưu theo `run_id`/phiên của nó.
 
-## 4. Host: nối agent vào `DynaformBuilder`
+## 4. Host: nối agent vào `DynamicFormBuilder`
 
 ```tsx
 import {
-  DynaformBuilder, createSseRunAgentTurn, defineClientTool, okResult, errorResult,
+  DynamicFormBuilder, createSseRunAgentTurn, defineClientTool, okResult, errorResult,
   type ConfirmHandler,
 } from "@dnu/dynaform-builder";
 
@@ -152,7 +152,7 @@ const clientTools = [
 export function EditorPage({ id }: { id: string }) {
   hostNav.current = useNavigate();                                    // react-router
   const confirm = useStableConfirm();                                 // trả Promise<boolean> từ dialog của host
-  return <DynaformBuilder idForm={id} runAgentTurn={runAgentTurn} agentClientTools={clientTools} onAgentConfirm={confirm} />;
+  return <DynamicFormBuilder idForm={id} runAgentTurn={runAgentTurn} agentClientTools={clientTools} onAgentConfirm={confirm} />;
 }
 ```
 
@@ -163,8 +163,8 @@ export function EditorPage({ id }: { id: string }) {
 Widget có hội thoại và kết nối gateway riêng; chỉ cần "executor" cho client tool.
 
 ```ts
-const handleRef = useRef<DynamicFormBuilderHandle>(null);
-<DynaformBuilder ref={handleRef} idForm={id} agentClientTools={clientTools} onAgentConfirm={confirm} />
+const handleRef = useRef<DynamicCoreBuilderHandle>(null);
+<DynamicFormBuilder ref={handleRef} idForm={id} agentClientTools={clientTools} onAgentConfirm={confirm} />
 
 // widget:
 const tools = await handleRef.current!.getAgentTools();               // gửi cho agent trong tools[]

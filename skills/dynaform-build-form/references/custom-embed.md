@@ -66,7 +66,7 @@ Quy tắc:
 
 JSON viết tay **không** có `tailwindCss` (cần trình biên dịch Tailwind của builder). Embed sẽ **chưa có style** cho tới khi:
 
-1. Nạp JSON vào builder (Open JSON / `loadFormJson` / `DynaformBuilder form=…` ở editor).
+1. Nạp JSON vào builder (Open JSON / `loadFormJson` / `DynamicFormBuilder form=…` ở editor).
 2. Chọn control → **Sửa TSX / HTML (Tailwind)** → **Lưu** — builder biên dịch TSX và sinh `tailwindCss` (cần mạng để tải Monaco).
 3. Save form.
 

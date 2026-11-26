@@ -47,7 +47,7 @@ Kết quả: [`example-contact-json.md`](example-contact-json.md).
 | Cách | Làm |
 |---|---|
 | Xem/chỉnh trong builder | Mở form → nút *Open JSON* → dán JSON → kiểm trên canvas → Save |
-| Chạy ở app host | `data.dataFormDesign` của `DynamicFormBuilder`, hoặc `form={…}` của `DynaformBuilder` — xem `../../dynaform-embed-lib/references/examples.md` §4, §6 |
+| Chạy ở app host | `data.dataFormDesign` của `DynamicCoreBuilder`, hoặc `form={…}` của `DynamicFormBuilder` — xem `../../dynaform-embed-lib/references/examples.md` §4, §6 |
 | Có `custom` (Tailwind) hoặc `custom-embed` | mở trong builder một lần và Save để lib sinh `tailwindCss` |
 
 Không tự lưu/publish form hay gọi API ghi khi người dùng chưa yêu cầu.

@@ -57,7 +57,7 @@ Mỗi dòng `data: <một object JSON>`, kết thúc bằng `data: [DONE]`. Dòn
 | Việc | API |
 |---|---|
 | Transport cho `runAgentTurn` | `createSseRunAgentTurn({ url, getHeaders?, credentials?, getContext?, onRunStart? })` |
-| Gắn vào editor | props `DynaformBuilder`: `runAgentTurn`, `generateForm`, `agentClientTools`, `onAgentConfirm`, `agentContext` |
+| Gắn vào editor | props `DynamicFormBuilder`: `runAgentTurn`, `generateForm`, `agentClientTools`, `onAgentConfirm`, `agentContext` |
 | Khai báo client tool | `defineClientTool({ schema, risk?, handler })` |
 | Chat UI ngoài thanh chat | `ref.getAgentTools()`, `ref.runAgentTool(name, input, {toolUseId?, signal?})`, `ref.beginAgentRun()` / `ref.endAgentRun()` |
 | Giới hạn | kết quả tool ≤ 60 000 ký tự (`MAX_TOOL_RESULT_CHARS`); `maxIterations` mặc định 25 mỗi run |
