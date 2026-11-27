@@ -1,6 +1,7 @@
 ---
 name: dynaform-form-design
 description: Thiết kế bố cục và thẩm mỹ form dynaform TRƯỚC khi viết JSON — brief, outline, chia card/nhóm, tiêu đề, callout, nhịp 12 cột, chọn phẳng/tab/steps, nút hành động. Dùng khi dựng hoặc làm lại form mà cần form gọn, có phân cấp, không bị "rải hết control ra". Từ khoá — form đẹp, thiết kế form, bố cục form, UI/UX form, form xấu, làm lại form, redesign form, outline form.
+user-invocable: false
 ---
 
 # Thiết kế form dynaform (gu "hành chính gọn")

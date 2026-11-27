@@ -1,6 +1,7 @@
 ---
 name: dynaform-embed-lib
 description: Nhúng thư viện @dnu/dynaform-builder vào app React/MFE — cài theo git tag, import style.css, DynamicFormBuilderProvider (backendUrl), DynamicFormBuilder (builder-host, editor/preview/release), DynamicCoreBuilder (builder-core) + dataFormDesign, bảng đổi tên v6, props/events/ref, embedPolicy, chạy lib build local (start:linked). Dùng khi tích hợp, hiển thị/điền/submit form trong host app, hoặc debug lỗi tích hợp lib.
+user-invocable: false
 ---
 
 # Nhúng @dnu/dynaform-builder

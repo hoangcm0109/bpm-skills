@@ -24,7 +24,7 @@ Một repo, một plugin, dùng được cho **Claude Code** và **Codex**.
 
 ## Cài đặt & cập nhật
 
-Phiên bản hiện tại: **0.14.0** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v6.1.0` (tên component mới: host `DynamicFormBuilder`, core `DynamicCoreBuilder`, không còn `shellUrl`; lib < 6 dùng tên cũ, xem bảng đổi tên trong `dynaform-embed-lib`); các tính năng 5.3.0–5.6.6 nằm trong tag `v5.6.7` (không có tag riêng); riêng **biến môi trường** `@{NAME}` cần tag `v5.8.3` trở lên (các thay đổi 5.7.x chưa đối chiếu); riêng khoá `showShadow` của container card cần tag `v5.9.0` trở lên; riêng `dynaform-agent-tools` cần bản lib có agent bridge (export `createSseRunAgentTurn`) — **không có trong `v5.6.7`**, kiểm tag bằng `git ls-remote --tags` trước khi ghi version.
+Phiên bản hiện tại: **0.14.1** (xem [`CHANGELOG.md`](CHANGELOG.md)) — khớp lib `@dnu/dynaform-builder` tag `v6.1.0` (tên component mới: host `DynamicFormBuilder`, core `DynamicCoreBuilder`, không còn `shellUrl`; lib < 6 dùng tên cũ, xem bảng đổi tên trong `dynaform-embed-lib`); các tính năng 5.3.0–5.6.6 nằm trong tag `v5.6.7` (không có tag riêng); riêng **biến môi trường** `@{NAME}` cần tag `v5.8.3` trở lên (các thay đổi 5.7.x chưa đối chiếu); riêng khoá `showShadow` của container card cần tag `v5.9.0` trở lên; riêng `dynaform-agent-tools` cần bản lib có agent bridge (export `createSseRunAgentTurn`) — **không có trong `v5.6.7`**, kiểm tag bằng `git ls-remote --tags` trước khi ghi version.
 
 ### Claude Code
 

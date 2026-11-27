@@ -1,6 +1,7 @@
 ---
 name: dynaform-validation
 description: Quy tắc validation của form dynaform — required, minLength/maxLength, min/max, email, url, regex, matchField (xác nhận mật khẩu), thông báo lỗi tiếng Việt. Dùng khi thêm/sửa ràng buộc cho field, khi form không chặn submit, hoặc khi cần so khớp 2 field.
+user-invocable: false
 ---
 
 # Validation trong dynaform

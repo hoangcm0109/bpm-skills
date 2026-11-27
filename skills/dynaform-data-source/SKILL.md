@@ -1,6 +1,7 @@
 ---
 name: dynaform-data-source
 description: Nguồn dữ liệu cho field dynaform — option tĩnh, select lấy từ API, select phụ thuộc (tỉnh → quận → xã), địa chỉ API khác nhau theo môi trường DEV/STG/PROD bằng biến môi trường @{NAME}, bind biến, giá trị nạp từ host (bound_variables, dataUserFill). Dùng khi field cần danh sách từ API, option phụ thuộc field khác, địa chỉ API phải đổi theo môi trường, hoặc điền sẵn giá trị.
+user-invocable: false
 ---
 
 # Data source & biến

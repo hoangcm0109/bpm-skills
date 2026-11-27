@@ -3,6 +3,10 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.14.1 — 2026-11-27 (ẩn skill phụ khỏi menu `/`)
+
+Chỉ để `bpm-skills:dynaform-build-form` hiện trong gợi ý khi gõ `/`. 9 skill phụ (`dynaform-agent-tools`, `-components`, `-data-source`, `-embed-lib`, `-form-design`, `-layout`, `-logic-events`, `-mfe-module`, `-validation`) thêm `user-invocable: false` vào frontmatter: người dùng không gọi trực tiếp nữa, nhưng Claude vẫn tự nạp khi skill chính hoặc ngữ cảnh cần. Không đổi nội dung hướng dẫn.
+
 ## 0.14.0 — 2026-11-27 (khớp lib v6.1.0: control dashboard `chart`, `gauge`, thẻ KPI)
 
 Lib `@dnu/dynaform-builder` v6.1.0 (tag đã push 2026-11-27) thêm control hiển thị cho màn dashboard; không đổi API cũ. Đối chiếu với `docs/DASHBOARD_CHARTS.md` và các mẫu `chart` / `gauge` trong `src/config/component-groups.ts` của lib.

@@ -1,6 +1,7 @@
 ---
 name: dynaform-agent-tools
 description: Tool cho AI agent làm việc với dynaform — 9 server tool (MCP dynaform-service - list_form_designs, get_form_design, list_form_versions, list_item_controls, list_form_submissions, create_form_draft, save_form_design, clone_form_design, publish_form_draft; tool đọc có view=agent để giảm token), client tool chạy trong editor (get_form_state, add_component, update_component, set_event_flow, load_form_json, validate_form, confirm_action…), giao thức SSE giữa agent gateway và editor, cách nối runAgentTurn / agentClientTools / window.DynaformAgentBridge ở host. Dùng khi tích hợp một hệ thống AI/agent khác với dynaform, viết gateway hoặc agent gọi tool, thêm client tool cho host, hoặc debug agent sửa form.
+user-invocable: false
 ---
 
 # Tool cho AI agent trong dynaform

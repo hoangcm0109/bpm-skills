@@ -1,6 +1,7 @@
 ---
 name: dynaform-logic-events
 description: Logic và sự kiện của form dynaform — mọi event (click/change/load/open/close/condition/embed/menu) theo từng loại control, rule hiển thị/bắt buộc theo điều kiện, action engine đầy đủ (validate_form, call_api, set_values, field_state, dialog, push_table, navigate, show_message, branch, try, parallel, for_each…), cách truyền dữ liệu giữa các bước, và các kịch bản thường gặp (submit, chọn → điền, mở dialog, làm mới bảng, xác nhận xoá). Ưu tiên action flow, hạn chế field ẩn. Dùng khi field cần ẩn/hiện theo field khác, nút cần mở dialog/gọi API/điều hướng, hoặc cần luồng nhiều bước.
+user-invocable: false
 ---
 
 # Logic & sự kiện

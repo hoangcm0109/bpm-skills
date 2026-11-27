@@ -1,6 +1,7 @@
 ---
 name: dynaform-layout
 description: Bố cục form dynaform — lưới 12 cột (colSpan, colStart), mỗi control chiếm bao nhiêu cột, căn dọc trong hàng (alignSelf — nút thẳng đáy với ô nhập), xếp hàng, responsive desktop-first (override sm/md, tự xuống hàng trên mobile), chọn container/columns/grid/tab/steps, công thức bố cục (2-3-4 cột, 8+4, nút căn phải), theme/settings. Dùng khi sắp xếp field thành hàng/nhóm, quyết định số cột cho từng control, chia tab/wizard, chỉnh hiển thị mobile, hoặc đổi theme form.
+user-invocable: false
 ---
 
 # Bố cục form

@@ -1,6 +1,7 @@
 ---
 name: dynaform-mfe-module
 description: Quy ước làm việc trong repo mfe-dynaform (module federation remote dùng @dnu/dynaform-builder) — cấu trúc thư mục, API client, TanStack Query, form editor/preview, môi trường & publish, SectionedFormLayout, UI/UX list. Dùng khi sửa hoặc thêm trang/dialog/service trong mfe-dynaform, hoặc thêm luồng quản lý form (form manager, item control, host app).
+user-invocable: false
 ---
 
 # Làm việc trong mfe-dynaform
