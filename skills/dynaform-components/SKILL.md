@@ -146,7 +146,9 @@ Chi tiết bố cục (số cột từng control, responsive, công thức): ski
 | Cặp nhãn–giá trị chỉ đọc (chi tiết hồ sơ) | `descriptions` | |
 | Chọn bản ghi từ API dạng thẻ (lọc, tìm kiếm, xem chi tiết) | `record-picker` | `docs/COLLECTION_CONTROLS.md` |
 | Thư viện thẻ/ảnh chọn nhiều, sắp xếp, phân trang, thanh hành động | `record-gallery` | |
-| Thẻ KPI bấm được để lọc | `stat-cards` | |
+| Thẻ KPI bấm được để lọc (từ 6.1.0: định dạng số, chip tăng/giảm, đường xu hướng) | `stat-cards` | `docs/DASHBOARD_CHARTS.md` |
+| Biểu đồ cột / đường / vùng / tròn / donut (lib ≥ 6.1.0) | `chart` | `docs/DASHBOARD_CHARTS.md` |
+| Đồng hồ đo một chỉ số, dải màu theo ngưỡng (lib ≥ 6.1.0) | `gauge` | `docs/DASHBOARD_CHARTS.md` |
 | Danh sách kéo thả đổi thứ tự | `sortable-list` | |
 | Bảng khảo sát hàng × cột / chấm điểm | `matrix` | |
 | Chọn dạng cây | `tree-select` | |
@@ -154,6 +156,15 @@ Chi tiết bố cục (số cột từng control, responsive, công thức): ski
 | Nhúng form khác vào màn hình nhiều form | `sub-form` | layout runtime |
 | Hiện JSON / mã | `json-tree`, `code` | |
 | Chữ ký, soạn thảo định dạng, lịch, thanh trượt, tệp | `signature`, `wysiwyg-editor`, `calendar`, `range-slider`, `file` | |
+
+### Dashboard — `chart`, `gauge`, thẻ KPI (lib ≥ 6.1.0)
+
+Chỉ để **hiển thị** (category `content`, không có giá trị, không phải gắn Variable). Dựng khung rồi người dùng chỉnh tiếp trong builder (palette **Advanced**: "Biểu đồ", "Đồng hồ đo").
+
+- **`chart`** — `properties.chart` = `{ options, data }`. `options.kind`: `bar` | `line` | `area` | `pie` | `donut`; thêm `title`, `showHeader`, `showLegend`, `showGrid`, `showTooltip`, `height` (mẫu 280). `data.mode`: `static` (`rows` gõ sẵn) | `variable` (`variableName` + `dataPath`: field hoặc khoá `dataUserFill` chứa mảng; rỗng thì hiện `rows` mẫu) | `dynamic` (DataSource gắn ở `variables.data_source`, mảng ở `dataPath`) | `request` (chart tự gọi API: `data.request` + `data.filters` lấy từ field của form, tự gọi lại khi field đổi, debounce 400 ms). `categoryKey` là trục x / tên lát; `series: [{ key, label, color? }]` (biểu đồ tròn chỉ vẽ series đầu); `aggregate`: `none` | `sum` | `count` | `avg` | `min` | `max`; `topN` + `othersLabel` gộp phần còn lại thành "Khác". colSpan mẫu **12**.
+- **`gauge`** — `properties.gauge` = `{ options, data }`. `options.variant`: `ring` | `half` | `bar`; `min`/`max`, `unit` hoặc `showPercent`, `size`, `label`, `thresholds: [{ from, color }]` (dải có `from` lớn nhất mà ≤ giá trị thì thắng). `data`: `{ mode: "static", value }` hoặc `{ mode: "variable", variableName, valuePath? }`. colSpan mẫu **4**.
+- **Thẻ KPI (`stat-cards`)** — mỗi item thêm được (đều tuỳ chọn, form cũ không đổi): `format` (`number` | `compact` | `percent`), `unit`, `deltaPath` (% thay đổi → chip ▲/▼), `deltaInverted` (giảm là tốt), `sparklinePath` (mảng số → đường xu hướng). Các `*Path` đọc từ object của `sourceField`, giống `valuePath`.
+- **Chưa có**: biểu đồ kết hợp cột + đường, radar, heatmap, bấm vào cột để lọc, sự kiện của `chart`. Chart `request` không chạy lại theo `push_table` — dùng một field form mà bộ lọc đọc. Xuất code React: chart ra JSX `recharts` với điểm dữ liệu cố định.
 
 ### Hành động từng dòng của `table`
 

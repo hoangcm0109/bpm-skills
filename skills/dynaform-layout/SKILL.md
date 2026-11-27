@@ -40,6 +40,8 @@ Số dưới là **gợi ý thiết kế** để form đều và đọc được
 | `file` | **12** (hoặc 6 nếu chỉ 1 tệp nhỏ) | |
 | `table`, `matrix`, `timeline`, `descriptions`, `record-picker`, `record-gallery`, `sortable-list`, `json-tree`, `code`, `custom-embed` | **12** | Control dữ liệu rộng |
 | `stat-cards` | **12** | Tự chia thẻ bên trong |
+| `chart` | **12** | Mặc định cả hàng; hai biểu đồ cạnh nhau thì **6** |
+| `gauge` | **4** | Mặc định 4 — ba đồng hồ một hàng |
 | `text` (tiêu đề / đoạn) | **12** | Tiêu đề nhóm: `text` ở đầu `container` |
 | `image` | **4**–**6** (ảnh đại diện cạnh form) hoặc **12** (banner) | |
 | `divider` | **12** | |

@@ -115,13 +115,15 @@ Quy tắc:
 | descriptions | advanced | DfsFormDescriptions | ListChecks | Descriptions | content |
 | json-tree | advanced | DfsJsonTree | Braces | JSON Tree | form |
 | code | advanced | code | Code2 | Code | form |
+| chart | advanced | DfsFormChart | ChartColumn | Biểu đồ | content |
+| gauge | advanced | DfsFormGauge | Gauge | Đồng hồ đo | content |
 | record-picker | choose | DfsRecordPickerField | LayoutList | Record Picker | form |
 | record-gallery | choose | DfsRecordGalleryField | GalleryVerticalEnd | Record Gallery | form |
 | stat-cards | choose | DfsStatCardsField | ChartColumn | Stat Cards | form |
 | sortable-list | choose | DfsSortableListField | ArrowDownUp | Sortable List | form |
 | custom-embed | choose | DfsCustomEmbedField | CodeXml | Custom Embed | form |
 
-Type không có trong bảng = không dùng (đừng bịa `type`; `phone` không tồn tại, dùng `tel`). Control cấu hình sâu (`table`, `matrix`, `sub-form`, `record-*`, `timeline`, `descriptions`…): viết khung + `properties` theo skill `dynaform-components`; phần còn lại cấu hình trong builder.
+Type không có trong bảng = không dùng (đừng bịa `type`; `phone` không tồn tại, dùng `tel`). Control cấu hình sâu (`table`, `matrix`, `sub-form`, `record-*`, `timeline`, `descriptions`, `chart`, `gauge`…): viết khung + `properties` theo skill `dynaform-components`; phần còn lại cấu hình trong builder.
 
 ## 4. Cây cha–con
 

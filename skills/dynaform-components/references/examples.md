@@ -80,5 +80,5 @@ Cách đặt con theo loại cha (bảng ở SKILL.md › "Control layout"):
 
 ## 4. Control chuyên dụng — dựng khung rồi cấu hình trong builder
 
-`table`, `timeline`, `descriptions`, `record-picker`, `record-gallery`, `stat-cards`, `sortable-list`, `matrix`, `sub-form`: chỉ dựng khung; `props` đi thẳng vào `editable_props.properties`. Ví dụ có `table` đầy đủ hành động hàng:
+`table`, `timeline`, `descriptions`, `chart`, `gauge`, `record-picker`, `record-gallery`, `stat-cards`, `sortable-list`, `matrix`, `sub-form`: chỉ dựng khung; `props` đi thẳng vào `editable_props.properties`. Ví dụ có `table` đầy đủ hành động hàng:
 `../../dynaform-logic-events/references/example-table-row-actions.md`. Chỉ dùng `custom-embed` khi mọi cách trên không đáp ứng (nêu lý do trong báo cáo) — ví dụ: `../../dynaform-build-form/references/custom-embed.md`.

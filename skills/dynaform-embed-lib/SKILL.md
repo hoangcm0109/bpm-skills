@@ -10,12 +10,12 @@ Lib phát hành bằng **git tag** `vX.Y.Z` của repo `fe_dynaform`, `dist/lib`
 ## 1. Cài đặt
 
 ```jsonc
-"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v6.0.0"
+"@dnu/dynaform-builder": "git+http://git.dnu.edu.vn/dnu/fe_dynaform.git#v6.1.0"
 ```
 
-(`v6.0.0` là tag mới nhất lúc viết skill, `package.json` ở tag ghi `6.0.0`. Các prop ghi "từ 4.5.0" ở dưới cần tag ≥ 4.5.0. Repo chỉ có tag `v5.2.0` rồi nhảy tới `v5.6.7` — **không có tag riêng cho 5.3.0 → 5.6.6**; mọi tính năng của các bản đó nằm trong `v5.6.7`, xem "Từ 5.3.0" bên dưới.)
+(`v6.1.0` là tag mới nhất lúc viết skill, `package.json` ở tag ghi `6.1.0`. Các prop ghi "từ 4.5.0" ở dưới cần tag ≥ 4.5.0. Repo chỉ có tag `v5.2.0` rồi nhảy tới `v5.6.7` — **không có tag riêng cho 5.3.0 → 5.6.6**; mọi tính năng của các bản đó nằm trong `v5.6.7`, xem "Từ 5.3.0" bên dưới.)
 
-- **pnpm + tag có chú thích**: `pnpm install` ghi vào `pnpm-lock.yaml` mã của *tag object* (v6.0.0: `9260105…`), lần cài `--frozen-lockfile` sau sẽ lỗi. Thay bằng mã **commit** của tag (`git ls-remote <repo> 'refs/tags/v6.0.0^{}'` → `34aa337…`) ở mọi chỗ trong lockfile.
+- **pnpm + tag có chú thích**: `pnpm install` ghi vào `pnpm-lock.yaml` mã của *tag object* (v6.1.0: `9348704…`), lần cài `--frozen-lockfile` sau sẽ lỗi. Thay bằng mã **commit** của tag (`git ls-remote <repo> 'refs/tags/v6.1.0^{}'` → `4ea089d…`) ở mọi chỗ trong lockfile.
 
 - Luôn `git+http://` (http thường → `TAR_BAD_ARCHIVE`) và **pin tag**; không dùng `#main`/nhánh.
 - Peer (**từ 5.0.0**, `feat!`): `react`, `react-dom` ≥ 18, `lucide-react` ≥ 0.562 < 2, `@sth87/shadcn-design-system` ≥ 0.2.7 < 0.4, `@tanstack/react-query` ^5, `@dnd-kit/core` ^6.1, `@dnd-kit/sortable` ^10, `@dnd-kit/utilities` ^3.2.2, `zod` ^4, `react-hook-form` ^7.56 — **host phải tự cài** (trước 5.0.0 các gói này bundle trong lib; lib ≤ 4.x không cần khai). Host không cần bọc `QueryClientProvider` riêng cho lib.
@@ -99,6 +99,7 @@ Props chính: `idForm` (bắt buộc nếu không truyền `form`), `environment
   - Chưa thay biến (còn nguyên `@{NAME}`): `queries` của layout runtime, nút submit kiểu cũ, `navigate.download`, upload file, bảng tải từ xa — chưa kiểm hết.
 - **Từ 5.9.0**: container `styles.showShadow: "no"` (card có viền mà không bóng).
 - **Từ 6.0.0** (`feat!`, có tag): đổi tên hai lớp và bỏ `shellUrl` / `bootstrapStandaloneAuth` — bảng "Đổi tên ở v6.0.0" ở mục 1. Không đổi props hay hành vi khác.
+- **Từ 6.1.0** (có tag): control hiển thị cho màn dashboard — `chart` (cột / đường / vùng / tròn / donut), `gauge` (đồng hồ đo) và thẻ KPI của `stat-cards` (`format`, `unit`, `deltaPath`, `deltaInverted`, `sparklinePath`); `chart` tự gọi API được (`data.mode: "request"`). Chi tiết: `dynaform-components` › "Dashboard". `recharts` được bundle trong một chunk riêng (~620 kB, chỉ tải khi form có biểu đồ) nên host **không** phải cài thêm gói. Form cũ không đổi; lib < 6.1.0 gặp `chart`/`gauge` sẽ báo "type không có trong registry".
 - **Từ 4.8.0**: `properties.style.alignSelf` (căn dọc control trong hàng lưới), hành động từng dòng của `table` chạy action flow (`actions[].flow`, `$row`), step `confirm`, `dialog.fillFromRow` / `awaitSubmit`; grid giữ đúng ô khi lưu/nạp và không xoá control khi thả; CSS "Ô nhập" của button không còn ăn thanh công cụ canvas. Form lưu bằng bản cũ vẫn chạy (cấu hình hành động hàng cũ tự chuyển thành flow khi bấm).
 - **Từ 4.6.0**: `ref.current.loadFormJson(json, { snapshot?, progress? })` thay toàn bộ form của editor từ host (build dần; editor chỉ đọc `dataFormDesign` lúc mount); canvas có hiệu ứng build dần. Mọi control nhận **CSS thuần + class Tailwind** (`properties.custom`, panel "CSS tuỳ chỉnh" ở tab Thiết kế; host tắt bằng `embedPolicy.allowCustomCss: false`). Control `table-filter` đã **gỡ** (không migrate): form cũ hiện khung cảnh báo tại chỗ đó.
 - `onError` (**4.4.0**, editor): gọi khi lưu form / lưu thành control thất bại; lib đã tự toast message chi tiết của server và `console.error` toàn bộ response. `error` = `{ action, message, status?, details[], body?, cause }` để host ghi log riêng.

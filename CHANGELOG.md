@@ -3,6 +3,17 @@
 Phiên bản plugin (`version` trong manifest) tăng mỗi khi nội dung skill đổi — Claude Code chỉ cập nhật khi `version` tăng.
 Cách cập nhật: xem [README → Cài đặt & cập nhật](README.md#cài-đặt--cập-nhật).
 
+## 0.14.0 — 2026-11-27 (khớp lib v6.1.0: control dashboard `chart`, `gauge`, thẻ KPI)
+
+Lib `@dnu/dynaform-builder` v6.1.0 (tag đã push 2026-11-27) thêm control hiển thị cho màn dashboard; không đổi API cũ. Đối chiếu với `docs/DASHBOARD_CHARTS.md` và các mẫu `chart` / `gauge` trong `src/config/component-groups.ts` của lib.
+
+- **`dynaform-components`**: bảng "Control chuyên dụng" thêm `chart` và `gauge`, dòng `stat-cards` ghi các trường KPI mới; thêm mục "Dashboard — `chart`, `gauge`, thẻ KPI" (khoá `properties.chart` / `properties.gauge`, 4 nguồn dữ liệu của chart kể cả `request`, `aggregate`/`topN`, ngưỡng màu của gauge, các điều chưa có).
+- **`dynaform-build-form`**: `form-json.md` thêm `chart` (`DfsFormChart`) và `gauge` (`DfsFormGauge`) vào bảng type, `SKILL.md` thêm vào thang chọn control chuyên dụng.
+- **`dynaform-layout`**: colSpan mẫu `chart` = 12, `gauge` = 4.
+- **`dynaform-embed-lib`**: tag mẫu `#v6.1.0`; mã tag object / commit của `v6.1.0` trong mẹo lockfile pnpm (`9348704…` → `4ea089d…`); mục "Từ 6.1.0" (recharts nằm trong chunk riêng, host không phải cài thêm gói).
+- **`dynaform-mfe-module`**: mfe-dynaform ghim `#v6.1.0`. README: dòng "khớp lib" → `v6.1.0`.
+- **Chưa làm / chưa kiểm**: chưa dựng thử form có `chart` / `gauge` rồi lưu qua MCP và mở editor để xem chạy thật (chỉ đối chiếu với tài liệu và mẫu mặc định của lib); chưa đối chiếu `docs/` khác của lib 6.0.0 → 6.1.0 (mapping-builder đổi nhưng không thuộc việc dựng form nên chưa đưa vào skill).
+
 ## 0.13.0 — 2026-11-26 (khớp lib v6.0.0: tên component mới, bỏ `shellUrl`)
 
 Lib `@dnu/dynaform-builder` v6.0.0 (tag đã push 2026-11-26) là bản breaking: core `DynamicFormBuilder` → `DynamicCoreBuilder` (+ `Props`/`Mode`/`Handle`), host `DynaformBuilder` → `DynamicFormBuilder` (+ `Props`/`Error`), `DynaformBuilderProvider` → `DynamicFormBuilderProvider`; bỏ `shellUrl` và `bootstrapStandaloneAuth` (lib không chuyển trang khi 401, chỉ ném `ApiError`). `DynamicFormBuilderHandle` vẫn export, là alias của `DynamicCoreBuilderHandle`.
